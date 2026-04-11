@@ -1,0 +1,13 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+plt.rcParams["figure.figsize"] = [7.50, 3.50]
+plt.rcParams["figure.autolayout"] = True
+
+x, y = np.random.rand(2, 150)
+z = np.random.rand(150)
+f,ax = plt.subplots()
+
+points = ax.scatter(x, y, c=z, cmap="jet",marker='s')
+
+plt.show()
