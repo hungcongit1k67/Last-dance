@@ -1,5 +1,5 @@
 from numpy.core.fromnumeric import shape
-import My_grid as My_grid
+import My_grid_patched as My_grid
 import GA
 import numpy as np
 import time
@@ -195,6 +195,14 @@ def evaluation3(
     print("Best cost:", bestcost)
 
     points = grid.getPath(bestpath)
+
+    length = grid.pathLength(points)
+    risk = grid.pathRisk(points)
+
+    print("length(P) =", length)
+    if risk is not None:
+        print("risk(P)   =", risk)
+
     grid.drawPath(points)
     grid.drawFMComponent(rmv=[0])
     grid.drawDijkstraWave(rmv=[])
@@ -252,7 +260,7 @@ def main():
         # grid.get_grid_from_file("map35_11.txt")
         # grid.get_grid_from_file("map35_12.txt")
         # grid.get_grid_from_file("map35_13.txt")
-        grid.get_grid_from_file("E:\\last_dance\\LastDance\FMF\\square400.txt")
+        grid.get_grid_from_file(r"E:\last_dance\LastDance\FMF\square400.txt")
         # grid.get_grid_from_file("map40_2.txt")
         # grid.get_grid_from_file("map40_12.txt")
         # grid.get_grid_from_file("map40_15.txt")
