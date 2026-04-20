@@ -260,7 +260,7 @@ def main():
         # grid.get_grid_from_file("map35_11.txt")
         # grid.get_grid_from_file("map35_12.txt")
         # grid.get_grid_from_file("map35_13.txt")
-        grid.get_grid_from_file(r"E:\last_dance\LastDance\FMF\square400.txt")
+        grid.get_grid_from_file(r"E:\last_dance\LastDance\FMF\mixed2002.txt")
         # grid.get_grid_from_file("map40_2.txt")
         # grid.get_grid_from_file("map40_12.txt")
         # grid.get_grid_from_file("map40_15.txt")

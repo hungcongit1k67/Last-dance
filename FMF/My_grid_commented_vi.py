@@ -24,11 +24,11 @@ class GridMap():
     mapSize = None
     # [Giải thích dòng gốc 14] Khai báo biến mức lớp `gridMap`; sẽ chứa ma trận ô của bản đồ.
     gridMap = None
-    # [Giải thích dòng gốc 15] Khai báo biến mức lớp `npos`; số lượng goal/checkpoint trên map.
+    # [Giải thích dòng gốc 15] Khai báo biến mức lớp `npos`; số lượng goal/checkpoint trên map. --> S
     npos = None
-    # [Giải thích dòng gốc 16] Khai báo biến mức lớp `deslist`; danh sách tọa độ các goal.
+    # [Giải thích dòng gốc 16] Khai báo biến mức lớp `deslist`; danh sách tọa độ các goal. --> s_i
     deslist = None
-    # [Giải thích dòng gốc 17] Khai báo biến mức lớp `dista`; trường khoảng cách/arrival time khi lan sóng.
+    # [Giải thích dòng gốc 17] Khai báo biến mức lớp `dista`; trường khoảng cách/arrival time khi lan sóng. --> T(x)
     dista = None
     # [Giải thích dòng gốc 18] Khai báo biến mức lớp `trace`; lưu dấu vết cha để lần ngược đường đi.
     trace = None

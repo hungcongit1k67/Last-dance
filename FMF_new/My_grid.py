@@ -212,9 +212,9 @@ class GridMap:
                     self.safety[i][j] = 0.0
                     continue
                 n_obs = 0
-                d_min = 3.0  # mặc định khi không có vật cản trong 5x5
-                for di in range(-2, 3):
-                    for dj in range(-2, 3):
+                d_min = 5.0  # mặc định khi không có vật cản trong 11x11
+                for di in range(-5, 6):
+                    for dj in range(-5, 6):
                         if di == 0 and dj == 0:
                             continue
                         ni, nj = i + di, j + dj
@@ -224,8 +224,8 @@ class GridMap:
                                 d = math.hypot(di, dj)
                                 if d < d_min:
                                     d_min = d
-                self.safety[i][j] = (self.C1 * (24 - n_obs) / 24.0
-                                    + (1.0 - self.C1) * d_min / 3.0)
+                self.safety[i][j] = (self.C1 * (120.0 - n_obs) / 120.0
+                                    + (1.0 - self.C1) * d_min / 5.0)
 
     def computeFCost(self):
         """Công thức (11a): f(x) = w1 + (1 - w1) * (1 - S(x))."""

@@ -253,7 +253,7 @@ def main():
     # Chinh duong dan map cho phu hop may cua ban.
     # Cac file map nam trong thu muc FMF/ cua repo.
 
-    map_path = r"E:\last_dance\LastDance\FMF\square400.txt"
+    map_path = r"E:\last_dance\LastDance\FMF\mixed2002.txt"
     # candidates = [
     #     "warehouse2.txt",
     #     "./FMF/warehouse2.txt",
@@ -277,7 +277,7 @@ def main():
     # Chinh w1, C1 o day de thay nghiem thay doi
     run_wpfmf_pipeline(
         grid,
-        w1=0.7,      # 0.7 length + 0.3 safety (giam w1 -> an toan hon, dai hon)
+        w1=0.1,      # 0.7 length + 0.3 safety (giam w1 -> an toan hon, dai hon)
         C1=0.5,      # can bang N_obs va d_min
         ntest=1,
         distance_scale=1000,
