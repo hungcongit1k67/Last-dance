@@ -827,7 +827,7 @@ class GridMap():
                     continue
 
                 n_obs = 0
-                d_min = 5.0
+                d_min = 7.0
 
                 for di in range(-5, 6):
                     for dj in range(-5, 6):
@@ -843,7 +843,7 @@ class GridMap():
 
                 self.safety[i][j] = (
                     self.C1 * (120.0 - n_obs) / 120.0
-                    + (1.0 - self.C1) * d_min / 5.0
+                    + (1.0 - self.C1) * d_min / 7.0
                 )
 
 

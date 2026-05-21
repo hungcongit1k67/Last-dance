@@ -1,0 +1,47 @@
+project:
+  name: aco_ga_astar_mtipp_large
+  output_dir: results
+
+map:
+  obstacle_file: data/maps/scenario_large/obstacle_grid.txt
+  radiation_file: data/maps/scenario_large/radiation_grid.txt
+  target_file: data/targets/targets.json
+  target_source: map
+  grid_size: 1.0
+  robot_velocity: 1.0
+  ri_max: 3.5
+  allow_diagonal: true
+  prevent_corner_cutting: true
+
+cost_weights:
+  omega_length: 0.38
+  omega_risk: 0.47
+  omega_energy: 0.15
+  turn_angle_weight: 0.7
+  turn_count_weight: 0.3
+
+astar:
+  high_risk_avoidance: true
+
+GA:
+  population_size: 160
+  max_generation: 300
+  crossover_rate: 0.9
+  mutation_rate: 0.05
+  elite_size: 4
+  gap: 0.9
+
+ACO:
+  num_ants: 90
+  max_iteration: 360
+  alpha: 1.0
+  beta: 5.0
+  rho: 0.10
+  q: 100.0
+  q0: 0.85
+  initial_pheromone: 0.5
+  ga_pheromone_bonus: 0.7
+  min_pheromone: 1.0e-6
+  max_pheromone: 15.0
+
+random_seed: 42
