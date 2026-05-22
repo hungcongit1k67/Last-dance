@@ -167,6 +167,9 @@ def evaluation_wpfmf(grid,
     length = grid.pathLength(cells)
     risk = grid.pathRisk(cells)
     print("\n===== Path metrics (thuc te tren grid) =====")
+    path_tuples = [(int(c[0]), int(c[1])) for c in cells]
+    print(f"Detailed path ({len(path_tuples)} steps):")
+    print(path_tuples)
     print(f"length(P) = {length:.4f}  (cong thuc 3)")
     if risk is not None:
         print(f"risk(P)   = {risk:.4f}   (cong thuc 5)")
