@@ -59,6 +59,9 @@ Chạy kịch bản khác:
 python run.py --config configs/scenario_medium.yaml
 python run.py --config configs/scenario_large.yaml
 python run.py --config configs/scenario_custom_200x200.yaml
+python run.py --config configs/scenario_triangle_300_lowrisk.yaml
+python run.py --config configs/scenario_square_400_lowrisk.yaml
+python run.py --config configs/scenario5.yaml
 ```
 
 ## Kết quả đầu ra

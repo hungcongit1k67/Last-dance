@@ -56,7 +56,8 @@ def main() -> None:
     print("Done.")
     print("Route:", " -> ".join(route_target_ids(result)))
     print("ACO matrix cost:", result.aco_cost) # đây là chi phí tính từ ma trận, có thể khác với chi phí thực tế trên đường đi do đường đi có thể không phải là đường đi ngắn nhất giữa 2 target
-    print("Full path components:", result.full_path_components) # chi phí thực tế trên đường đi, được tính bằng cách cộng chi phí từng bước đi trên full path, có thể khác với chi phí từ ma trận nếu đường đi không phải là đường ngắn nhất giữa 2 target hoặc nếu có chi phí phi tuyến tính nào đó
+    print("Full path components:", result.full_path_components)
+    print(f"Full path ({len(result.full_path)} steps):", result.full_path) # chi phí thực tế trên đường đi, được tính bằng cách cộng chi phí từng bước đi trên full path, có thể khác với chi phí từ ma trận nếu đường đi không phải là đường ngắn nhất giữa 2 target hoặc nếu có chi phí phi tuyến tính nào đó
 
     print("\nRuntime:")
     print(f"  Lower level - Modified A*: {result.timings['lower_level_modified_astar_time_sec']:.6f} s")

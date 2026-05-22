@@ -131,5 +131,9 @@ class AntColonyTSP:
             )
             history.append(float(global_best_cost))
 
-        assert global_best_route is not None
+        if global_best_route is None:
+            raise RuntimeError(
+                "ACO failed: all routes have infinite cost. "
+                "Check that every target has at least one finite path to every other target."
+            )
         return ACOResult(route=global_best_route, cost=float(global_best_cost), history=history)

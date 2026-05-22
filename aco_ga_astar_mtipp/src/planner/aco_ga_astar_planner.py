@@ -58,6 +58,34 @@ class AcoGaAstarPlanner:
         if not np.isfinite(matrices.total).any():
             raise RuntimeError("No finite pairwise path was found")
 
+        # Keep only the strongly-connected component that contains start_index.
+        scc_indices = self._scc_of_start(matrices.total, start_index)
+        if len(scc_indices) < len(self.targets):
+            dropped = [self.targets[i] for i in range(len(self.targets)) if i not in set(scc_indices)]
+            print(
+                f"[WARNING] {len(dropped)} target(s) cannot participate in a closed tour and will be skipped:\n"
+                + "\n".join(f"  {t.id} at ({t.row},{t.col})" for t in dropped)
+            )
+            idx_map = {old: new for new, old in enumerate(scc_indices)}
+            active_targets = [self.targets[i] for i in scc_indices]
+            ix = np.array(scc_indices)
+            new_paths = {
+                (idx_map[a], idx_map[b]): v
+                for (a, b), v in matrices.pairwise_paths.items()
+                if a in idx_map and b in idx_map
+            }
+            matrices = CostMatrices(
+                length=matrices.length[np.ix_(ix, ix)],
+                risk=matrices.risk[np.ix_(ix, ix)],
+                energy=matrices.energy[np.ix_(ix, ix)],
+                collision_risk=matrices.collision_risk[np.ix_(ix, ix)],
+                total=matrices.total[np.ix_(ix, ix)],
+                pairwise_paths=new_paths,
+            )
+            start_index = idx_map[start_index]
+        else:
+            active_targets = self.targets
+
         ga_cfg = self.config.get("GA", self.config.get("ga", {}))
         ga = GeneticAlgorithmTSP(
             matrices.total,
@@ -75,7 +103,7 @@ class AcoGaAstarPlanner:
 
         aco_cfg = self.config.get("ACO", self.config.get("aco", {}))
         pheromone = initialize_pheromone_from_ga(
-            n_targets=len(self.targets),
+            n_targets=len(active_targets),
             ga_route=ga_result.route,
             base=float(aco_cfg.get("initial_pheromone", 0.5)),
             bonus=float(aco_cfg.get("ga_pheromone_bonus", 0.5)),
@@ -116,7 +144,7 @@ class AcoGaAstarPlanner:
         }
 
         return PlannerResult(
-            targets=self.targets,
+            targets=active_targets,
             cost_matrices=matrices,
             ga_route=ga_result.route,
             ga_cost=ga_result.cost,
@@ -128,6 +156,26 @@ class AcoGaAstarPlanner:
             aco_history=aco_result.history,
             timings=timings,
         )
+
+    @staticmethod
+    def _scc_of_start(total: np.ndarray, start: int) -> List[int]:
+        """Return sorted indices of targets reachable FROM start AND that can reach start back."""
+        n = total.shape[0]
+
+        def bfs(src: int, forward: bool) -> set:
+            visited: set = {src}
+            queue = [src]
+            while queue:
+                cur = queue.pop()
+                for j in range(n):
+                    if j not in visited:
+                        cost = total[cur, j] if forward else total[j, cur]
+                        if np.isfinite(cost):
+                            visited.add(j)
+                            queue.append(j)
+            return visited
+
+        return sorted(bfs(start, forward=True) & bfs(start, forward=False))
 
     @staticmethod
     def _stitch_pairwise_paths(route: List[int], matrices: CostMatrices) -> List[GridPosition]:

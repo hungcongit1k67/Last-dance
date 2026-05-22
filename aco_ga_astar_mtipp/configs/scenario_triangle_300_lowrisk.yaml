@@ -1,0 +1,51 @@
+project:
+  name: aco_ga_astar_mtipp_triangle_300_lowrisk
+  output_dir: results/triangle_300_lowrisk
+
+map:
+  obstacle_file: data/maps/triangle300/triangle300.txt
+  radiation_file: data/maps/triangle300/radiation_grid_triangle300.txt
+  target_file: data/targets/targets.json
+  target_source: map
+  grid_size: 1.0
+  robot_velocity: 1.0
+  ri_max: 8.0
+  allow_diagonal: true
+  prevent_corner_cutting: true
+
+cost_weights:
+  omega_length: 0.5
+  omega_risk: 0.0
+  omega_energy: 0.0
+  omega_collision_risk: 0.5
+  turn_angle_weight: 0.7
+  turn_count_weight: 0.3
+  safety_c1: 0.5
+  safety_radius: 5.0
+  safety_max_distance: 7.0
+
+astar:
+  high_risk_avoidance: true
+
+GA:
+  population_size: 140
+  max_generation: 260
+  crossover_rate: 0.9
+  mutation_rate: 0.06
+  elite_size: 3
+  gap: 0.9
+
+ACO:
+  num_ants: 80
+  max_iteration: 300
+  alpha: 1.0
+  beta: 5.0
+  rho: 0.12
+  q: 100.0
+  q0: 0.85
+  initial_pheromone: 0.5
+  ga_pheromone_bonus: 0.6
+  min_pheromone: 1.0e-6
+  max_pheromone: 12.0
+
+random_seed: 42

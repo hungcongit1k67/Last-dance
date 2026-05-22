@@ -14,11 +14,15 @@ map:
   prevent_corner_cutting: true
 
 cost_weights:
-  omega_length: 0.45
-  omega_risk: 0.40
-  omega_energy: 0.15
+  omega_length: 0.5
+  omega_risk: 0.0
+  omega_energy: 0.0
+  omega_collision_risk: 0.5
   turn_angle_weight: 0.7
   turn_count_weight: 0.3
+  safety_c1: 0.5
+  safety_radius: 5.0
+  safety_max_distance: 7.0
 
 astar:
   high_risk_avoidance: true

@@ -18,6 +18,7 @@ class CostMatrices:
     length: np.ndarray
     risk: np.ndarray
     energy: np.ndarray
+    collision_risk: np.ndarray
     total: np.ndarray
     pairwise_paths: Dict[Tuple[int, int], List[GridPosition]]
 
@@ -36,13 +37,14 @@ class CostMatrixBuilder:
         length = np.full((n, n), np.inf)
         risk = np.full((n, n), np.inf)
         energy = np.full((n, n), np.inf)
+        collision_risk = np.full((n, n), np.inf)
         total = np.full((n, n), np.inf)
         paths: Dict[Tuple[int, int], List[GridPosition]] = {}
 
         for i, ti in enumerate(self.targets):
             for j, tj in enumerate(self.targets):
                 if i == j:
-                    length[i, j] = risk[i, j] = energy[i, j] = total[i, j] = 0.0
+                    length[i, j] = risk[i, j] = energy[i, j] = collision_risk[i, j] = total[i, j] = 0.0
                     paths[(i, j)] = [ti.position]
                     continue
                 result = self.pairwise_planner.plan(ti.position, tj.position)
@@ -50,7 +52,15 @@ class CostMatrixBuilder:
                     length[i, j] = result.components["length"]
                     risk[i, j] = result.components["risk"]
                     energy[i, j] = result.components["energy"]
+                    collision_risk[i, j] = result.components["collision_risk"]
                     total[i, j] = result.components["total"]
                     paths[(i, j)] = result.path
 
-        return CostMatrices(length=length, risk=risk, energy=energy, total=total, pairwise_paths=paths)
+        return CostMatrices(
+            length=length,
+            risk=risk,
+            energy=energy,
+            collision_risk=collision_risk,
+            total=total,
+            pairwise_paths=paths,
+        )

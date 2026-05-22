@@ -1,40 +1,41 @@
 {
   "ga_route_index": [
     0,
-    2,
     3,
+    2,
     1,
     0
   ],
-  "ga_cost": 13.006972870520734,
+  "ga_cost": 19.130496534549344,
   "aco_route_index": [
     0,
+    1,
     2,
     3,
-    1,
     0
   ],
   "aco_route_target_ids": [
     "T1",
+    "T2",
     "T3",
     "T4",
-    "T2",
     "T1"
   ],
-  "aco_cost_from_matrix": 13.006972870520734,
+  "aco_cost_from_matrix": 19.130496534549344,
   "full_path_components": {
     "length": 27.31370849898476,
-    "risk": 0.00826011494397889,
-    "energy": 6.574999999999999,
-    "total": 13.280722870520734
+    "risk": 0.008633393354148774,
+    "energy": 7.699999999999999,
+    "collision_risk": 10.947284570113926,
+    "total": 19.130496534549344
   },
   "timings": {
-    "lower_level_modified_astar_time_sec": 0.0065320999710820615,
-    "upper_level_ga_time_sec": 0.2348024999955669,
-    "upper_level_aco_time_sec": 0.23995699995430186,
-    "upper_level_total_time_sec": 0.47475949994986877,
-    "stitch_and_full_cost_time_sec": 6.769999163225293e-05,
-    "algorithm_total_time_sec": 0.4813592999125831
+    "lower_level_modified_astar_time_sec": 0.025509099999908358,
+    "upper_level_ga_time_sec": 0.19624700001440942,
+    "upper_level_aco_time_sec": 0.21192719996906817,
+    "upper_level_total_time_sec": 0.4081741999834776,
+    "stitch_and_full_cost_time_sec": 0.0006061000167392194,
+    "algorithm_total_time_sec": 0.43428940000012517
   },
   "full_path": [
     [
@@ -43,18 +44,34 @@
     ],
     [
       2,
-      5
+      4
     ],
     [
       3,
-      5
+      3
     ],
     [
       4,
-      5
+      2
+    ],
+    [
+      4,
+      1
+    ],
+    [
+      4,
+      2
     ],
     [
       5,
+      3
+    ],
+    [
+      6,
+      4
+    ],
+    [
+      6,
       5
     ],
     [
@@ -94,11 +111,11 @@
       8
     ],
     [
-      5,
+      6,
       7
     ],
     [
-      5,
+      6,
       6
     ],
     [
@@ -106,28 +123,12 @@
       5
     ],
     [
-      5,
-      4
-    ],
-    [
-      5,
-      3
-    ],
-    [
-      5,
-      2
-    ],
-    [
       4,
-      1
-    ],
-    [
-      4,
-      2
+      5
     ],
     [
       3,
-      3
+      5
     ],
     [
       2,
