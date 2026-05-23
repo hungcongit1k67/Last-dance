@@ -3,18 +3,21 @@ My_grid.py - WP-FMF (Weighted Potential Fast Marching Firework)
 =================================================================
 Triển khai thuật toán WP-FMF theo paper:
     "WP-FMF: Phương pháp Weighted Potential Fast Marching Firework
-     cho quy hoạch đường đi đa đích đến của robot di động"
+     cho quy hoạch đường đi đa đích đến của robot di động
+     trong môi trường nhà máy hạt nhân"
 
-Các thay đổi cốt lõi so với FMF cổ điển:
-- Chỉ số an toàn S(c) trên lân cận 5x5 (eq. 4 trong paper)
-- Hàm chi phí cục bộ f(x) = w1 + (1-w1)(1-S(x)) (eq. 11a)
+Cải tiến so với FMF cổ điển:
+- Chỉ số an toàn S(c) trên lân cận 11×11 (eq. 4)
+- Hàm chi phí cục bộ f(x) = w1 + w2·R̄_norm(x) + w3·(1−S(x)) (eq. 11)
+- Bản đồ phóng xạ R̄(x) tích hợp trực tiếp vào lan truyền pháo hoa
 - Cập nhật Eikonal dạng sai phân: T(y) = T(x) + d(x,y)·f(y) (eq. 13a)
-- Bridge cost dùng f trung bình: d(x,y)·(f(x)+f(y))/2 (eq. 14a)
+- Bridge cost: d(x,y)·(f(x)+f(y))/2 (eq. 14a)
 - Pipeline 2 pha: Expanding (sơ cấp) + Intersecting (thứ cấp)
 """
 
 import heapq
 import math
+import os
 import queue
 import random
 import numpy as np
@@ -47,27 +50,76 @@ class GridMap:
         self.deslist = []
         self.mksz = 10
 
-        # Trọng số WP-FMF (có thể chỉnh qua setWeights)
-        self.w1 = 0.7    # trade-off length vs safety
-        self.C1 = 0.5    # trade-off N_obs vs d_min trong S(c)
+        # Trọng số WP-FMF — chỉnh qua config()
+        self.w1 = 0.6    # trọng số chiều dài đường đi
+        self.w2 = 0.2    # trọng số độ rủi ro phóng xạ R(P)
+        self.w3 = 0.2    # trọng số độ rủi ro va chạm risk(P)
+        self.C1 = 0.5    # cân bằng N_obs (→1) vs d_min (→0) trong S(c)
+        self.a  = 1.0    # kích thước ô lưới (m) — dùng trong công thức R(P)
+        self.v  = 1.0    # vận tốc robot (m/s)   — dùng trong công thức R(P)
+
+        # Bản đồ phóng xạ
+        self.radiation_map  = None   # giá trị thô (μSv/h hoặc đơn vị tương đương)
+        self.radiation_norm = None   # chuẩn hóa về [0, 1]
 
         self.window_size = [mapSize * square_width + (mapSize + 1) * margin,
                             mapSize * square_height + (mapSize + 1) * margin]
-
         self.DFType = "WP-FMF"
 
     # =========================================================
-    # Chỉnh trọng số
+    # Cấu hình tham số
     # =========================================================
+    def config(self, w1=None, w2=None, w3=None, C1=None, a=None, v=None):
+        """Cấu hình tham số thuật toán.
+
+        Trọng số (w1 + w2 + w3 = 1):
+          w1 – chiều dài đường đi length(P)
+          w2 – độ rủi ro phóng xạ R(P)
+          w3 – độ rủi ro va chạm risk(P)
+
+        An toàn va chạm (công thức 4):
+          C1 – cân bằng N_obs (C1→1) vs d_min (C1→0)
+
+        Vật lý (công thức 6):
+          a  – kích thước ô lưới (m)
+          v  – vận tốc robot (m/s)
+        """
+        w1_ = float(w1) if w1 is not None else self.w1
+        w2_ = float(w2) if w2 is not None else self.w2
+        w3_ = float(w3) if w3 is not None else self.w3
+        if abs(w1_ + w2_ + w3_ - 1.0) > 1e-6:
+            raise ValueError(
+                f"w1+w2+w3 phải bằng 1.0. "
+                f"Hiện tại: {w1_:.4f}+{w2_:.4f}+{w3_:.4f} = {w1_+w2_+w3_:.4f}"
+            )
+        self.w1, self.w2, self.w3 = w1_, w2_, w3_
+        if C1 is not None:
+            self.C1 = float(C1)
+        if a is not None:
+            self.a = float(a)
+        if v is not None:
+            self.v = float(v)
+
     def setWeights(self, w1=0.7, C1=0.5):
-        """w1 -> 1: ưu tiên đường ngắn; w1 -> 0: ưu tiên đường an toàn.
-           C1 -> 1: nhấn số vật cản; C1 -> 0: nhấn khoảng cách tới vật cản gần."""
+        """Giữ lại cho tương thích ngược. Khuyến nghị dùng config() thay thế."""
         self.w1 = float(w1)
         self.C1 = float(C1)
 
     # =========================================================
     # I/O bản đồ
     # =========================================================
+    def load_radiation_map(self, file_path):
+        """Nạp bản đồ phóng xạ từ file.
+
+        Định dạng: mỗi dòng là một hàng lưới, các giá trị cách nhau bởi khoảng trắng.
+        """
+        with open(file_path, 'r') as f:
+            lines = [line.strip() for line in f if line.strip()]
+        self.radiation_map = [[float(x) for x in line.split()] for line in lines]
+        nrows = len(self.radiation_map)
+        ncols = len(self.radiation_map[0]) if nrows > 0 else 0
+        print(f"  Radiation map: {nrows}×{ncols}  [{os.path.basename(file_path)}]")
+
     def get_grid_from_file(self, file_path):
         with open(file_path, 'r') as f:
             info = f.read().split('\n')
@@ -87,6 +139,13 @@ class GridMap:
         self.deslist = points
         self.gridMap = gr
         self.mksz = int(20 * 20 / msz + 1)
+
+        # Tự động nạp bản đồ phóng xạ nếu tồn tại cùng thư mục
+        rad_path = os.path.join(
+            os.path.dirname(os.path.abspath(file_path)), 'radiation_grid.txt'
+        )
+        if os.path.exists(rad_path):
+            self.load_radiation_map(rad_path)
 
     def create_grid_map(self, npos):
         """Tạo bản đồ tương tác qua pygame (giữ lại từ bản gốc)."""
@@ -174,7 +233,7 @@ class GridMap:
                 - self.sumBlock[x2][y1 - 1] + self.sumBlock[x1 - 1][y1 - 1])
 
     def connectable(self, x1, y1, x2, y2):
-        """Kiểm tra "line of sight" giữa 2 ô (dùng prefix-sum, giữ nguyên từ bản gốc)."""
+        """Kiểm tra "line of sight" giữa 2 ô (dùng prefix-sum)."""
         vec = 0
         if x1 > x2:
             x1, x2 = x2, x1
@@ -196,23 +255,24 @@ class GridMap:
         return tot - t1 - t2
 
     # =========================================================
-    # WP-FMF bước 1: tính S(c) và f(x)
+    # WP-FMF bước 1: tính S(c), chuẩn hoá phóng xạ, rồi f(x)
     # =========================================================
     def computeSafety(self):
-        """Công thức (4) trong paper:
-            S(c) = C1 · (24 - N_obs)/24 + (1-C1) · d_min/3
-        với N_obs, d_min tính trên vùng lân cận 5x5 (không kể chính c).
+        """Công thức (4): S(c) = C1·(120−N_obs)/120 + (1−C1)·d_min/7
+
+        Dùng vùng lân cận 11×11 (bán kính 5) để có trường an toàn mịn hơn
+        trên bản đồ kích thước lớn (200×200+).
+        Tham số C1 chỉnh qua config().
         """
         sz = self.mapSize
         self.safety = [[0.0] * sz for _ in range(sz)]
         for i in range(sz):
             for j in range(sz):
                 if self.gridMap[i][j] == 1:
-                    # Vật cản: an toàn = 0 (không dùng ô này để đi qua)
                     self.safety[i][j] = 0.0
                     continue
                 n_obs = 0
-                d_min = 7.0  # mặc định khi không có vật cản trong 11x11
+                d_min = 7.0
                 for di in range(-5, 6):
                     for dj in range(-5, 6):
                         if di == 0 and dj == 0:
@@ -225,10 +285,33 @@ class GridMap:
                                 if d < d_min:
                                     d_min = d
                 self.safety[i][j] = (self.C1 * (120.0 - n_obs) / 120.0
-                                    + (1.0 - self.C1) * d_min / 7.0)
+                                     + (1.0 - self.C1) * d_min / 7.0)
+
+    def _normalize_radiation(self):
+        """Chuẩn hóa R̄(x) về [0, 1] dựa trên max tại các ô không phải vật cản."""
+        if self.radiation_map is None:
+            self.radiation_norm = None
+            return
+        sz = self.mapSize
+        nrows = len(self.radiation_map)
+        ncols = len(self.radiation_map[0]) if nrows > 0 else 0
+        rmax = 0.0
+        for i in range(min(sz, nrows)):
+            for j in range(min(sz, ncols)):
+                if self.gridMap[i][j] != 1:
+                    val = self.radiation_map[i][j]
+                    if val > rmax:
+                        rmax = val
+        if rmax == 0.0:
+            rmax = 1.0
+        self.radiation_norm = [[0.0] * sz for _ in range(sz)]
+        for i in range(sz):
+            for j in range(sz):
+                if i < nrows and j < ncols:
+                    self.radiation_norm[i][j] = self.radiation_map[i][j] / rmax
 
     def computeFCost(self):
-        """Công thức (11a): f(x) = w1 + (1 - w1) * (1 - S(x))."""
+        """Công thức (11): f(x) = w1 + w2·R̄_norm(x) + w3·(1−S(x))."""
         sz = self.mapSize
         INF = float('inf')
         self.f_cost = [[INF] * sz for _ in range(sz)]
@@ -237,17 +320,19 @@ class GridMap:
                 if self.gridMap[i][j] == 1:
                     self.f_cost[i][j] = INF
                 else:
-                    self.f_cost[i][j] = self.w1 + (1.0 - self.w1) * (1.0 - self.safety[i][j])
+                    r_norm = (self.radiation_norm[i][j]
+                              if self.radiation_norm is not None else 0.0)
+                    self.f_cost[i][j] = (self.w1
+                                         + self.w2 * r_norm
+                                         + self.w3 * (1.0 - self.safety[i][j]))
 
     # =========================================================
-    # Algorithm 2: AddEdge (đã cải tiến theo bridge cost)
+    # Algorithm 2: AddEdge (cải tiến bridge cost)
     # =========================================================
     def _add_edge_wp(self, x, y, stage):
         """
-        x, y là 2 ô thuộc 2 vùng pháo hoa khác nhau.
-            cost_bridge = d(x,y) * (f(x) + f(y)) / 2
-            new_D       = T[x] + T[y] + cost_bridge
-        Nếu new_D < D[u,v] hiện tại thì cập nhật. M[u,v] lưu stage (1 hoặc 2).
+        cost_bridge = d(x,y) · (f(x)+f(y))/2
+        D[u,v]      = T[x] + T[y] + cost_bridge   (eq. 14a)
         """
         fx = self.F_label[x[0]][x[1]]
         fy = self.F_label[y[0]][y[1]]
@@ -274,17 +359,14 @@ class GridMap:
         INF = float('inf')
         n = self.npos
 
-        # State của pháo hoa sơ cấp
         self.T = [[INF] * sz for _ in range(sz)]
-        self.F_label = [[-1] * sz for _ in range(sz)]       # F(x) trong paper
-        self.trace_p = [[(-1, -1)] * sz for _ in range(sz)]  # parent sơ cấp
+        self.F_label = [[-1] * sz for _ in range(sz)]
+        self.trace_p = [[(-1, -1)] * sz for _ in range(sz)]
 
-        # Ma trận D' (adjacency giữa các source)
         self.adj = [[INF] * n for _ in range(n)]
         self.inters = [[((-1, -1), (-1, -1))] * n for _ in range(n)]
         self.M = [[0] * n for _ in range(n)]
 
-        # Khởi tạo: mỗi source đẩy vào heap với T = 0
         pq = []
         for i, pos in enumerate(self.deslist):
             r, c = pos
@@ -292,7 +374,6 @@ class GridMap:
             self.F_label[r][c] = i
             heapq.heappush(pq, (0.0, r, c))
 
-        # Weighted Dijkstra đa nguồn (8-connected)
         while pq:
             t, r, c = heapq.heappop(pq)
             if t > self.T[r][c] + 1e-12:
@@ -312,14 +393,12 @@ class GridMap:
                     self.trace_p[nr][nc] = (r, c)
                     heapq.heappush(pq, (new_t, nr, nc))
 
-        # Phân hoạch Hold[i]
         self.hold = [[] for _ in range(n)]
         for i in range(sz):
             for j in range(sz):
                 if self.F_label[i][j] != -1:
                     self.hold[self.F_label[i][j]].append((i, j))
 
-        # Kết nối sơ cấp: cặp ô kề nhau thuộc 2 vùng khác nhau
         for i in range(sz):
             for j in range(sz):
                 if self.F_label[i][j] == -1:
@@ -337,17 +416,9 @@ class GridMap:
     # Algorithm 1 pha 2: Intersecting stage (kết nối thứ cấp)
     # =========================================================
     def _firework_secondary(self):
-        """
-        Với mỗi source i:
-          1. Tạm xoá Hold[i] (T = INF, F = -1)
-          2. Lan truyền từ các ô biên (thuộc vùng khác) vào vùng bị xoá
-          3. Khi hai sóng từ 2 source khác gặp nhau trong Hold[i] -> AddEdge stage 2
-          4. Khôi phục Hold[i]
-        """
         sz = self.mapSize
         INF = float('inf')
 
-        # trace_s lưu parent cho sóng thứ cấp (chỉ set cho ô bị re-label)
         self.trace_s = [[(-1, -1)] * sz for _ in range(sz)]
 
         for i in range(self.npos):
@@ -355,7 +426,6 @@ class GridMap:
             if not hold_cells:
                 continue
 
-            # Sao lưu và tạm xoá Hold[i]
             saved = {}
             hold_set = set(hold_cells)
             for (r, c) in hold_cells:
@@ -363,7 +433,6 @@ class GridMap:
                 self.T[r][c] = INF
                 self.F_label[r][c] = -1
 
-            # Khởi tạo Border: các ô lân cận Hold[i] nhưng thuộc vùng khác
             pq = []
             seeded = set()
             for (r, c) in hold_cells:
@@ -378,7 +447,6 @@ class GridMap:
                     seeded.add((nr, nc))
                     heapq.heappush(pq, (self.T[nr][nc], nr, nc))
 
-            # Lan truyền: chỉ đi vào các ô đang bị xoá (thuộc Hold[i])
             while pq:
                 t, r, c = heapq.heappop(pq)
                 if t > self.T[r][c] + 1e-12:
@@ -389,7 +457,6 @@ class GridMap:
                         continue
                     if self.gridMap[nr][nc] == 1:
                         continue
-                    # Chỉ đi vào vùng tạm bị xoá
                     if (nr, nc) not in hold_set:
                         continue
                     d_step = math.hypot(dr, dc)
@@ -401,7 +468,6 @@ class GridMap:
                         self.trace_s[nr][nc] = (r, c)
                         heapq.heappush(pq, (new_t, nr, nc))
 
-            # Kết nối thứ cấp: trong Hold[i], cặp ô kề mà secondary label khác nhau
             for (r, c) in hold_cells:
                 if self.F_label[r][c] == -1:
                     continue
@@ -412,10 +478,8 @@ class GridMap:
                     if self.F_label[nr][nc] == -1:
                         continue
                     if self.F_label[nr][nc] != self.F_label[r][c]:
-                        # f() và T() hiện tại đều là secondary → bridge cost đúng
                         self._add_edge_wp((r, c), (nr, nc), stage=2)
 
-            # Khôi phục Hold[i] về trạng thái sơ cấp
             for (r, c), (t0, f0) in saved.items():
                 self.T[r][c] = t0
                 self.F_label[r][c] = f0
@@ -424,12 +488,6 @@ class GridMap:
     # Dựng lại path ô-by-ô giữa mọi cặp source
     # =========================================================
     def _backtrack_to_source(self, start_cell, target_source):
-        """
-        Đi từ start_cell về source target_source dựa trên trace.
-        - Khi ở vùng primary == target_source: dùng trace_p (đi về nguồn gốc)
-        - Khi ở vùng primary khác: dùng trace_s trước (sóng thứ cấp đi ra khỏi Hold),
-          nếu không có trace_s thì dùng trace_p.
-        """
         sr, sc = self.deslist[target_source]
         target = (sr, sc)
         cur = tuple(start_cell)
@@ -451,17 +509,16 @@ class GridMap:
             cur = parent
             path.append(cur)
             visited.add(cur)
-        return path  # start → ... → source
+        return path
 
     def _smooth_path(self, cells):
-        """Làm mịn đường đi bằng line-of-sight check (dùng prefix-sum)."""
+        """Làm mịn đường đi bằng line-of-sight check."""
         if len(cells) <= 2:
             return [list(c) for c in cells]
         out = [list(cells[0])]
         anchor = cells[0]
         for i in range(1, len(cells)):
             if self.connectable(anchor[0], anchor[1], cells[i][0], cells[i][1]) != 0:
-                # Line-of-sight bị phá: commit ô trước đó
                 out.append(list(cells[i - 1]))
                 anchor = cells[i - 1]
         out.append(list(cells[-1]))
@@ -479,11 +536,9 @@ class GridMap:
                 if self.inters[u][v][0][0] == -1:
                     continue
                 x, y = self.inters[u][v]
-                p_u = self._backtrack_to_source(x, u)   # x → ... → s_u
-                p_v = self._backtrack_to_source(y, v)   # y → ... → s_v
-                # Ghép: s_u → ... → x → y → ... → s_v
+                p_u = self._backtrack_to_source(x, u)
+                p_v = self._backtrack_to_source(y, v)
                 cells = list(reversed(p_u)) + list(p_v)
-                # Khử cell trùng liên tiếp
                 dedup = [cells[0]]
                 for c in cells[1:]:
                     if c != dedup[-1]:
@@ -494,7 +549,7 @@ class GridMap:
     # Dijkstra trên đồ thị checkpoint (pha 1 cuối cùng)
     # =========================================================
     def dijkstra(self):
-        """All-pairs shortest path trên đồ thị checkpoint (kích thước npos)."""
+        """All-pairs shortest path trên đồ thị checkpoint."""
         n = self.npos
         INF = float('inf')
         self.dijk = [[INF] * n for _ in range(n)]
@@ -519,17 +574,27 @@ class GridMap:
                         heapq.heappush(pq, (nd, v))
 
     # =========================================================
-    # Pipeline
+    # Pipeline tổng hợp
     # =========================================================
-    def buildGraphAdvanced(self, w1=None, C1=None):
-        """Pipeline pha 1 hoàn chỉnh theo paper WP-FMF."""
+    def buildGraphAdvanced(self, w1=None, w2=None, w3=None, C1=None):
+        """Pipeline pha 1 hoàn chỉnh.
+
+        Các tham số truyền vào ghi đè cài đặt hiện tại.
+        Khuyến nghị: gọi config() trước rồi gọi buildGraphAdvanced() không tham số.
+        """
         if w1 is not None:
             self.w1 = float(w1)
+        if w2 is not None:
+            self.w2 = float(w2)
+        if w3 is not None:
+            self.w3 = float(w3)
         if C1 is not None:
             self.C1 = float(C1)
-        self.DFType = f"WP-FMF (w1={self.w1}, C1={self.C1})"
+        self.DFType = (f"WP-FMF (w1={self.w1:.2f}, w2={self.w2:.2f}, "
+                       f"w3={self.w3:.2f}, C1={self.C1:.2f})")
 
         self.computeSafety()
+        self._normalize_radiation()
         self.computeFCost()
         self._firework_primary()
         self._firework_secondary()
@@ -537,10 +602,9 @@ class GridMap:
         self.dijkstra()
 
         # Alias giữ tương thích với code visualization cũ
-        self.owner = [self.F_label]   # drawFMComponent dùng owner[0]
-        self.dista = self.T           # drawDijkstraWave dùng dista
+        self.owner = [self.F_label]
+        self.dista = self.T
 
-    # Giữ tên cũ cho khả năng tương thích
     def buildGraphNormal(self):
         self.buildGraphAdvanced()
 
@@ -548,30 +612,78 @@ class GridMap:
     # getPath: mở rộng TSP permutation thành chuỗi ô
     # =========================================================
     def getPath(self, sol):
-        """
-        sol: permutation của 0..npos-1 (TSP solution, không kèm depot cuối).
-        Trả về list các [r, c] mà robot đi qua trên lưới (tour khép kín).
-        """
+        """sol: permutation 0..npos-1. Trả về list [r, c] tour khép kín."""
         sol = list(sol) + [sol[0]]
         cells = []
         for i in range(len(sol) - 1):
             u, v = int(sol[i]), int(sol[i + 1])
             p = v
             t1 = []
-            # Lần ngược từ v về u qua dtra
             while p != u:
                 k = self.dtra[u][p]
                 if k == -1:
-                    # Không có path -> fallback đường thẳng
                     t1.append(list(self.deslist[p]))
                     t1.append(list(self.deslist[u]))
                     break
                 seg = list(self.pathTrace[p][k])
                 t1.extend(seg)
                 p = k
-            t1.reverse()  # u → ... → v
+            t1.reverse()
             cells.extend(t1)
         return cells
+
+    # =========================================================
+    # Metrics đường đi
+    # =========================================================
+    def pathLength(self, cells):
+        """length(P) = Σ d(p_i, p_{i+1})  — công thức (3)."""
+        total = 0.0
+        for i in range(len(cells) - 1):
+            total += math.hypot(cells[i + 1][0] - cells[i][0],
+                                cells[i + 1][1] - cells[i][1])
+        return total
+
+    def pathRisk(self, cells):
+        """risk(P) = Σ(1 − S(p)) với p ∈ P  — công thức (5)."""
+        if not hasattr(self, 'safety'):
+            return None
+        total = 0.0
+        for p in cells:
+            r, c = int(p[0]), int(p[1])
+            if 0 <= r < self.mapSize and 0 <= c < self.mapSize:
+                total += (1.0 - self.safety[r][c])
+        return total
+
+    def pathRadiation(self, cells):
+        """R(P) = Σ d(p_n,p_{n+1})·(R̄(p_n)+R̄(p_{n+1}))/2·(a/v)  — công thức (6)."""
+        if self.radiation_map is None:
+            return None
+        nrows = len(self.radiation_map)
+        ncols = len(self.radiation_map[0]) if nrows > 0 else 0
+        total = 0.0
+        for i in range(len(cells) - 1):
+            r0, c0 = int(cells[i][0]),     int(cells[i][1])
+            r1, c1 = int(cells[i + 1][0]), int(cells[i + 1][1])
+            R0 = (self.radiation_map[r0][c0]
+                  if 0 <= r0 < nrows and 0 <= c0 < ncols else 0.0)
+            R1 = (self.radiation_map[r1][c1]
+                  if 0 <= r1 < nrows and 0 <= c1 < ncols else 0.0)
+            d = math.hypot(r1 - r0, c1 - c0)
+            total += (d * (R0 + R1) / 2.0 * (self.a / self.v))/3600.0  # Chuyển μSv·m/s thành mSv·h
+        return total
+
+    def pathTotalCost(self, cells):
+        """Total cost = w1·length(P) + w2·R(P) + w3·risk(P)  — công thức (7a).
+
+        Trả về (total, length, radiation, risk).
+        """
+        L    = self.pathLength(cells)
+        risk = self.pathRisk(cells)
+        R    = self.pathRadiation(cells)
+        risk = risk if risk is not None else 0.0
+        R    = R    if R    is not None else 0.0
+        total = self.w1 * L + self.w2 * R + self.w3 * risk
+        return total, L, R, risk
 
     # =========================================================
     # Visualization
@@ -590,7 +702,6 @@ class GridMap:
             ys, xs = zip(*pts)
             plt.plot(xs, ys, color='blue', linewidth=4)
 
-        # Vật cản
         blx, bly = [], []
         for i in range(sz):
             for j in range(sz):
@@ -598,7 +709,6 @@ class GridMap:
                     blx.append(j); bly.append(-i)
         plt.plot(blx, bly, 'ks', markersize=mksz)
 
-        # Checkpoint
         dx, dy = [], []
         for i in range(sz):
             for j in range(sz):
@@ -621,7 +731,6 @@ class GridMap:
         plt.title(self.DFType, fontsize=14)
         mksz = self.mksz
 
-        # Tô vùng Voronoi-like
         for i in range(sz):
             for j in range(sz):
                 if self.gridMap[i][j] == 1:
@@ -632,7 +741,6 @@ class GridMap:
                 col = self.colorHold[lbl % len(self.colorHold)]
                 plt.plot(j, -i, 's', color=col, markersize=mksz)
 
-        # Vật cản
         blx, bly = [], []
         for i in range(sz):
             for j in range(sz):
@@ -640,7 +748,6 @@ class GridMap:
                     blx.append(j); bly.append(-i)
         plt.plot(blx, bly, 'ks', markersize=mksz)
 
-        # Đường nối giữa các source (crimson)
         for i in range(self.npos - 1):
             for j in range(i + 1, self.npos):
                 pts = self.pathTrace[i][j]
@@ -653,7 +760,6 @@ class GridMap:
                 ys, xs = zip(*pts)
                 plt.plot(xs, ys, color='crimson', linewidth=3)
 
-        # Checkpoint
         dx, dy = [], []
         for i in range(sz):
             for j in range(sz):
@@ -676,7 +782,6 @@ class GridMap:
         plt.title(self.DFType + " - Cumulative cost T(x)", fontsize=14)
         mksz = self.mksz
 
-        # Vật cản
         blx, bly = [], []
         for i in range(sz):
             for j in range(sz):
@@ -684,7 +789,6 @@ class GridMap:
                     blx.append(j); bly.append(-i)
         plt.plot(blx, bly, 'ks', markersize=mksz)
 
-        # Heatmap T
         x2, y2, z2 = [], [], []
         for i in range(sz):
             for j in range(sz):
@@ -695,7 +799,6 @@ class GridMap:
         if x2:
             plt.scatter(x2, y2, c=z2, cmap='jet', marker='s', s=mksz * mksz)
 
-        # Checkpoint
         dx, dy = [], []
         for i in range(sz):
             for j in range(sz):
@@ -711,7 +814,7 @@ class GridMap:
         plt.show()
 
     def drawSafety(self):
-        """Trường chỉ số an toàn S(x) - mới trong WP-FMF."""
+        """Trường chỉ số an toàn S(x)."""
         sz = self.mapSize
         if not hasattr(self, 'safety'):
             print("Chưa tính safety. Hãy gọi buildGraphAdvanced() trước.")
@@ -749,21 +852,24 @@ class GridMap:
         plt.show()
 
     def drawFCost(self):
-        """Trường chi phí cục bộ f(x) - mới trong WP-FMF."""
+        """Trường chi phí cục bộ f(x)."""
         sz = self.mapSize
         if not hasattr(self, 'f_cost'):
             print("Chưa tính f_cost. Hãy gọi buildGraphAdvanced() trước.")
             return
         plt.figure(figsize=(8, 8), dpi=80)
         plt.axis([-1, sz, -sz, 1])
-        plt.title(f"Local cost f(x), w1={self.w1}", fontsize=14)
+        plt.title(f"Local cost f(x)  [w1={self.w1:.2f}, w2={self.w2:.2f}, w3={self.w3:.2f}]",
+                  fontsize=14)
         mksz = self.mksz
 
         x2, y2, z2 = [], [], []
         for i in range(sz):
             for j in range(sz):
                 if self.gridMap[i][j] != 1:
-                    x2.append(j); y2.append(-i); z2.append(self.f_cost[i][j])
+                    fv = self.f_cost[i][j]
+                    if fv < 1e9:
+                        x2.append(j); y2.append(-i); z2.append(fv)
         if x2:
             plt.scatter(x2, y2, c=z2, cmap='viridis', marker='s', s=mksz * mksz)
             plt.colorbar(label='f(x)')
@@ -786,24 +892,43 @@ class GridMap:
         plt.xticks([]); plt.yticks([])
         plt.show()
 
-    # =========================================================
-    # Tính risk thực của một đường đi (để đánh giá)
-    # =========================================================
-    def pathRisk(self, cells):
-        """risk(P) = sum over p in P of (1 - S(p))  - công thức (5)."""
-        if not hasattr(self, 'safety'):
-            return None
-        total = 0.0
-        for p in cells:
-            r, c = int(p[0]), int(p[1])
-            if 0 <= r < self.mapSize and 0 <= c < self.mapSize:
-                total += (1.0 - self.safety[r][c])
-        return total
+    def drawRadiation(self):
+        """Heatmap bản đồ phóng xạ R̄(x)."""
+        if self.radiation_map is None:
+            print("Chưa nạp radiation_map.")
+            return
+        sz = self.mapSize
+        nrows = len(self.radiation_map)
+        ncols = len(self.radiation_map[0]) if nrows > 0 else 0
+        plt.figure(figsize=(8, 8), dpi=80)
+        plt.axis([-1, sz, -sz, 1])
+        plt.title("Radiation map R̄(x)", fontsize=14)
+        mksz = self.mksz
 
-    def pathLength(self, cells):
-        """length(P) = sum of Euclidean distance giữa các waypoint liên tiếp."""
-        total = 0.0
-        for i in range(len(cells) - 1):
-            total += math.hypot(cells[i + 1][0] - cells[i][0],
-                                cells[i + 1][1] - cells[i][1])
-        return total
+        x2, y2, z2 = [], [], []
+        for i in range(sz):
+            for j in range(sz):
+                if self.gridMap[i][j] != 1 and i < nrows and j < ncols:
+                    x2.append(j); y2.append(-i)
+                    z2.append(self.radiation_map[i][j])
+        if x2:
+            plt.scatter(x2, y2, c=z2, cmap='hot_r', marker='s', s=mksz * mksz)
+            plt.colorbar(label='Radiation dose rate')
+
+        blx, bly = [], []
+        for i in range(sz):
+            for j in range(sz):
+                if self.gridMap[i][j] == 1:
+                    blx.append(j); bly.append(-i)
+        plt.plot(blx, bly, 'ks', markersize=mksz)
+
+        dx, dy = [], []
+        for i in range(sz):
+            for j in range(sz):
+                if self.gridMap[i][j] == 2:
+                    dx.append(j); dy.append(-i)
+        plt.plot(dx, dy, 's', color='cyan',
+                 markeredgecolor='blue', markersize=mksz, markeredgewidth=2)
+
+        plt.xticks([]); plt.yticks([])
+        plt.show()

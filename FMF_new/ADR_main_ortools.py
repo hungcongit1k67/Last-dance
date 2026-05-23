@@ -8,7 +8,9 @@ Cách dùng nhanh:
     python ADR_main_ortools.py
 Hoặc import hàm run_wpfmf_pipeline(...) để gọi trong notebook.
 """
-
+# -*- coding: utf-8 -*-
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
 import os
 import time
 import numpy as np
@@ -23,11 +25,37 @@ except ImportError:
 
 
 # =========================================================
+# CONFIG — Chỉnh sửa tất cả tham số tại đây
+# =========================================================
+CONFIG = {
+    # --- Trọng số tổng hợp (bắt buộc: w1 + w2 + w3 = 1.0) ---
+    "w1": 0.4,      # Chiều dài đường đi  length(P)
+    "w2": 0.3,      # Độ rủi ro phóng xạ  R(P)
+    "w3": 0.3,      # Độ rủi ro va chạm   risk(P)
+
+    # --- Tham số an toàn va chạm (công thức 4) ---
+    "C1": 0.5,      # C1→1: ưu tiên N_obs;  C1→0: ưu tiên d_min
+
+    # --- Tham số vật lý (công thức 6) ---
+    "a": 1.0,       # Kích thước ô lưới (m)
+    "v": 1.0,       # Vận tốc robot (m/s)
+
+    # --- Đường dẫn bản đồ ---
+    "map_path": r"E:\last_dance\LastDance\FMF_new\mixed200\mixed200.txt",
+
+    # --- Tham số OR-Tools TSP ---
+    "ntest": 1,
+    "distance_scale": 1000,
+    "time_limit_sec": 5,
+}
+
+
+# =========================================================
 # Timing helper
 # =========================================================
-def timeEval(grid, w1=0.7, C1=0.5):
+def timeEval(grid, w1=None, w2=None, w3=None, C1=None):
     start = time.time()
-    grid.buildGraphAdvanced(w1=w1, C1=C1)
+    grid.buildGraphAdvanced(w1=w1, w2=w2, w3=w3, C1=C1)
     print("--- Phase 1 (WP-FMF) took %.4f seconds ---" % (time.time() - start))
 
 
@@ -129,7 +157,7 @@ def evaluation_wpfmf(grid,
     """
     Chay OR-Tools ntest lan tren grid.dijk (da duoc tinh bang WP-FMF).
     Tra ve (best_path, best_cost).
-    Ngoai ra, in ra chieu dai va risk cua duong di tot nhat theo cong thuc (3) va (5).
+    In ra: chieu dai, phong xa, rui ro va cham, va total cost.
     """
     _require_ortools()
 
@@ -162,17 +190,22 @@ def evaluation_wpfmf(grid,
     print(f"Std  weighted cost: {res_arr.std():.4f}")
     print(f"Best weighted cost: {best_cost:.4f}")
 
-    # Bung permutation thanh chuoi o thuc te
+    # Mở rộng permutation thành chuỗi ô thực tế
     cells = grid.getPath(best_path)
-    length = grid.pathLength(cells)
-    risk = grid.pathRisk(cells)
-    print("\n===== Path metrics (thuc te tren grid) =====")
+    total, length, radiation, risk = grid.pathTotalCost(cells)
+
+    print("\n===== Path metrics (thực tế trên grid) =====")
     path_tuples = [(int(c[0]), int(c[1])) for c in cells]
     print(f"Detailed path ({len(path_tuples)} steps):")
     print(path_tuples)
-    print(f"length(P) = {length:.4f}  (cong thuc 3)")
-    if risk is not None:
-        print(f"risk(P)   = {risk:.4f}   (cong thuc 5)")
+    print(f"  length(P)    = {length:.4f}   (công thức 3)")
+    if grid.radiation_map is not None:
+        print(f"  R(P)         = {radiation:.4f}   (công thức 6, a={grid.a}, v={grid.v})")
+    else:
+        print(f"  R(P)         = N/A  (chưa nạp radiation_map)")
+    print(f"  risk(P)      = {risk:.4f}   (công thức 5)")
+    print(f"  Total cost   = {total:.4f}")
+    print(f"  (w1={grid.w1:.2f}·length + w2={grid.w2:.2f}·R + w3={grid.w3:.2f}·risk)")
 
     if draw:
         grid.drawPath(cells)
@@ -181,6 +214,8 @@ def evaluation_wpfmf(grid,
         try:
             grid.drawSafety()
             grid.drawFCost()
+            if grid.radiation_map is not None:
+                grid.drawRadiation()
         except AttributeError:
             pass
 
@@ -191,8 +226,10 @@ def evaluation_wpfmf(grid,
 # Full pipeline wrapper
 # =========================================================
 def run_wpfmf_pipeline(grid,
-                      w1=1,
-                      C1=0.5,
+                      w1=None,
+                      w2=None,
+                      w3=None,
+                      C1=None,
                       ntest=1,
                       distance_scale=1000,
                       time_limit_sec=5,
@@ -200,15 +237,20 @@ def run_wpfmf_pipeline(grid,
                       local_search_metaheuristic=None,
                       draw=True):
     """
-    Pipeline day du:
-      Pha 1: WP-FMF   -> grid.dijk (ma tran chi phi giua cac checkpoint)
-      Pha 2: OR-Tools -> thu tu tham toi uu
-    w1: trong so giua length (w1=1) va risk (w1=0)
-    C1: trong so N_obs (C1=1) vs d_min (C1=0) trong S(c)
+    Pipeline đầy đủ:
+      Pha 1: WP-FMF   -> grid.dijk (ma trận chi phí giữa các checkpoint)
+      Pha 2: OR-Tools -> thứ tự thăm tối ưu
+
+    Trọng số (w1+w2+w3=1):
+      w1: length(P),  w2: R(P) phóng xạ,  w3: risk(P) va chạm
+    C1: cân bằng N_obs vs d_min trong S(c)
+
+    Nếu không truyền tham số, dùng giá trị hiện tại của grid (đã set qua config()).
     """
-    print(f"===== WP-FMF Pipeline (w1={w1}, C1={C1}) =====")
+    print(f"===== WP-FMF Pipeline (w1={w1 or grid.w1}, w2={w2 or grid.w2}, "
+          f"w3={w3 or grid.w3}, C1={C1 or grid.C1}) =====")
     print("[Phase 1] Building WP-FMF cost matrix ...")
-    timeEval(grid, w1=w1, C1=C1)
+    timeEval(grid, w1=w1, w2=w2, w3=w3, C1=C1)
 
     print("\n[Phase 2] OR-Tools TSP on cost matrix ...")
     return evaluation_wpfmf(
@@ -222,19 +264,20 @@ def run_wpfmf_pipeline(grid,
     )
 
 
-# Giu ten ham cu cho tuong thich
+# Giữ tên hàm cũ cho tương thích
 def ADR_main(grid,
              ntest=1,
              distance_scale=1000,
              time_limit_sec=5,
              first_solution_strategy=None,
              local_search_metaheuristic=None,
-             w1=0.7,
-             C1=0.5):
+             w1=None,
+             w2=None,
+             w3=None,
+             C1=None):
     return run_wpfmf_pipeline(
         grid,
-        w1=w1,
-        C1=C1,
+        w1=w1, w2=w2, w3=w3, C1=C1,
         ntest=ntest,
         distance_scale=distance_scale,
         time_limit_sec=time_limit_sec,
@@ -253,38 +296,28 @@ def ADF(grid):
 def main():
     grid = My_grid.GridMap(mapSize=20)
 
-    # Chinh duong dan map cho phu hop may cua ban.
-    # Cac file map nam trong thu muc FMF/ cua repo.
+    # Áp dụng CONFIG vào grid
+    grid.config(
+        w1=CONFIG["w1"],
+        w2=CONFIG["w2"],
+        w3=CONFIG["w3"],
+        C1=CONFIG["C1"],
+        a=CONFIG["a"],
+        v=CONFIG["v"],
+    )
 
-    map_path = r"E:\last_dance\LastDance\FMF\mixed200.txt"
-    # candidates = [
-    #     "warehouse2.txt",
-    #     "./FMF/warehouse2.txt",
-    #     r"E:\last_dance\LastDance\FMF\warehouse2.txt",
-    # ]
-    # map_path = None
-    # for p in candidates:
-    #     if os.path.exists(p):
-    #         map_path = p
-    #         break
-    # if map_path is None:
-    #     map_path = candidates[0]
-    #     print(f"Khong tim thay map. Su dung {map_path} (co the bao loi).")
-
+    map_path = CONFIG["map_path"]
     grid.get_grid_from_file(map_path)
     print(f"Loaded {map_path}: {grid.mapSize}x{grid.mapSize}, {grid.npos} checkpoints")
     for pos in grid.deslist:
         print(" ", pos)
     print()
 
-    # Chinh w1, C1 o day de thay nghiem thay doi
     run_wpfmf_pipeline(
         grid,
-        w1=0.5,      # 0.7 length + 0.3 safety (giam w1 -> an toan hon, dai hon)
-        C1=0.5,      # can bang N_obs va d_min
-        ntest=1,
-        distance_scale=1000,
-        time_limit_sec=5,
+        ntest=CONFIG["ntest"],
+        distance_scale=CONFIG["distance_scale"],
+        time_limit_sec=CONFIG["time_limit_sec"],
         first_solution_strategy=(
             routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
             if routing_enums_pb2 is not None else None),
