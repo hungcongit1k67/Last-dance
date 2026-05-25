@@ -1,1 +1,5 @@
 .env
+__pycache__/
+*.pyc
+*.pyo
+caothanhhuy/path_finding_with_safe/

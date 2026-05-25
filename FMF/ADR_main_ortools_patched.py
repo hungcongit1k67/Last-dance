@@ -1,14 +1,84 @@
-from numpy.core.fromnumeric import shape
+# -*- coding: utf-8 -*-
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+
 import My_grid_patched as My_grid
 import GA
 import numpy as np
 import time
+import json
+import os
+import datetime
 
 try:
     from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 except ImportError:  # pragma: no cover
     pywrapcp = None
     routing_enums_pb2 = None
+
+
+# =========================================================
+# CONFIG — Chỉnh sửa tất cả tham số tại đây
+# =========================================================
+CONFIG = {
+    # --- Trọng số báo cáo (bắt buộc: w1 + w2 + w3 = 1.0) ---
+    # Không ảnh hưởng thuật toán FMF (vẫn minimize length thuần túy).
+    # Chỉ dùng để tính và in total cost sau khi tìm được đường đi.
+    "w1": 0.6,      # Chiều dài đường đi  length(P)
+    "w2": 0.2,      # Độ rủi ro phóng xạ  R(P)
+    "w3": 0.2,      # Độ rủi ro va chạm   risk(P)
+
+    # --- Tham số an toàn va chạm S(c) (công thức 4) ---
+    "C1": 0.5,      # C1→1: ưu tiên N_obs;  C1→0: ưu tiên d_min
+    "safety_radius": 5.0,        # bán kính vùng lân cận tính S(c)
+    "safety_max_distance": 7.0,  # khoảng cách chuẩn hóa d_min trong S(c)
+
+    # --- Tham số vật lý (công thức 6 — tính R(P)) ---
+    "a": 1.0,       # Kích thước ô lưới (m)
+    "v": 1.0,       # Vận tốc robot (m/s)
+
+    # --- Đường dẫn bản đồ ---
+    # radiation_grid.txt trong cùng thư mục sẽ được nạp tự động.
+    "map_path": r"E:\last_dance\LastDance\FMF\mixed200\mixed200.txt",
+
+    # --- Tham số OR-Tools TSP ---
+    "ntest": 1,
+    "distance_scale": 1000,
+    "time_limit_sec": 5,
+
+    # --- Path output ---
+    # True  → in/lưu path đã smooth (turning points, ~128 bước)
+    # False → in/lưu full path cell-by-cell (đi qua từng ô lưới, ~1000+ bước)
+    "smooth": True,
+}
+
+
+def _results_dir():
+    """Trả về đường dẫn thư mục results/ cạnh script, tạo nếu chưa có."""
+    d = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'results')
+    os.makedirs(d, exist_ok=True)
+    return d
+
+
+def _save_run(map_path, config_snapshot, run_data):
+    """Lưu/cập nhật kết quả vào results/<map_name>.json, mỗi lần chạy append thêm 1 run."""
+    map_name = os.path.splitext(os.path.basename(map_path))[0]
+    json_path = os.path.join(_results_dir(), f"{map_name}.json")
+
+    if os.path.exists(json_path):
+        with open(json_path, 'r', encoding='utf-8') as f:
+            record = json.load(f)
+    else:
+        record = {"map": map_name, "map_path": map_path, "runs": []}
+
+    run_data["timestamp"] = datetime.datetime.now().isoformat(timespec='seconds')
+    run_data["config"] = config_snapshot
+    record["runs"].append(run_data)
+
+    with open(json_path, 'w', encoding='utf-8') as f:
+        json.dump(record, f, ensure_ascii=False, indent=2)
+
+    print(f"\nResults saved -> {json_path}  (total runs: {len(record['runs'])})")
 
 
 def timeEval(grid):
@@ -155,6 +225,8 @@ def evaluation3(
     time_limit_sec=5,
     first_solution_strategy=None,
     local_search_metaheuristic=None,
+    map_path=None,
+    smooth=True,
 ):
     """
     Pha 2 TSP bang OR-Tools thay cho ACO.
@@ -165,6 +237,7 @@ def evaluation3(
     resORT = []
     bestpath = None
     bestcost = float("inf")
+    iterations_log = []
 
     for iter in range(ntest):
         print("Iteration ", iter + 1, "/", ntest)
@@ -178,9 +251,9 @@ def evaluation3(
             local_search_metaheuristic=local_search_metaheuristic,
         )
 
-        # getPath cua grid se tu dong them lai dinh dau o cuoi,
-        # nen path o day chi can moi dinh xuat hien 1 lan.
+        elapsed = time.time() - a
         resORT.append(cost)
+        iterations_log.append({"iteration": iter + 1, "cost": cost, "time_sec": round(elapsed, 4)})
 
         if cost < bestcost:
             bestcost = cost
@@ -188,20 +261,65 @@ def evaluation3(
 
         print("Route (OR-Tools):", path)
         print("Cost (float):", cost)
-        print(f"--- Iteration {iter+1}: {time.time() - a} seconds ---")
+        print(f"--- Iteration {iter+1}: {elapsed} seconds ---")
 
     resORT = np.array(resORT)
     print("Mean OR-Tools cost:", resORT.mean(), "Std OR-Tools:", resORT.std())
     print("Best cost:", bestcost)
 
+    if not smooth:
+        grid.twoPointTracing(smooth=False)   # rebuild cell-by-cell
     points = grid.getPath(bestpath)
 
-    length = grid.pathLength(points)
-    risk = grid.pathRisk(points)
+    total, length, radiation, risk = grid.pathTotalCost(points)
 
-    print("length(P) =", length)
-    if risk is not None:
-        print("risk(P)   =", risk)
+    path_tuples = [(int(p[0]), int(p[1])) for p in points]
+    path_label  = "turning points (smoothed)" if smooth else "cell-by-cell (full)"
+    print(f"\nPath ({len(path_tuples)} bước, {path_label}):")
+    print(path_tuples)
+
+    print("\n===== Path metrics =====")
+    print(f"  length(P)  = {length:.4f}   (cong thuc 3)")
+    if grid.radiation_map is not None:
+        print(f"  R(P)       = {radiation:.4f}   (cong thuc 6, a={grid.a}, v={grid.v})")
+    else:
+        print(f"  R(P)       = N/A  (chua nap radiation_map)")
+    print(f"  risk(P)    = {risk:.4f}   (cong thuc 5)")
+    print(f"  Total cost = {total:.4f}")
+    print(f"  (w1={grid.w1:.2f}*length + w2={grid.w2:.2f}*R + w3={grid.w3:.2f}*risk)")
+
+    # Khôi phục smooth=True để drawPath hoạt động bình thường
+    if not smooth:
+        grid.twoPointTracing(smooth=True)
+
+    # Lưu kết quả ra JSON nếu có map_path
+    if map_path is not None:
+        config_snapshot = {
+            "w1": grid.w1, "w2": grid.w2, "w3": grid.w3,
+            "C1": grid.C1, "a": grid.a, "v": grid.v,
+            "safety_radius": grid.safety_radius,
+            "safety_max_distance": grid.safety_max_distance,
+            "ntest": ntest, "distance_scale": distance_scale,
+            "time_limit_sec": time_limit_sec,
+            "map_size": grid.mapSize, "checkpoints": grid.npos,
+            "smooth": smooth,
+        }
+        run_data = {
+            "summary": {
+                "mean_cost": round(float(resORT.mean()), 6),
+                "std_cost":  round(float(resORT.std()),  6),
+                "best_cost": round(float(bestcost),      6),
+            },
+            "metrics": {
+                "length":    round(float(length),    6),
+                "radiation": round(float(radiation), 6) if grid.radiation_map is not None else None,
+                "risk":      round(float(risk),      6),
+                "total_cost":round(float(total),     6),
+            },
+            "path": path_tuples,
+            "iterations": iterations_log,
+        }
+        _save_run(map_path, config_snapshot, run_data)
 
     grid.drawPath(points)
     grid.drawFMComponent(rmv=[0])
@@ -218,6 +336,8 @@ def ADR_main(
     time_limit_sec=5,
     first_solution_strategy=None,
     local_search_metaheuristic=None,
+    map_path=None,
+    smooth=True,
 ):
     """
     Quy trinh day du cho bai toan grid map:
@@ -233,6 +353,8 @@ def ADR_main(
         time_limit_sec=time_limit_sec,
         first_solution_strategy=first_solution_strategy,
         local_search_metaheuristic=local_search_metaheuristic,
+        map_path=map_path,
+        smooth=smooth,
     )
 
 
@@ -243,43 +365,33 @@ def ADF(grid):
 
 
 def main():
-    mapSize = 20
-    grid = My_grid.GridMap(mapSize)
-    if 0 == 1:
-        npos = 4
-        grid.create_grid_map(npos)
-    else:
-        # grid.get_grid_from_file("mixed2002.txt")
-        # grid.get_grid_from_file("square400.txt")
-        # grid.get_grid_from_file("triangle300.txt")
-        # grid.get_grid_from_file("obstacle80.txt")
-        # grid.get_grid_from_file("example1.txt")
-        # grid.get_grid_from_file("warehouse4.txt")
-        # grid.get_grid_from_file("map20_4.txt")
-        # grid.get_grid_from_file("map20_7.txt")
-        # grid.get_grid_from_file("map35_11.txt")
-        # grid.get_grid_from_file("map35_12.txt")
-        # grid.get_grid_from_file("map35_13.txt")
-        grid.get_grid_from_file(r"E:\last_dance\LastDance\FMF\map20_4.txt")
-        # grid.get_grid_from_file("map40_2.txt")
-        # grid.get_grid_from_file("map40_12.txt")
-        # grid.get_grid_from_file("map40_15.txt")
-        # grid.get_grid_from_file("map80_1.txt")
-        # grid.get_grid_from_file("map80_2.txt")
-        # grid.get_grid_from_file("map101_00.txt")
-        # grid.get_grid_from_file("map200_00.txt")
-        # grid.get_grid_from_file("maptest1.txt")
-        # grid.get_grid_from_file("maptest2.txt")
+    grid = My_grid.GridMap(20)
 
+    # Áp dụng CONFIG vào grid
+    grid.config(
+        w1=CONFIG["w1"],
+        w2=CONFIG["w2"],
+        w3=CONFIG["w3"],
+        C1=CONFIG["C1"],
+        a=CONFIG["a"],
+        v=CONFIG["v"],
+        safety_radius=CONFIG["safety_radius"],
+        safety_max_distance=CONFIG["safety_max_distance"],
+    )
+
+    # Nạp bản đồ (radiation_grid.txt trong cùng thư mục được nạp tự động)
+    grid.get_grid_from_file(CONFIG["map_path"])
+    print(f"Loaded: {CONFIG['map_path']}")
+    print(f"Map size: {grid.mapSize}x{grid.mapSize},  checkpoints: {grid.npos}")
     for pos in grid.deslist:
-        print(pos)
-    print("\n\n\n")
+        print(" ", pos)
+    print()
 
     ADR_main(
         grid,
-        ntest=1,
-        distance_scale=1000,
-        time_limit_sec=5,
+        ntest=CONFIG["ntest"],
+        distance_scale=CONFIG["distance_scale"],
+        time_limit_sec=CONFIG["time_limit_sec"],
         first_solution_strategy=(
             routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
             if routing_enums_pb2 is not None else None
@@ -288,6 +400,8 @@ def main():
             routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
             if routing_enums_pb2 is not None else None
         ),
+        map_path=CONFIG["map_path"],
+        smooth=CONFIG["smooth"],
     )
 
 

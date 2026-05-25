@@ -1,12 +1,15 @@
-from cgi import print_form
+import os
 import random
-#from numpy.lib.shape_base import tile
-import pygame
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-import queue 
-from pygame import color
+import queue
+
+try:
+    import pygame
+    from pygame import color
+except ImportError:
+    pygame = None
 
 class GridMap():
 
@@ -42,9 +45,19 @@ class GridMap():
                             self.mapSize*square_height+(self.mapSize+1)*self.margin]
         self.gridMap = []
         self.checked = np.zeros((mapSize,mapSize))
-        # Risk / Safety parameters
-        self.C1 = 0.5
-        self.w1 = 0.7
+
+        # Tham số an toàn & trọng số (chỉnh qua config())
+        self.C1  = 0.5   # cân bằng N_obs (→1) vs d_min (→0) trong S(c)
+        self.w1  = 0.6   # trọng số length(P)  — chỉ dùng để báo cáo total cost
+        self.w2  = 0.2   # trọng số R(P) phóng xạ
+        self.w3  = 0.2   # trọng số risk(P) va chạm
+        self.a   = 1.0   # kích thước ô lưới (m)
+        self.v   = 1.0   # vận tốc robot (m/s)
+        self.safety_radius       = 5    # bán kính vùng lân cận tính S(c)
+        self.safety_max_distance = 7.0  # khoảng cách chuẩn hóa d_min trong S(c)
+
+        # Bản đồ phóng xạ (nạp qua load_radiation_map hoặc tự động từ cùng thư mục)
+        self.radiation_map = None
 
 
 
@@ -484,7 +497,9 @@ class GridMap():
 
 
 
-    def twoPointTracing(self):
+    def twoPointTracing(self, smooth=True):
+        """smooth=True : lưu turning points (hành vi gốc).
+           smooth=False: lưu toàn bộ ô cell-by-cell."""
         self.pathTrace = [ [ [0] for i in range(self.npos)] for j in range(self.npos)]
         self.buildSumBlock()
 
@@ -496,11 +511,10 @@ class GridMap():
                 t1 = self.getAdj(u,v)
                 t2,dis = self.getTrace(t1)
 
-                #print("Get trace fron ",u," to ",v)
-                #print("Path :",t1)
-                #print("Short:",t2)
-
-                self.pathTrace[u][v] = t2.copy()
+                if smooth:
+                    self.pathTrace[u][v] = t2.copy()   # turning points
+                else:
+                    self.pathTrace[u][v] = [p.copy() for p in t1]  # cell-by-cell
                 self.adj[u][v] = dis
 
         for u in range(n-1):
@@ -585,7 +599,49 @@ class GridMap():
         return re
 
 
-    def get_grid_from_file(self,file_path):
+    # =========================================================
+    # Cấu hình tham số
+    # =========================================================
+    def config(self, w1=None, w2=None, w3=None, C1=None, a=None, v=None,
+               safety_radius=None, safety_max_distance=None):
+        """Cấu hình trọng số báo cáo và tham số vật lý.
+
+        w1+w2+w3 = 1  (chỉ dùng để tính total cost khi báo cáo kết quả,
+                        KHÔNG ảnh hưởng tới thuật toán FMF tìm đường).
+          w1 – length(P),  w2 – R(P) phóng xạ,  w3 – risk(P) va chạm
+        C1                – cân bằng N_obs (→1) vs d_min (→0) trong S(c)
+        safety_radius     – bán kính vùng lân cận tính S(c)
+        safety_max_distance – khoảng cách chuẩn hóa d_min
+        a  – kích thước ô lưới (m),  v – vận tốc robot (m/s)
+        """
+        w1_ = float(w1) if w1 is not None else self.w1
+        w2_ = float(w2) if w2 is not None else self.w2
+        w3_ = float(w3) if w3 is not None else self.w3
+        if abs(w1_ + w2_ + w3_ - 1.0) > 1e-6:
+            raise ValueError(
+                f"w1+w2+w3 phải bằng 1.0. "
+                f"Hiện tại: {w1_:.4f}+{w2_:.4f}+{w3_:.4f} = {w1_+w2_+w3_:.4f}"
+            )
+        self.w1, self.w2, self.w3 = w1_, w2_, w3_
+        if C1 is not None: self.C1 = float(C1)
+        if a  is not None: self.a  = float(a)
+        if v  is not None: self.v  = float(v)
+        if safety_radius       is not None: self.safety_radius       = int(safety_radius)
+        if safety_max_distance is not None: self.safety_max_distance = float(safety_max_distance)
+
+    # =========================================================
+    # I/O bản đồ
+    # =========================================================
+    def load_radiation_map(self, file_path):
+        """Nạp bản đồ phóng xạ từ file (space-separated floats, một hàng mỗi dòng)."""
+        with open(file_path, 'r') as f:
+            lines = [ln.strip() for ln in f if ln.strip()]
+        self.radiation_map = [[float(x) for x in ln.split()] for ln in lines]
+        nrows = len(self.radiation_map)
+        ncols = len(self.radiation_map[0]) if nrows > 0 else 0
+        print(f"  Radiation map: {nrows}x{ncols}  [{os.path.basename(file_path)}]")
+
+    def get_grid_from_file(self, file_path):
 
         f = open(file_path, "r")
         info = f.read().split('\n')
@@ -602,12 +658,19 @@ class GridMap():
                 if (gr[i][j]==2):
                     points.append((i,j))
                     npos += 1
-        
+
         self.mapSize = msz
         self.npos = npos
         self.deslist = points
         self.gridMap = gr
         self.mksz = int(20*20/msz +1)
+
+        # Tự động nạp bản đồ phóng xạ nếu có trong cùng thư mục
+        rad_path = os.path.join(
+            os.path.dirname(os.path.abspath(file_path)), 'radiation_grid.txt'
+        )
+        if os.path.exists(rad_path):
+            self.load_radiation_map(rad_path)
            
 
 
@@ -813,11 +876,14 @@ class GridMap():
 
 
     def computeSafety(self):
-        """
-        Tinh S(c) tren lan can 5x5:
-        S(c) = C1 * (24 - N_obs)/24 + (1-C1) * d_min/3
+        """Công thức (4): S(c) = C1·(N_max−N_obs)/N_max + (1−C1)·d_min/safety_max_distance
+
+        Bán kính lân cận và khoảng cách chuẩn hóa chỉnh qua config().
         """
         sz = self.mapSize
+        r = self.safety_radius
+        n_max = float((2 * r + 1) ** 2 - 1)  # số ô trong vùng lân cận (trừ tâm)
+        d_max = self.safety_max_distance
         self.safety = [[0.0 for _ in range(sz)] for _ in range(sz)]
 
         for i in range(sz):
@@ -827,10 +893,10 @@ class GridMap():
                     continue
 
                 n_obs = 0
-                d_min = 7.0
+                d_min = d_max
 
-                for di in range(-5, 6):
-                    for dj in range(-5, 6):
+                for di in range(-r, r + 1):
+                    for dj in range(-r, r + 1):
                         if di == 0 and dj == 0:
                             continue
                         ni, nj = i + di, j + dj
@@ -842,8 +908,8 @@ class GridMap():
                                     d_min = d
 
                 self.safety[i][j] = (
-                    self.C1 * (120.0 - n_obs) / 120.0
-                    + (1.0 - self.C1) * d_min / 7.0
+                    self.C1 * (n_max - n_obs) / n_max
+                    + (1.0 - self.C1) * d_min / d_max
                 )
 
 
@@ -861,6 +927,7 @@ class GridMap():
 
 
     def pathLength(self, cells):
+        """length(P) = tổng khoảng cách Euclidean giữa các waypoint — công thức (3)."""
         total = 0.0
         for i in range(len(cells) - 1):
             total += math.hypot(
@@ -868,6 +935,35 @@ class GridMap():
                 cells[i + 1][1] - cells[i][1]
             )
         return total
+
+    def pathRadiation(self, cells):
+        """R(P) = Σ d(p_n,p_{n+1})·(R̄(p_n)+R̄(p_{n+1}))/2·(a/v) — công thức (6)."""
+        if self.radiation_map is None:
+            return None
+        nrows = len(self.radiation_map)
+        ncols = len(self.radiation_map[0]) if nrows > 0 else 0
+        total = 0.0
+        for i in range(len(cells) - 1):
+            r0, c0 = int(cells[i][0]),     int(cells[i][1])
+            r1, c1 = int(cells[i+1][0]),   int(cells[i+1][1])
+            R0 = self.radiation_map[r0][c0] if (0 <= r0 < nrows and 0 <= c0 < ncols) else 0.0
+            R1 = self.radiation_map[r1][c1] if (0 <= r1 < nrows and 0 <= c1 < ncols) else 0.0
+            d  = math.hypot(r1 - r0, c1 - c0)
+            total += (d * (R0 + R1) / 2.0 * (self.a / self.v)) / 3600.0  # convert seconds to hours
+        return total
+
+    def pathTotalCost(self, cells):
+        """Total cost = w1·length(P) + w2·R(P) + w3·risk(P) — công thức (7a).
+
+        Trả về (total, length, radiation, risk).
+        """
+        L    = self.pathLength(cells)
+        risk = self.pathRisk(cells)
+        R    = self.pathRadiation(cells)
+        risk = risk if risk is not None else 0.0
+        R    = R    if R    is not None else 0.0
+        total = self.w1 * L + self.w2 * R + self.w3 * risk
+        return total, L, R, risk
 
 
     def inBound(self,pos):

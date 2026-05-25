@@ -57,6 +57,8 @@ class GridMap:
         self.C1 = 0.5    # cân bằng N_obs (→1) vs d_min (→0) trong S(c)
         self.a  = 1.0    # kích thước ô lưới (m) — dùng trong công thức R(P)
         self.v  = 1.0    # vận tốc robot (m/s)   — dùng trong công thức R(P)
+        self.safety_radius       = 5    # bán kính vùng lân cận tính S(c)
+        self.safety_max_distance = 7.0  # khoảng cách chuẩn hóa d_min trong S(c)
 
         # Bản đồ phóng xạ
         self.radiation_map  = None   # giá trị thô (μSv/h hoặc đơn vị tương đương)
@@ -69,7 +71,8 @@ class GridMap:
     # =========================================================
     # Cấu hình tham số
     # =========================================================
-    def config(self, w1=None, w2=None, w3=None, C1=None, a=None, v=None):
+    def config(self, w1=None, w2=None, w3=None, C1=None, a=None, v=None,
+               safety_radius=None, safety_max_distance=None):
         """Cấu hình tham số thuật toán.
 
         Trọng số (w1 + w2 + w3 = 1):
@@ -78,7 +81,9 @@ class GridMap:
           w3 – độ rủi ro va chạm risk(P)
 
         An toàn va chạm (công thức 4):
-          C1 – cân bằng N_obs (C1→1) vs d_min (C1→0)
+          C1                – cân bằng N_obs (C1→1) vs d_min (C1→0)
+          safety_radius     – bán kính vùng lân cận tính S(c)
+          safety_max_distance – khoảng cách chuẩn hóa d_min
 
         Vật lý (công thức 6):
           a  – kích thước ô lưới (m)
@@ -99,6 +104,10 @@ class GridMap:
             self.a = float(a)
         if v is not None:
             self.v = float(v)
+        if safety_radius is not None:
+            self.safety_radius = int(safety_radius)
+        if safety_max_distance is not None:
+            self.safety_max_distance = float(safety_max_distance)
 
     def setWeights(self, w1=0.7, C1=0.5):
         """Giữ lại cho tương thích ngược. Khuyến nghị dùng config() thay thế."""
@@ -258,13 +267,14 @@ class GridMap:
     # WP-FMF bước 1: tính S(c), chuẩn hoá phóng xạ, rồi f(x)
     # =========================================================
     def computeSafety(self):
-        """Công thức (4): S(c) = C1·(120−N_obs)/120 + (1−C1)·d_min/7
+        """Công thức (4): S(c) = C1·(N_max−N_obs)/N_max + (1−C1)·d_min/safety_max_distance
 
-        Dùng vùng lân cận 11×11 (bán kính 5) để có trường an toàn mịn hơn
-        trên bản đồ kích thước lớn (200×200+).
-        Tham số C1 chỉnh qua config().
+        Bán kính lân cận và khoảng cách chuẩn hóa chỉnh qua config().
         """
         sz = self.mapSize
+        r = self.safety_radius
+        n_max = float((2 * r + 1) ** 2 - 1)  # số ô trong vùng lân cận (trừ tâm)
+        d_max = self.safety_max_distance
         self.safety = [[0.0] * sz for _ in range(sz)]
         for i in range(sz):
             for j in range(sz):
@@ -272,9 +282,9 @@ class GridMap:
                     self.safety[i][j] = 0.0
                     continue
                 n_obs = 0
-                d_min = 7.0
-                for di in range(-5, 6):
-                    for dj in range(-5, 6):
+                d_min = d_max
+                for di in range(-r, r + 1):
+                    for dj in range(-r, r + 1):
                         if di == 0 and dj == 0:
                             continue
                         ni, nj = i + di, j + dj
@@ -284,8 +294,8 @@ class GridMap:
                                 d = math.hypot(di, dj)
                                 if d < d_min:
                                     d_min = d
-                self.safety[i][j] = (self.C1 * (120.0 - n_obs) / 120.0
-                                     + (1.0 - self.C1) * d_min / 7.0)
+                self.safety[i][j] = (self.C1 * (n_max - n_obs) / n_max
+                                     + (1.0 - self.C1) * d_min / d_max)
 
     def _normalize_radiation(self):
         """Chuẩn hóa R̄(x) về [0, 1] dựa trên max tại các ô không phải vật cản."""
@@ -524,8 +534,12 @@ class GridMap:
         out.append(list(cells[-1]))
         return out
 
-    def twoPointTracing(self):
-        """Dựng lại pathTrace[u][v] cho mọi cặp source có kết nối."""
+    def twoPointTracing(self, smooth=True):
+        """Dựng lại pathTrace[u][v] cho mọi cặp source có kết nối.
+
+        smooth=True  (mặc định): rút gọn bằng line-of-sight → turning points.
+        smooth=False            : giữ toàn bộ ô cell-by-cell.
+        """
         self.buildSumBlock()
         n = self.npos
         self.pathTrace = [[[] for _ in range(n)] for _ in range(n)]
@@ -543,7 +557,10 @@ class GridMap:
                 for c in cells[1:]:
                     if c != dedup[-1]:
                         dedup.append(c)
-                self.pathTrace[u][v] = self._smooth_path(dedup)
+                if smooth:
+                    self.pathTrace[u][v] = self._smooth_path(dedup)
+                else:
+                    self.pathTrace[u][v] = [list(c) for c in dedup]
 
     # =========================================================
     # Dijkstra trên đồ thị checkpoint (pha 1 cuối cùng)
