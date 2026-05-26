@@ -45,12 +45,12 @@ CONFIG = {
     "v": 1.0,       # Vận tốc robot (m/s)
 
     # --- Đường dẫn bản đồ ---
-    "map_path": r"E:\last_dance\LastDance\FMF_new\mixed200\mixed200.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF_new\triangle300\triangle300.txt",
 
     # --- Tham số OR-Tools TSP ---
     "ntest": 1, # Số lần chạy OR-Tools (với cùng tham số) để đánh giá độ ổn định của giải pháp
     "distance_scale": 1000, # Scale ma trận chi phí từ float sang int cho OR-Tools (ví dụ: 1.0 -> 1000, sqrt(2) -> 1414)
-    "time_limit_sec": 20, # Thời gian tối đa cho mỗi lần chạy OR-Tools (giây)
+    "time_limit_sec": 10, # Thời gian tối đa cho mỗi lần chạy OR-Tools (giây)
 
     # --- Path output ---
     # True  → in/lưu path đã smooth (turning points, ~128 bước)
