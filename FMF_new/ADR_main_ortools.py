@@ -45,7 +45,8 @@ CONFIG = {
     "v": 1.0,       # Vận tốc robot (m/s)
 
     # --- Đường dẫn bản đồ ---
-    "map_path": r"E:\last_dance\LastDance\FMF_new\triangle300\triangle300.txt",
+    # "map_path": r"E:\last_dance\LastDance\FMF_new\triangle300\triangle300.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF_new\default\obstacle_grid.txt",
 
     # --- Tham số OR-Tools TSP ---
     "ntest": 1, # Số lần chạy OR-Tools (với cùng tham số) để đánh giá độ ổn định của giải pháp
@@ -204,9 +205,18 @@ def evaluation_wpfmf(grid,
     _require_ortools()
 
     res = []
+    res_lengths = []
+    res_radiations = []
+    res_risks = []
+    res_totals = []
     best_path = None
     best_cost = float("inf")
     iterations_log = []
+    has_radiation = grid.radiation_map is not None
+
+    # Cần cell-by-cell để getPath/pathTotalCost cho từng iteration
+    if not smooth:
+        grid.twoPointTracing(smooth=False)
 
     for it in range(ntest):
         print(f"Iteration {it + 1}/{ntest}")
@@ -219,25 +229,56 @@ def evaluation_wpfmf(grid,
             local_search_metaheuristic=local_search_metaheuristic,
         )
         elapsed = time.time() - t0
+
+        cells_i = grid.getPath(path)
+        total_i, length_i, rad_i, risk_i = grid.pathTotalCost(cells_i)
+
         res.append(cost)
-        iterations_log.append({"iteration": it + 1, "cost": cost, "time_sec": round(elapsed, 4)})
+        res_lengths.append(float(length_i))
+        res_radiations.append(float(rad_i) if rad_i is not None else 0.0)
+        res_risks.append(float(risk_i))
+        res_totals.append(float(total_i))
+        iterations_log.append({
+            "iteration": it + 1,
+            "cost": cost,
+            "length":     round(float(length_i), 6),
+            "radiation":  round(float(rad_i), 6) if has_radiation else None,
+            "risk":       round(float(risk_i), 6),
+            "total_cost": round(float(total_i), 6),
+            "time_sec":   round(elapsed, 4),
+        })
         if cost < best_cost:
             best_cost = cost
             best_path = list(path)
 
         print("  Route (OR-Tools):", path)
-        print(f"  Weighted cost:   {cost:.4f}")
+        print(f"  Weighted cost:   {cost:.4f}   "
+              f"length={length_i:.4f}   "
+              f"R={(rad_i if rad_i is not None else 0.0):.4f}   "
+              f"risk={risk_i:.4f}   total={total_i:.4f}")
         print(f"  --- Iteration {it + 1}: {elapsed:.3f} seconds ---")
 
-    res_arr = np.array(res)
+    res_arr        = np.array(res)
+    res_lengths    = np.array(res_lengths)
+    res_radiations = np.array(res_radiations)
+    res_risks      = np.array(res_risks)
+    res_totals     = np.array(res_totals)
+
     print("\n===== Phase 2 summary =====")
     print(f"Mean weighted cost: {res_arr.mean():.4f}")
     print(f"Std  weighted cost: {res_arr.std():.4f}")
     print(f"Best weighted cost: {best_cost:.4f}")
 
-    # Mở rộng permutation thành chuỗi ô thực tế
-    if not smooth:
-        grid.twoPointTracing(smooth=False)   # rebuild cell-by-cell
+    print(f"\n===== Metrics mean ± std qua {ntest} lần chạy =====")
+    print(f"  length(P)  : {res_lengths.mean():10.4f} ± {res_lengths.std():.4f}")
+    if has_radiation:
+        print(f"  R(P)       : {res_radiations.mean():10.4f} ± {res_radiations.std():.4f}")
+    else:
+        print(f"  R(P)       : N/A  (chưa nạp radiation_map)")
+    print(f"  risk(P)    : {res_risks.mean():10.4f} ± {res_risks.std():.4f}")
+    print(f"  Total cost : {res_totals.mean():10.4f} ± {res_totals.std():.4f}")
+
+    # Best path metrics (theo TSP cost)
     cells = grid.getPath(best_path)
     total, length, radiation, risk = grid.pathTotalCost(cells)
 
@@ -283,6 +324,17 @@ def evaluation_wpfmf(grid,
                 "radiation":  round(float(radiation), 6) if grid.radiation_map is not None else None,
                 "risk":       round(float(risk),      6),
                 "total_cost": round(float(total),     6),
+            },
+            "metrics_mean": {
+                "length":     {"mean": round(float(res_lengths.mean()),    6),
+                               "std":  round(float(res_lengths.std()),     6)},
+                "radiation":  ({"mean": round(float(res_radiations.mean()), 6),
+                                "std":  round(float(res_radiations.std()),  6)}
+                               if has_radiation else None),
+                "risk":       {"mean": round(float(res_risks.mean()),      6),
+                               "std":  round(float(res_risks.std()),       6)},
+                "total_cost": {"mean": round(float(res_totals.mean()),     6),
+                               "std":  round(float(res_totals.std()),      6)},
             },
             "path": path_tuples,
             "iterations": iterations_log,

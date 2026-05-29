@@ -51,11 +51,12 @@ def weighted_segment_cost(
 
     collision_risk is computed on `current` cell only; the goal cell is excluded
     when all steps are accumulated, matching formula 11: sum_{n=1}^{|p|-1} (1-S(p_n)).
+    Objectives with weight == 0 are skipped entirely (not computed).
     """
-    l = segment_length(current, nxt, grid_map.grid_size)
-    r = segment_risk(grid_map, current, nxt)
-    e = segment_turn_energy(prev_pos, current, nxt, weights.turn_angle_weight, weights.turn_count_weight)
-    cr = cell_collision_risk(grid_map, current, weights.safety_c1, weights.safety_radius, weights.safety_max_distance)
+    l = segment_length(current, nxt, grid_map.grid_size) if weights.omega_length else 0.0
+    r = segment_risk(grid_map, current, nxt) if weights.omega_risk else 0.0
+    e = segment_turn_energy(prev_pos, current, nxt, weights.turn_angle_weight, weights.turn_count_weight) if weights.omega_energy else 0.0
+    cr = cell_collision_risk(grid_map, current, weights.safety_c1, weights.safety_radius, weights.safety_max_distance) if weights.omega_collision_risk else 0.0
     total = (
         weights.omega_length * l
         + weights.omega_risk * r
@@ -66,15 +67,19 @@ def weighted_segment_cost(
 
 
 def path_cost_components(grid_map: GridMap, path: list[GridPosition], weights: CostWeights) -> dict:
-    length = path_length(path, grid_map.grid_size)
-    risk = path_risk(grid_map, path)
-    energy = path_energy(path, weights.turn_angle_weight, weights.turn_count_weight)
-    collision_risk = path_collision_risk(
-        grid_map=grid_map,
-        path=path,
-        c1=weights.safety_c1,
-        radius=weights.safety_radius,
-        max_distance=weights.safety_max_distance,
+    length = path_length(path, grid_map.grid_size) if weights.omega_length else 0.0
+    risk = path_risk(grid_map, path) if weights.omega_risk else 0.0
+    energy = path_energy(path, weights.turn_angle_weight, weights.turn_count_weight) if weights.omega_energy else 0.0
+    collision_risk = (
+        path_collision_risk(
+            grid_map=grid_map,
+            path=path,
+            c1=weights.safety_c1,
+            radius=weights.safety_radius,
+            max_distance=weights.safety_max_distance,
+        )
+        if weights.omega_collision_risk
+        else 0.0
     )
     total = (
         weights.omega_length * length

@@ -86,6 +86,20 @@ src/planner/       # ghép lower-level và upper-level
 src/visualization/ # vẽ bản đồ, đường đi, hội tụ
 ```
 
+## Chạy eval.py
+```
+# Chạy 10 lần với seed tăng dần (42, 43, 44, ...)
+python eval.py --config configs/default.yaml --n 10
+
+# Chạy 20 lần với seed ngẫu nhiên hoàn toàn độc lập (đảm bảo không trùng seed nào --> nên dùng khi muốn đánh giá tổng thể, không cần so sánh seed cụ thể)
+python eval.py --config configs/default.yaml --n 20 --independent
+python eval.py --config configs/scenario_custom_200x200.yaml --n 5 --independent
+
+# Dùng config khác
+python eval.py --config configs/scenario_small.yaml --n 15
+```
+
+
 ## Ghi chú quan trọng
 
 - `ri_max` càng nhỏ thì robot càng né nhiều vùng phóng xạ cao.

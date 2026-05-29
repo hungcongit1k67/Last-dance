@@ -44,11 +44,18 @@ class ModifiedAStar:
     def heuristic(self, current: GridPosition, goal: GridPosition) -> float:
         # Admissible lower bound: straight-line length + estimated radiation dose.
         # Collision risk lower bound is 0, so it is omitted here.
-        length = euclidean_grid_distance(current, goal, self.grid_map.grid_size)
-        time_hours = (length / self.grid_map.robot_velocity) / 3600.0
-        avg_radiation = (self.grid_map.radiation_at(current) + self.grid_map.radiation_at(goal)) / 2.0
-        risk = avg_radiation * time_hours
-        return self.weights.omega_length * length + self.weights.omega_risk * risk
+        # Objectives with weight == 0 are skipped entirely (not computed).
+        h = 0.0
+        need_length = bool(self.weights.omega_length or self.weights.omega_risk)
+        if need_length:
+            length = euclidean_grid_distance(current, goal, self.grid_map.grid_size)
+            if self.weights.omega_length:
+                h += self.weights.omega_length * length
+            if self.weights.omega_risk:
+                time_hours = (length / self.grid_map.robot_velocity) / 3600.0
+                avg_radiation = (self.grid_map.radiation_at(current) + self.grid_map.radiation_at(goal)) / 2.0
+                h += self.weights.omega_risk * avg_radiation * time_hours
+        return h
 
     def search(self, start: GridPosition, goal: GridPosition) -> AStarResult:
         if not self.grid_map.is_passable(start, avoid_high_risk=self.high_risk_avoidance):

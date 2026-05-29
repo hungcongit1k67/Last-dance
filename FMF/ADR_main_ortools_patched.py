@@ -4,6 +4,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 import My_grid_patched as My_grid
 import GA
+import aco as aco_module
 import numpy as np
 import time
 import json
@@ -24,9 +25,9 @@ CONFIG = {
     # --- Trọng số báo cáo (bắt buộc: w1 + w2 + w3 = 1.0) ---
     # Không ảnh hưởng thuật toán FMF (vẫn minimize length thuần túy).
     # Chỉ dùng để tính và in total cost sau khi tìm được đường đi.
-    "w1": 0.6,      # Chiều dài đường đi  length(P)
-    "w2": 0.2,      # Độ rủi ro phóng xạ  R(P)
-    "w3": 0.2,      # Độ rủi ro va chạm   risk(P)
+    "w1": 0.4,      # Chiều dài đường đi  length(P)
+    "w2": 0.3,      # Độ rủi ro phóng xạ  R(P)
+    "w3": 0.3,      # Độ rủi ro va chạm   risk(P)
 
     # --- Tham số an toàn va chạm S(c) (công thức 4) ---
     "C1": 0.5,      # C1→1: ưu tiên N_obs;  C1→0: ưu tiên d_min
@@ -41,15 +42,32 @@ CONFIG = {
     # radiation_grid.txt trong cùng thư mục sẽ được nạp tự động.
     "map_path": r"E:\last_dance\LastDance\FMF\mixed200\mixed200.txt",
 
+    # --- Bộ giải TSP ---
+    # "ortools" | "aco" | "ga"
+    "tsp": "ortools",
+    "ntest": 5,
+
     # --- Tham số OR-Tools TSP ---
-    "ntest": 1,
     "distance_scale": 1000,
     "time_limit_sec": 5,
+
+    # --- Tham số ACO TSP ---
+    "aco_ant_count": 20,
+    "aco_generations": 100,
+    "aco_alpha": 1.0,
+    "aco_beta": 5.0,
+    "aco_rho": 0.5,
+    "aco_q": 10,
+    "aco_strategy": 0,    # 0=ant-cycle, 1=ant-quality, 2=ant-density
+
+    # --- Tham số GA TSP ---
+    "ga_population": 300,
+    "ga_generations": 300,
 
     # --- Path output ---
     # True  → in/lưu path đã smooth (turning points, ~128 bước)
     # False → in/lưu full path cell-by-cell (đi qua từng ô lưới, ~1000+ bước)
-    "smooth": True,
+    "smooth": False,
 }
 
 
@@ -216,61 +234,174 @@ def solve_tsp_ortools(
 
 
 # =========================
+# ACO / GA wrappers
+# =========================
+def solve_tsp_aco(
+    dist_matrix,
+    ant_count=20,
+    generations=100,
+    alpha=1.0,
+    beta=5.0,
+    rho=0.5,
+    q=10,
+    strategy=0,
+):
+    """Giải TSP chu trình bằng Ant Colony Optimization."""
+    n = len(dist_matrix)
+    graph = aco_module.Graph([list(row) for row in dist_matrix], n)
+    solver = aco_module.ACO(ant_count, generations, alpha, beta, rho, q, strategy)
+    path, _ = solver.solve(graph)
+    real_cost = _route_cost_float(path, dist_matrix)
+    return path, real_cost
+
+
+def solve_tsp_ga(grid, population=300, generations=300):
+    """Giải TSP chu trình bằng Genetic Algorithm (dùng grid.dijk)."""
+    ga = GA.GA(grid)
+    path = ga.solve(population, generations)
+    path = [int(x) for x in path]
+    real_cost = _route_cost_float(path, grid.dijk)
+    return path, real_cost
+
+
+def _solve_tsp(grid, tsp_name, **params):
+    """Dispatcher chọn bộ giải TSP theo tên."""
+    name = (tsp_name or "ortools").lower()
+    if name == "ortools":
+        return solve_tsp_ortools(
+            grid.dijk,
+            distance_scale=params.get("distance_scale", 1000),
+            time_limit_sec=params.get("time_limit_sec", 5),
+            first_solution_strategy=params.get("first_solution_strategy"),
+            local_search_metaheuristic=params.get("local_search_metaheuristic"),
+        )
+    if name == "aco":
+        return solve_tsp_aco(
+            grid.dijk,
+            ant_count=params.get("aco_ant_count", 20),
+            generations=params.get("aco_generations", 100),
+            alpha=params.get("aco_alpha", 1.0),
+            beta=params.get("aco_beta", 5.0),
+            rho=params.get("aco_rho", 0.5),
+            q=params.get("aco_q", 10),
+            strategy=params.get("aco_strategy", 0),
+        )
+    if name == "ga":
+        return solve_tsp_ga(
+            grid,
+            population=params.get("ga_population", 300),
+            generations=params.get("ga_generations", 300),
+        )
+    raise ValueError(f"Khong biet tsp solver: {tsp_name!r}. Chon: 'ortools' | 'aco' | 'ga'.")
+
+
+# =========================
 # New evaluation using OR-Tools
 # =========================
 def evaluation3(
     grid,
+    tsp="ortools",
     ntest=10,
     distance_scale=1000,
     time_limit_sec=5,
     first_solution_strategy=None,
     local_search_metaheuristic=None,
+    aco_ant_count=20,
+    aco_generations=100,
+    aco_alpha=1.0,
+    aco_beta=5.0,
+    aco_rho=0.5,
+    aco_q=10,
+    aco_strategy=0,
+    ga_population=300,
+    ga_generations=300,
     map_path=None,
     smooth=True,
 ):
     """
-    Pha 2 TSP bang OR-Tools thay cho ACO.
+    Pha 2 TSP — dispatch theo tham số `tsp`:
+      "ortools" | "aco" | "ga"
     grid.dijk la ma tran chi phi ngan nhat giua cac checkpoint tren grid map.
     """
-    _require_ortools()
+    if tsp == "ortools":
+        _require_ortools()
 
-    resORT = []
+    solver_params = dict(
+        distance_scale=distance_scale,
+        time_limit_sec=time_limit_sec,
+        first_solution_strategy=first_solution_strategy,
+        local_search_metaheuristic=local_search_metaheuristic,
+        aco_ant_count=aco_ant_count,
+        aco_generations=aco_generations,
+        aco_alpha=aco_alpha,
+        aco_beta=aco_beta,
+        aco_rho=aco_rho,
+        aco_q=aco_q,
+        aco_strategy=aco_strategy,
+        ga_population=ga_population,
+        ga_generations=ga_generations,
+    )
+
+    # Dời twoPointTracing(smooth=False) lên trước loop để mọi iteration
+    # đều getPath ra đúng cell-by-cell / turning points theo cấu hình.
+    if not smooth:
+        grid.twoPointTracing(smooth=False)
+
+    res_costs = []
+    res_lengths = []
+    res_radiations = []
+    res_risks = []
+    res_totals = []
     bestpath = None
     bestcost = float("inf")
     iterations_log = []
+    has_radiation = grid.radiation_map is not None
 
+    tsp_label = tsp.upper()
     for iter in range(ntest):
         print("Iteration ", iter + 1, "/", ntest)
         a = time.time()
 
-        path, cost = solve_tsp_ortools(
-            grid.dijk,
-            distance_scale=distance_scale,
-            time_limit_sec=time_limit_sec,
-            first_solution_strategy=first_solution_strategy,
-            local_search_metaheuristic=local_search_metaheuristic,
-        )
+        path, cost = _solve_tsp(grid, tsp, **solver_params)
+
+        # Tính metrics cho từng iteration để lấy mean/std
+        points_i = grid.getPath(path)
+        total_i, length_i, rad_i, risk_i = grid.pathTotalCost(points_i)
 
         elapsed = time.time() - a
-        resORT.append(cost)
-        iterations_log.append({"iteration": iter + 1, "cost": cost, "time_sec": round(elapsed, 4)})
+        res_costs.append(cost)
+        res_lengths.append(length_i)
+        res_radiations.append(rad_i if rad_i is not None else 0.0)
+        res_risks.append(risk_i)
+        res_totals.append(total_i)
+        iterations_log.append({
+            "iteration": iter + 1,
+            "cost": cost,
+            "length": round(float(length_i), 6),
+            "radiation": round(float(rad_i), 6) if has_radiation else None,
+            "risk": round(float(risk_i), 6),
+            "total_cost": round(float(total_i), 6),
+            "time_sec": round(elapsed, 4),
+        })
 
         if cost < bestcost:
             bestcost = cost
-            bestpath = path.copy()
+            bestpath = list(path)
 
-        print("Route (OR-Tools):", path)
-        print("Cost (float):", cost)
+        print(f"Route ({tsp_label}):", path)
+        print(f"Cost: {cost:.4f}   length={length_i:.4f}   "
+              f"R={rad_i if rad_i is not None else 0.0:.4f}   "
+              f"risk={risk_i:.4f}   total={total_i:.4f}")
         print(f"--- Iteration {iter+1}: {elapsed} seconds ---")
 
-    resORT = np.array(resORT)
-    print("Mean OR-Tools cost:", resORT.mean(), "Std OR-Tools:", resORT.std())
-    print("Best cost:", bestcost)
+    res_costs      = np.array(res_costs)
+    res_lengths    = np.array(res_lengths)
+    res_radiations = np.array(res_radiations)
+    res_risks      = np.array(res_risks)
+    res_totals     = np.array(res_totals)
 
-    if not smooth:
-        grid.twoPointTracing(smooth=False)   # rebuild cell-by-cell
+    # Path tốt nhất (theo TSP cost) — dùng cho vẽ và lưu path_tuples
     points = grid.getPath(bestpath)
-
     total, length, radiation, risk = grid.pathTotalCost(points)
 
     path_tuples = [(int(p[0]), int(p[1])) for p in points]
@@ -278,14 +409,20 @@ def evaluation3(
     print(f"\nPath ({len(path_tuples)} bước, {path_label}):")
     print(path_tuples)
 
-    print("\n===== Path metrics =====")
-    print(f"  length(P)  = {length:.4f}   (cong thuc 3)")
-    if grid.radiation_map is not None:
-        print(f"  R(P)       = {radiation:.4f}   (cong thuc 6, a={grid.a}, v={grid.v})")
+    print(f"\n===== Path metrics  (mean ± std qua {ntest} lần chạy, best theo TSP cost) =====")
+    print(f"  length(P)  : {res_lengths.mean():10.4f} ± {res_lengths.std():.4f}    "
+          f"(best: {length:.4f})   (cong thuc 3)")
+    if has_radiation:
+        print(f"  R(P)       : {res_radiations.mean():10.4f} ± {res_radiations.std():.4f}    "
+              f"(best: {radiation:.4f})   (cong thuc 6, a={grid.a}, v={grid.v})")
     else:
-        print(f"  R(P)       = N/A  (chua nap radiation_map)")
-    print(f"  risk(P)    = {risk:.4f}   (cong thuc 5)")
-    print(f"  Total cost = {total:.4f}")
+        print(f"  R(P)       : N/A  (chua nap radiation_map)")
+    print(f"  risk(P)    : {res_risks.mean():10.4f} ± {res_risks.std():.4f}    "
+          f"(best: {risk:.4f})   (cong thuc 5)")
+    print(f"  Total cost : {res_totals.mean():10.4f} ± {res_totals.std():.4f}    "
+          f"(best: {total:.4f})")
+    print(f"  TSP cost   : {res_costs.mean():10.4f} ± {res_costs.std():.4f}    "
+          f"(best: {bestcost:.4f})")
     print(f"  (w1={grid.w1:.2f}*length + w2={grid.w2:.2f}*R + w3={grid.w3:.2f}*risk)")
 
     # Khôi phục smooth=True để drawPath hoạt động bình thường
@@ -299,20 +436,41 @@ def evaluation3(
             "C1": grid.C1, "a": grid.a, "v": grid.v,
             "safety_radius": grid.safety_radius,
             "safety_max_distance": grid.safety_max_distance,
-            "ntest": ntest, "distance_scale": distance_scale,
+            "tsp": tsp, "ntest": ntest,
+            "distance_scale": distance_scale,
             "time_limit_sec": time_limit_sec,
+            "aco_ant_count": aco_ant_count,
+            "aco_generations": aco_generations,
+            "aco_alpha": aco_alpha, "aco_beta": aco_beta,
+            "aco_rho": aco_rho, "aco_q": aco_q,
+            "aco_strategy": aco_strategy,
+            "ga_population": ga_population,
+            "ga_generations": ga_generations,
             "map_size": grid.mapSize, "checkpoints": grid.npos,
             "smooth": smooth,
         }
         run_data = {
             "summary": {
-                "mean_cost": round(float(resORT.mean()), 6),
-                "std_cost":  round(float(resORT.std()),  6),
-                "best_cost": round(float(bestcost),      6),
+                "tsp_cost":   {"mean": round(float(res_costs.mean()),      6),
+                               "std":  round(float(res_costs.std()),       6),
+                               "best": round(float(bestcost),              6)},
+                "length":     {"mean": round(float(res_lengths.mean()),    6),
+                               "std":  round(float(res_lengths.std()),     6),
+                               "best": round(float(length),                6)},
+                "radiation":  ({"mean": round(float(res_radiations.mean()), 6),
+                                "std":  round(float(res_radiations.std()),  6),
+                                "best": round(float(radiation),             6)}
+                               if has_radiation else None),
+                "risk":       {"mean": round(float(res_risks.mean()),      6),
+                               "std":  round(float(res_risks.std()),       6),
+                               "best": round(float(risk),                  6)},
+                "total_cost": {"mean": round(float(res_totals.mean()),     6),
+                               "std":  round(float(res_totals.std()),      6),
+                               "best": round(float(total),                 6)},
             },
-            "metrics": {
+            "best_metrics": {
                 "length":    round(float(length),    6),
-                "radiation": round(float(radiation), 6) if grid.radiation_map is not None else None,
+                "radiation": round(float(radiation), 6) if has_radiation else None,
                 "risk":      round(float(risk),      6),
                 "total_cost":round(float(total),     6),
             },
@@ -331,11 +489,21 @@ def evaluation3(
 
 def ADR_main(
     grid,
+    tsp="ortools",
     ntest=1,
     distance_scale=1000,
     time_limit_sec=5,
     first_solution_strategy=None,
     local_search_metaheuristic=None,
+    aco_ant_count=20,
+    aco_generations=100,
+    aco_alpha=1.0,
+    aco_beta=5.0,
+    aco_rho=0.5,
+    aco_q=10,
+    aco_strategy=0,
+    ga_population=300,
+    ga_generations=300,
     map_path=None,
     smooth=True,
 ):
@@ -343,16 +511,26 @@ def ADR_main(
     Quy trinh day du cho bai toan grid map:
     1) Build graph tren grid
     2) Dung Dijkstra/FMF de tao ma tran chi phi giua cac checkpoint
-    3) Dung OR-Tools giai pha 2 TSP
+    3) Dung TSP solver (chon bang tham so `tsp`): ortools | aco | ga
     """
     timeEval(grid)
     return evaluation3(
         grid,
+        tsp=tsp,
         ntest=ntest,
         distance_scale=distance_scale,
         time_limit_sec=time_limit_sec,
         first_solution_strategy=first_solution_strategy,
         local_search_metaheuristic=local_search_metaheuristic,
+        aco_ant_count=aco_ant_count,
+        aco_generations=aco_generations,
+        aco_alpha=aco_alpha,
+        aco_beta=aco_beta,
+        aco_rho=aco_rho,
+        aco_q=aco_q,
+        aco_strategy=aco_strategy,
+        ga_population=ga_population,
+        ga_generations=ga_generations,
         map_path=map_path,
         smooth=smooth,
     )
@@ -389,6 +567,7 @@ def main():
 
     ADR_main(
         grid,
+        tsp=CONFIG["tsp"],
         ntest=CONFIG["ntest"],
         distance_scale=CONFIG["distance_scale"],
         time_limit_sec=CONFIG["time_limit_sec"],
@@ -400,6 +579,15 @@ def main():
             routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
             if routing_enums_pb2 is not None else None
         ),
+        aco_ant_count=CONFIG["aco_ant_count"],
+        aco_generations=CONFIG["aco_generations"],
+        aco_alpha=CONFIG["aco_alpha"],
+        aco_beta=CONFIG["aco_beta"],
+        aco_rho=CONFIG["aco_rho"],
+        aco_q=CONFIG["aco_q"],
+        aco_strategy=CONFIG["aco_strategy"],
+        ga_population=CONFIG["ga_population"],
+        ga_generations=CONFIG["ga_generations"],
         map_path=CONFIG["map_path"],
         smooth=CONFIG["smooth"],
     )
