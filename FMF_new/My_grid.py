@@ -60,6 +60,12 @@ class GridMap:
         self.safety_radius       = 5    # bán kính vùng lân cận tính S(c)
         self.safety_max_distance = 7.0  # khoảng cách chuẩn hóa d_min trong S(c)
 
+        # Hàm mục tiêu mà TSP solver tối thiểu hóa:
+        #   True  → ma trận TSP = Total cost (7a) w1·length+w2·R+w3·risk của từng đoạn
+        #           ⇒ solver minimize đúng  min w1·length(P)+w2·R(P)+w3·Risk(P)  (TSP cost == Total cost).
+        #   False → ma trận TSP = thế năng WP-FMF có trọng số f (hành vi gốc).
+        self.Solver_minimize = True
+
         # Bản đồ phóng xạ
         self.radiation_map  = None   # giá trị thô (μSv/h hoặc đơn vị tương đương)
         self.radiation_norm = None   # chuẩn hóa về [0, 1]
@@ -72,7 +78,7 @@ class GridMap:
     # Cấu hình tham số
     # =========================================================
     def config(self, w1=None, w2=None, w3=None, C1=None, a=None, v=None,
-               safety_radius=None, safety_max_distance=None):
+               safety_radius=None, safety_max_distance=None, Solver_minimize=None):
         """Cấu hình tham số thuật toán.
 
         Trọng số (w1 + w2 + w3 = 1):
@@ -88,6 +94,10 @@ class GridMap:
         Vật lý (công thức 6):
           a  – kích thước ô lưới (m)
           v  – vận tốc robot (m/s)
+
+        Solver_minimize – True: ma trận TSP = Total cost (7a) → solver minimize đúng
+          w1·length(P)+w2·R(P)+w3·Risk(P) (TSP cost == Total cost);
+          False: dùng thế năng WP-FMF có trọng số f (gốc).
         """
         w1_ = float(w1) if w1 is not None else self.w1
         w2_ = float(w2) if w2 is not None else self.w2
@@ -108,6 +118,8 @@ class GridMap:
             self.safety_radius = int(safety_radius)
         if safety_max_distance is not None:
             self.safety_max_distance = float(safety_max_distance)
+        if Solver_minimize is not None:
+            self.Solver_minimize = bool(Solver_minimize)
 
     def setWeights(self, w1=0.7, C1=0.5):
         """Giữ lại cho tương thích ngược. Khuyến nghị dùng config() thay thế."""
@@ -561,6 +573,26 @@ class GridMap:
                     self.pathTrace[u][v] = self._smooth_path(dedup)
                 else:
                     self.pathTrace[u][v] = [list(c) for c in dedup]
+                if self.Solver_minimize:
+                    # Cạnh = Total cost (7a) của đúng đoạn pathTrace mà getPath sẽ ghép
+                    # ⇒ Σ cạnh dọc tour = Total cost toàn đường (TSP cost == Total cost).
+                    total, _, _, _ = self.pathTotalCost(self.pathTrace[u][v])
+                    self.adj[u][v] = total
+
+        # Hòa giải đối xứng: _smooth_path phụ thuộc chiều nên pathTrace[u][v] và
+        # pathTrace[v][u] (cùng adj) có thể lệch nhau. Chọn chiều rẻ hơn và đồng bộ
+        # pathTrace để dijkstra/getPath nhất quán → TSP cost == Total cost tuyệt đối.
+        if self.Solver_minimize:
+            for u in range(n - 1):
+                for v in range(u + 1, n):
+                    if self.inters[u][v][0][0] == -1:
+                        continue
+                    if self.adj[u][v] > self.adj[v][u]:
+                        self.adj[u][v] = self.adj[v][u]
+                        self.pathTrace[u][v] = [list(c) for c in reversed(self.pathTrace[v][u])]
+                    elif self.adj[u][v] < self.adj[v][u]:
+                        self.adj[v][u] = self.adj[u][v]
+                        self.pathTrace[v][u] = [list(c) for c in reversed(self.pathTrace[u][v])]
 
     # =========================================================
     # Dijkstra trên đồ thị checkpoint (pha 1 cuối cùng)

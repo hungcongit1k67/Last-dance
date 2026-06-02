@@ -38,13 +38,25 @@ CONFIG = {
     "a": 1.0,       # Kích thước ô lưới (m)
     "v": 1.0,       # Vận tốc robot (m/s)
 
+    # --- Bước chi phí Eikonal ---
+    # False → dis dùng hằng số 2 (FMF gốc).
+    # True  → dis dùng 2·f(x)², f(x)=w1+w2·R̄_norm(x)+w3·(1−S(x)).  (Eikonal có trọng số |∇T|=f)
+    "cost_step": True,
+
+    # --- Hàm mục tiêu của TSP solver ---
+    # False → ma trận TSP = chiều dài hình học (length).
+    # True  → ma trận TSP = Total cost (7a) w1·length+w2·R+w3·risk của từng đoạn
+    #         → solver minimize đúng Total cost, và khi đó TSP cost == Total cost.
+    "Solver_minimize": True,
+
     # --- Đường dẫn bản đồ ---
     # radiation_grid.txt trong cùng thư mục sẽ được nạp tự động.
-    "map_path": r"E:\last_dance\LastDance\FMF\mixed200\mixed200.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF\test_100\test_100.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF\triangle300\triangle300.txt",
 
     # --- Bộ giải TSP ---
     # "ortools" | "aco" | "ga"
-    "tsp": "ortools",
+    "tsp": "aco",
     "ntest": 5,
 
     # --- Tham số OR-Tools TSP ---
@@ -67,7 +79,7 @@ CONFIG = {
     # --- Path output ---
     # True  → in/lưu path đã smooth (turning points, ~128 bước)
     # False → in/lưu full path cell-by-cell (đi qua từng ô lưới, ~1000+ bước)
-    "smooth": False,
+    "smooth": True,
 }
 
 
@@ -346,6 +358,9 @@ def evaluation3(
     # đều getPath ra đúng cell-by-cell / turning points theo cấu hình.
     if not smooth:
         grid.twoPointTracing(smooth=False)
+        # twoPointTracing tính lại adj theo pathTrace mới (quan trọng khi Solver_minimize=True);
+        # chạy lại dijkstra để dijk/dtra khớp pathTrace → giữ TSP cost == Total cost.
+        grid.dijkstra()
 
     res_costs = []
     res_lengths = []
@@ -436,6 +451,8 @@ def evaluation3(
             "C1": grid.C1, "a": grid.a, "v": grid.v,
             "safety_radius": grid.safety_radius,
             "safety_max_distance": grid.safety_max_distance,
+            "cost_step": grid.cost_step,
+            "Solver_minimize": grid.Solver_minimize,
             "tsp": tsp, "ntest": ntest,
             "distance_scale": distance_scale,
             "time_limit_sec": time_limit_sec,
@@ -555,6 +572,8 @@ def main():
         v=CONFIG["v"],
         safety_radius=CONFIG["safety_radius"],
         safety_max_distance=CONFIG["safety_max_distance"],
+        cost_step=CONFIG["cost_step"],
+        Solver_minimize=CONFIG["Solver_minimize"],
     )
 
     # Nạp bản đồ (radiation_grid.txt trong cùng thư mục được nạp tự động)

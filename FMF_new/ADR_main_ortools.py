@@ -44,9 +44,15 @@ CONFIG = {
     "a": 1.0,       # Kích thước ô lưới (m)
     "v": 1.0,       # Vận tốc robot (m/s)
 
+    # --- Hàm mục tiêu của TSP solver ---
+    # True  → ma trận TSP = Total cost (7a) → solver minimize đúng
+    #         w1·length(P)+w2·R(P)+w3·Risk(P), và TSP cost == Total cost.
+    # False → thế năng WP-FMF có trọng số f (hành vi gốc).
+    "Solver_minimize": True,
+
     # --- Đường dẫn bản đồ ---
-    # "map_path": r"E:\last_dance\LastDance\FMF_new\triangle300\triangle300.txt",
-    "map_path": r"E:\last_dance\LastDance\FMF_new\default\obstacle_grid.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF_new\triangle300\triangle300.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF_new\test_100\test_100.txt",
 
     # --- Tham số OR-Tools TSP ---
     "ntest": 1, # Số lần chạy OR-Tools (với cùng tham số) để đánh giá độ ổn định của giải pháp
@@ -217,6 +223,9 @@ def evaluation_wpfmf(grid,
     # Cần cell-by-cell để getPath/pathTotalCost cho từng iteration
     if not smooth:
         grid.twoPointTracing(smooth=False)
+        # twoPointTracing tính lại adj theo pathTrace mới (khi Solver_minimize=True);
+        # chạy lại dijkstra để dijk/dtra khớp pathTrace → giữ TSP cost == Total cost.
+        grid.dijkstra()
 
     for it in range(ntest):
         print(f"Iteration {it + 1}/{ntest}")
@@ -450,6 +459,7 @@ def main():
         v=CONFIG["v"],
         safety_radius=CONFIG["safety_radius"],
         safety_max_distance=CONFIG["safety_max_distance"],
+        Solver_minimize=CONFIG["Solver_minimize"],
     )
 
     map_path = CONFIG["map_path"]

@@ -1,0 +1,314 @@
+{
+  "map": "test_100",
+  "map_path": "E:\\last_dance\\LastDance\\FMF_new\\test_100\\test_100.txt",
+  "runs": [
+    {
+      "summary": {
+        "mean_cost": 79.804459,
+        "std_cost": 0.0,
+        "best_cost": 79.804459
+      },
+      "metrics": {
+        "length": 179.621825,
+        "radiation": 0.050419,
+        "risk": 0.0,
+        "total_cost": 71.863856
+      },
+      "metrics_mean": {
+        "length": {
+          "mean": 179.621825,
+          "std": 0.0
+        },
+        "radiation": {
+          "mean": 0.050419,
+          "std": 0.0
+        },
+        "risk": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "total_cost": {
+          "mean": 71.863856,
+          "std": 0.0
+        }
+      },
+      "path": [
+        [
+          8,
+          81
+        ],
+        [
+          79,
+          26
+        ],
+        [
+          79,
+          26
+        ],
+        [
+          8,
+          81
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 79.80445907083886,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0097
+        }
+      ],
+      "timestamp": "2026-06-02T09:32:16",
+      "config": {
+        "w1": 0.4,
+        "w2": 0.3,
+        "w3": 0.3,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "ntest": 1,
+        "distance_scale": 1000,
+        "time_limit_sec": 10,
+        "map_size": 100,
+        "checkpoints": 2,
+        "smooth": true
+      }
+    },
+    {
+      "summary": {
+        "mean_cost": 79.804459,
+        "std_cost": 0.0,
+        "best_cost": 79.804459
+      },
+      "metrics": {
+        "length": 179.621825,
+        "radiation": 0.050419,
+        "risk": 0.0,
+        "total_cost": 71.863856
+      },
+      "metrics_mean": {
+        "length": {
+          "mean": 179.621825,
+          "std": 0.0
+        },
+        "radiation": {
+          "mean": 0.050419,
+          "std": 0.0
+        },
+        "risk": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "total_cost": {
+          "mean": 71.863856,
+          "std": 0.0
+        }
+      },
+      "path": [
+        [
+          8,
+          81
+        ],
+        [
+          79,
+          26
+        ],
+        [
+          79,
+          26
+        ],
+        [
+          8,
+          81
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 79.80445907083886,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0123
+        }
+      ],
+      "timestamp": "2026-06-02T09:34:09",
+      "config": {
+        "w1": 0.4,
+        "w2": 0.3,
+        "w3": 0.3,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "ntest": 1,
+        "distance_scale": 1000,
+        "time_limit_sec": 10,
+        "map_size": 100,
+        "checkpoints": 2,
+        "smooth": true
+      }
+    },
+    {
+      "summary": {
+        "mean_cost": 79.804459,
+        "std_cost": 0.0,
+        "best_cost": 79.804459
+      },
+      "metrics": {
+        "length": 179.621825,
+        "radiation": 0.050419,
+        "risk": 0.0,
+        "total_cost": 71.863856
+      },
+      "metrics_mean": {
+        "length": {
+          "mean": 179.621825,
+          "std": 0.0
+        },
+        "radiation": {
+          "mean": 0.050419,
+          "std": 0.0
+        },
+        "risk": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "total_cost": {
+          "mean": 71.863856,
+          "std": 0.0
+        }
+      },
+      "path": [
+        [
+          8,
+          81
+        ],
+        [
+          79,
+          26
+        ],
+        [
+          79,
+          26
+        ],
+        [
+          8,
+          81
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 79.80445907083886,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.057
+        }
+      ],
+      "timestamp": "2026-06-02T10:36:50",
+      "config": {
+        "w1": 0.4,
+        "w2": 0.3,
+        "w3": 0.3,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "ntest": 1,
+        "distance_scale": 1000,
+        "time_limit_sec": 10,
+        "map_size": 100,
+        "checkpoints": 2,
+        "smooth": true
+      }
+    },
+    {
+      "summary": {
+        "mean_cost": 79.804459,
+        "std_cost": 0.0,
+        "best_cost": 79.804459
+      },
+      "metrics": {
+        "length": 179.621825,
+        "radiation": 0.050419,
+        "risk": 0.0,
+        "total_cost": 71.863856
+      },
+      "metrics_mean": {
+        "length": {
+          "mean": 179.621825,
+          "std": 0.0
+        },
+        "radiation": {
+          "mean": 0.050419,
+          "std": 0.0
+        },
+        "risk": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "total_cost": {
+          "mean": 71.863856,
+          "std": 0.0
+        }
+      },
+      "path": [
+        [
+          8,
+          81
+        ],
+        [
+          79,
+          26
+        ],
+        [
+          79,
+          26
+        ],
+        [
+          8,
+          81
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 79.80445907083886,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0089
+        }
+      ],
+      "timestamp": "2026-06-02T11:47:42",
+      "config": {
+        "w1": 0.4,
+        "w2": 0.3,
+        "w3": 0.3,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "ntest": 1,
+        "distance_scale": 1000,
+        "time_limit_sec": 10,
+        "map_size": 100,
+        "checkpoints": 2,
+        "smooth": true
+      }
+    }
+  ]
+}

@@ -56,8 +56,19 @@ class GridMap():
         self.safety_radius       = 5    # bán kính vùng lân cận tính S(c)
         self.safety_max_distance = 7.0  # khoảng cách chuẩn hóa d_min trong S(c)
 
+        # cost_step=False: nghiệm Eikonal dùng hằng số 2 (FMF gốc, f≡1).
+        # cost_step=True : thay 2 bằng 2·f(x)² với f(x)=w1+w2·R̄_norm(x)+w3·(1−S(x)).
+        self.cost_step = False
+
+        # Solver_minimize=False: ma trận TSP là chiều dài hình học (length).
+        # Solver_minimize=True : ma trận TSP là Total cost (7a) w1·length+w2·R+w3·risk của
+        #   từng đoạn → solver minimize đúng Total cost, và TSP cost == Total cost.
+        self.Solver_minimize = False
+
         # Bản đồ phóng xạ (nạp qua load_radiation_map hoặc tự động từ cùng thư mục)
         self.radiation_map = None
+        self.radiation_norm = None
+        self.f_cost = None
 
 
 
@@ -317,7 +328,11 @@ class GridMap():
                     dis = 0
                     T = self.dista[u2][v2]
                     if (T>dx and T>dy):
-                        dis = (math.sqrt(-(dx*dx)+2*dx*dy-(dy*dy)+2) +dx +dy)/2
+                        val = -(dx*dx)+2*dx*dy-(dy*dy)+self._eikonal_const(u2,v2)
+                        if (val>=0):
+                            dis = (math.sqrt(val) +dx +dy)/2
+                        else:
+                            dis = min(dx,dy)+1
                     elif (T>dx and T<=dy):
                         dis = dx + 1
                     elif (T<=dx and T>dy):
@@ -402,7 +417,7 @@ class GridMap():
                         T = self.dista[u2][v2]
                         #print(dx," ",dy)
                         if (T>dx and T>dy):
-                            val = -(dx*dx)+2*dx*dy-(dy*dy)+2
+                            val = -(dx*dx)+2*dx*dy-(dy*dy)+self._eikonal_const(u2,v2)
                             if (val>=0):
                                 dis = (math.sqrt(val) +dx +dy)/2
                             else:
@@ -515,7 +530,12 @@ class GridMap():
                     self.pathTrace[u][v] = t2.copy()   # turning points
                 else:
                     self.pathTrace[u][v] = [p.copy() for p in t1]  # cell-by-cell
-                self.adj[u][v] = dis
+                if self.Solver_minimize:
+                    # Cạnh = Total cost (7a) của đúng đoạn pathTrace mà getPath sẽ ghép
+                    # ⇒ Σ cạnh dọc tour = Total cost toàn đường (TSP cost == Total cost).
+                    self.adj[u][v] = self.pathWeightedCost(self.pathTrace[u][v])
+                else:
+                    self.adj[u][v] = dis   # cạnh = chiều dài hình học (gốc)
 
         for u in range(n-1):
             for v in range(u,n):
@@ -554,14 +574,23 @@ class GridMap():
 
 
     def buildGraphNormal(self):
+        # Solver_minimize cần safety (cho risk) + radiation_map (cho R); cost_step cần thêm f_cost.
+        if self.cost_step or self.Solver_minimize:
+            self.computeSafety()
+        if self.cost_step:
+            self._normalize_radiation()
+            self.computeFCost()
         self.buildForest()
         self.twoPointTracing()
         self.dijkstra()
         self.DFType = "Fast marching"
-        
+
 
     def buildGraphAdvanced(self):
         self.computeSafety()
+        if self.cost_step:
+            self._normalize_radiation()
+            self.computeFCost()
         self.buildForest()
         self.buildForestAdvanced()
         self.twoPointTracing()
@@ -603,16 +632,23 @@ class GridMap():
     # Cấu hình tham số
     # =========================================================
     def config(self, w1=None, w2=None, w3=None, C1=None, a=None, v=None,
-               safety_radius=None, safety_max_distance=None):
+               safety_radius=None, safety_max_distance=None, cost_step=None,
+               Solver_minimize=None):
         """Cấu hình trọng số báo cáo và tham số vật lý.
 
-        w1+w2+w3 = 1  (chỉ dùng để tính total cost khi báo cáo kết quả,
-                        KHÔNG ảnh hưởng tới thuật toán FMF tìm đường).
+        w1+w2+w3 = 1.
           w1 – length(P),  w2 – R(P) phóng xạ,  w3 – risk(P) va chạm
         C1                – cân bằng N_obs (→1) vs d_min (→0) trong S(c)
         safety_radius     – bán kính vùng lân cận tính S(c)
         safety_max_distance – khoảng cách chuẩn hóa d_min
         a  – kích thước ô lưới (m),  v – vận tốc robot (m/s)
+        cost_step – False: Eikonal dùng hằng 2 (gốc); True: dùng 2·f(x)².
+        Solver_minimize – False: ma trận TSP = length; True: ma trận TSP = Total cost
+            (7a) w1·length+w2·R+w3·risk của từng đoạn → solver minimize đúng Total cost
+            (TSP cost == Total cost).
+
+        Lưu ý: với Solver_minimize=True, w1,w2,w3 ĐI VÀO hàm mục tiêu của solver,
+        không còn chỉ để báo cáo.
         """
         w1_ = float(w1) if w1 is not None else self.w1
         w2_ = float(w2) if w2 is not None else self.w2
@@ -628,6 +664,8 @@ class GridMap():
         if v  is not None: self.v  = float(v)
         if safety_radius       is not None: self.safety_radius       = int(safety_radius)
         if safety_max_distance is not None: self.safety_max_distance = float(safety_max_distance)
+        if cost_step           is not None: self.cost_step           = bool(cost_step)
+        if Solver_minimize     is not None: self.Solver_minimize     = bool(Solver_minimize)
 
     # =========================================================
     # I/O bản đồ
@@ -913,6 +951,61 @@ class GridMap():
                 )
 
 
+    def _normalize_radiation(self):
+        """Chuẩn hóa R̄(x) về [0, 1] dựa trên max tại các ô không phải vật cản."""
+        if self.radiation_map is None:
+            self.radiation_norm = None
+            return
+        sz = self.mapSize
+        nrows = len(self.radiation_map)
+        ncols = len(self.radiation_map[0]) if nrows > 0 else 0
+        rmax = 0.0
+        for i in range(min(sz, nrows)):
+            for j in range(min(sz, ncols)):
+                if self.gridMap[i][j] != 1:
+                    val = self.radiation_map[i][j]
+                    if val > rmax:
+                        rmax = val
+        if rmax == 0.0:
+            rmax = 1.0
+        self.radiation_norm = [[0.0 for _ in range(sz)] for _ in range(sz)]
+        for i in range(sz):
+            for j in range(sz):
+                if i < nrows and j < ncols:
+                    self.radiation_norm[i][j] = self.radiation_map[i][j] / rmax
+
+    def computeFCost(self):
+        """Công thức (11): f(x) = w1 + w2·R̄_norm(x) + w3·(1−S(x)).
+
+        Yêu cầu computeSafety() và _normalize_radiation() đã chạy trước.
+        Ô vật cản gán INF (không bao giờ được lan truyền tới).
+        """
+        sz = self.mapSize
+        INF = float('inf')
+        self.f_cost = [[INF for _ in range(sz)] for _ in range(sz)]
+        for i in range(sz):
+            for j in range(sz):
+                if self.gridMap[i][j] == 1:
+                    self.f_cost[i][j] = INF
+                else:
+                    r_norm = (self.radiation_norm[i][j]
+                              if self.radiation_norm is not None else 0.0)
+                    self.f_cost[i][j] = (self.w1
+                                         + self.w2 * r_norm
+                                         + self.w3 * (1.0 - self.safety[i][j]))
+
+    def _eikonal_const(self, u2, v2):
+        """Hằng số trong nghiệm Eikonal rời rạc |∇T| = f.
+
+        cost_step=False → 2 (FMF gốc, f≡1).
+        cost_step=True  → 2·f(x)² với f(x) = w1 + w2·R̄_norm(x) + w3·(1−S(x)).
+        """
+        if self.cost_step and self.f_cost is not None:
+            f = self.f_cost[u2][v2]
+            return 2.0 * f * f
+        return 2.0
+
+
     def pathRisk(self, cells):
         """risk(P) = sum(1 - S(p)) voi moi o p tren duong di P"""
         if not hasattr(self, 'safety'):
@@ -934,6 +1027,22 @@ class GridMap():
                 cells[i + 1][0] - cells[i][0],
                 cells[i + 1][1] - cells[i][1]
             )
+        return total
+
+    def pathWeightedCost(self, cells):
+        """Chi phí Total cost của một đoạn đường (công thức 7a):
+
+            cost = w1·length(seg) + w2·R(seg) + w3·risk(seg)
+
+        Dùng làm trọng số cạnh khi Solver_minimize=True → solver minimize đúng
+        Total cost. Tổng chi phí mọi đoạn dọc tour = Total cost của cả đường, vì:
+          - length, R cộng theo cạnh; các ô nối giữa hai đoạn trùng nhau (d=0) nên
+            không phát sinh thêm sai số ở chỗ nối.
+          - risk cộng theo ô; getPath ghép đúng các ô của từng đoạn nên risk tổng
+            = Σ risk(seg).
+        ⇒ TSP cost == Total cost (xem pathTotalCost).
+        """
+        total, _, _, _ = self.pathTotalCost(cells)
         return total
 
     def pathRadiation(self, cells):
