@@ -52,7 +52,7 @@ CONFIG = {
     # --- Đường dẫn bản đồ ---
     # radiation_grid.txt trong cùng thư mục sẽ được nạp tự động.
     #"map_path": r"E:\last_dance\LastDance\FMF\test_100\test_100.txt",
-    "map_path": r"E:\last_dance\LastDance\FMF\triangle300\triangle300.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF\square400\square400.txt",
 
     # --- Bộ giải TSP ---
     # "ortools" | "aco" | "ga"

@@ -82,16 +82,15 @@ def path_collision_risk(
     radius: int = 2,
     max_distance: float = 3.0,
 ) -> float:
-    """Sum of (1 - S(c)) for all cells except the last one.
+    """Sum of (1 - S(c)) for ALL cells of the path, including the goal cell.
 
-    Implements formula 11: risk(P) = sum_{n=1}^{|p|-1} (1 - S(p_n)),
-    where p_{|p|} = T_j (goal target) is excluded.
+    Khớp với FMF/FMF_new (pathRisk = sum trên MỌI ô của P của (1 - S(p))).
     """
     if not path:
         return 0.0
 
-    # Exclude the last cell (goal target) per formula 11
-    cells = path[:-1] if len(path) > 1 else path
+    # Cộng mọi ô, bao gồm cả ô cuối (đích) — giống FMF.
+    cells = path
     return float(
         sum(
             cell_collision_risk(

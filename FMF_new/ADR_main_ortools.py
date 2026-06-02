@@ -51,7 +51,7 @@ CONFIG = {
     "Solver_minimize": True,
 
     # --- Đường dẫn bản đồ ---
-    "map_path": r"E:\last_dance\LastDance\FMF_new\triangle300\triangle300.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF_new\square400\square400.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF_new\test_100\test_100.txt",
 
     # --- Tham số OR-Tools TSP ---

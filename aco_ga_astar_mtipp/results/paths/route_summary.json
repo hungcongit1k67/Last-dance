@@ -36,12 +36,12 @@
     "total": 32.6377323463642
   },
   "timings": {
-    "lower_level_modified_astar_time_sec": 0.05971319996751845,
-    "upper_level_ga_time_sec": 0.6784099999349564,
-    "upper_level_aco_time_sec": 0.9794702000217512,
-    "upper_level_total_time_sec": 1.6578801999567077,
-    "stitch_and_full_cost_time_sec": 0.00013589998707175255,
-    "algorithm_total_time_sec": 1.7177292999112979
+    "lower_level_modified_astar_time_sec": 0.04441360000055283,
+    "upper_level_ga_time_sec": 0.6307190000079572,
+    "upper_level_aco_time_sec": 0.9061613000230864,
+    "upper_level_total_time_sec": 1.5368803000310436,
+    "stitch_and_full_cost_time_sec": 0.00013729999773204327,
+    "algorithm_total_time_sec": 1.5814312000293285
   },
   "full_path": [
     [
