@@ -2287,6 +2287,393 @@
         "checkpoints": 2,
         "smooth": false
       }
+    },
+    {
+      "summary": {
+        "tsp_cost": {
+          "mean": 71.863856,
+          "std": 0.0,
+          "best": 71.863856
+        },
+        "length": {
+          "mean": 179.621825,
+          "std": 0.0,
+          "best": 179.621825
+        },
+        "radiation": {
+          "mean": 0.050419,
+          "std": 0.0,
+          "best": 0.050419
+        },
+        "risk": {
+          "mean": 0.0,
+          "std": 0.0,
+          "best": 0.0
+        },
+        "total_cost": {
+          "mean": 71.863856,
+          "std": 0.0,
+          "best": 71.863856
+        }
+      },
+      "best_metrics": {
+        "length": 179.621825,
+        "radiation": 0.050419,
+        "risk": 0.0,
+        "total_cost": 71.863856
+      },
+      "path": [
+        [
+          8,
+          81
+        ],
+        [
+          79,
+          26
+        ],
+        [
+          79,
+          26
+        ],
+        [
+          8,
+          81
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 71.86385563632638,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0099
+        },
+        {
+          "iteration": 2,
+          "cost": 71.86385563632638,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0106
+        },
+        {
+          "iteration": 3,
+          "cost": 71.86385563632638,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0097
+        },
+        {
+          "iteration": 4,
+          "cost": 71.86385563632638,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0099
+        },
+        {
+          "iteration": 5,
+          "cost": 71.86385563632638,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0095
+        }
+      ],
+      "timestamp": "2026-06-03T09:35:30",
+      "config": {
+        "w1": 0.4,
+        "w2": 0.3,
+        "w3": 0.3,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "cost_step": false,
+        "Solver_minimize": true,
+        "tsp": "aco",
+        "ntest": 5,
+        "distance_scale": 1000,
+        "time_limit_sec": 5,
+        "aco_ant_count": 20,
+        "aco_generations": 100,
+        "aco_alpha": 1.0,
+        "aco_beta": 5.0,
+        "aco_rho": 0.5,
+        "aco_q": 10,
+        "aco_strategy": 0,
+        "ga_population": 300,
+        "ga_generations": 300,
+        "map_size": 100,
+        "checkpoints": 2,
+        "smooth": true
+      }
+    },
+    {
+      "summary": {
+        "tsp_cost": {
+          "mean": 71.863856,
+          "std": 0.0,
+          "best": 71.863856
+        },
+        "length": {
+          "mean": 179.621825,
+          "std": 0.0,
+          "best": 179.621825
+        },
+        "radiation": {
+          "mean": 0.050419,
+          "std": 0.0,
+          "best": 0.050419
+        },
+        "risk": {
+          "mean": 0.0,
+          "std": 0.0,
+          "best": 0.0
+        },
+        "total_cost": {
+          "mean": 71.863856,
+          "std": 0.0,
+          "best": 71.863856
+        }
+      },
+      "best_metrics": {
+        "length": 179.621825,
+        "radiation": 0.050419,
+        "risk": 0.0,
+        "total_cost": 71.863856
+      },
+      "path": [
+        [
+          8,
+          81
+        ],
+        [
+          79,
+          26
+        ],
+        [
+          79,
+          26
+        ],
+        [
+          8,
+          81
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 71.86385563632638,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0111
+        },
+        {
+          "iteration": 2,
+          "cost": 71.86385563632638,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0102
+        },
+        {
+          "iteration": 3,
+          "cost": 71.86385563632638,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0101
+        },
+        {
+          "iteration": 4,
+          "cost": 71.86385563632638,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0104
+        },
+        {
+          "iteration": 5,
+          "cost": 71.86385563632638,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0095
+        }
+      ],
+      "timestamp": "2026-06-03T09:36:04",
+      "config": {
+        "w1": 0.4,
+        "w2": 0.3,
+        "w3": 0.3,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "cost_step": true,
+        "Solver_minimize": true,
+        "tsp": "aco",
+        "ntest": 5,
+        "distance_scale": 1000,
+        "time_limit_sec": 5,
+        "aco_ant_count": 20,
+        "aco_generations": 100,
+        "aco_alpha": 1.0,
+        "aco_beta": 5.0,
+        "aco_rho": 0.5,
+        "aco_q": 10,
+        "aco_strategy": 0,
+        "ga_population": 300,
+        "ga_generations": 300,
+        "map_size": 100,
+        "checkpoints": 2,
+        "smooth": true
+      }
+    },
+    {
+      "summary": {
+        "tsp_cost": {
+          "mean": 71.863856,
+          "std": 0.0,
+          "best": 71.863856
+        },
+        "length": {
+          "mean": 179.621825,
+          "std": 0.0,
+          "best": 179.621825
+        },
+        "radiation": {
+          "mean": 0.050419,
+          "std": 0.0,
+          "best": 0.050419
+        },
+        "risk": {
+          "mean": 0.0,
+          "std": 0.0,
+          "best": 0.0
+        },
+        "total_cost": {
+          "mean": 71.863856,
+          "std": 0.0,
+          "best": 71.863856
+        }
+      },
+      "best_metrics": {
+        "length": 179.621825,
+        "radiation": 0.050419,
+        "risk": 0.0,
+        "total_cost": 71.863856
+      },
+      "path": [
+        [
+          79,
+          26
+        ],
+        [
+          8,
+          81
+        ],
+        [
+          8,
+          81
+        ],
+        [
+          79,
+          26
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 71.86385563632638,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0098
+        },
+        {
+          "iteration": 2,
+          "cost": 71.86385563632638,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0102
+        },
+        {
+          "iteration": 3,
+          "cost": 71.86385563632638,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0097
+        },
+        {
+          "iteration": 4,
+          "cost": 71.86385563632638,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0103
+        },
+        {
+          "iteration": 5,
+          "cost": 71.86385563632638,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0107
+        }
+      ],
+      "timestamp": "2026-06-03T09:36:19",
+      "config": {
+        "w1": 0.4,
+        "w2": 0.3,
+        "w3": 0.3,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "cost_step": true,
+        "Solver_minimize": true,
+        "tsp": "aco",
+        "ntest": 5,
+        "distance_scale": 1000,
+        "time_limit_sec": 5,
+        "aco_ant_count": 20,
+        "aco_generations": 100,
+        "aco_alpha": 1.0,
+        "aco_beta": 5.0,
+        "aco_rho": 0.5,
+        "aco_q": 10,
+        "aco_strategy": 0,
+        "ga_population": 300,
+        "ga_generations": 300,
+        "map_size": 100,
+        "checkpoints": 2,
+        "smooth": true
+      }
     }
   ]
 }

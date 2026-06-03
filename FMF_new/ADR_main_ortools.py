@@ -51,8 +51,8 @@ CONFIG = {
     "Solver_minimize": True,
 
     # --- Đường dẫn bản đồ ---
-    "map_path": r"E:\last_dance\LastDance\FMF_new\square400\square400.txt",
-    #"map_path": r"E:\last_dance\LastDance\FMF_new\test_100\test_100.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF_new\square400\square400.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF_new\test_100\test_100.txt",
 
     # --- Tham số OR-Tools TSP ---
     "ntest": 1, # Số lần chạy OR-Tools (với cùng tham số) để đánh giá độ ổn định của giải pháp

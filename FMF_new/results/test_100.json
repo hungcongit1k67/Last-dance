@@ -309,6 +309,160 @@
         "checkpoints": 2,
         "smooth": true
       }
+    },
+    {
+      "summary": {
+        "mean_cost": 71.863856,
+        "std_cost": 0.0,
+        "best_cost": 71.863856
+      },
+      "metrics": {
+        "length": 179.621825,
+        "radiation": 0.050419,
+        "risk": 0.0,
+        "total_cost": 71.863856
+      },
+      "metrics_mean": {
+        "length": {
+          "mean": 179.621825,
+          "std": 0.0
+        },
+        "radiation": {
+          "mean": 0.050419,
+          "std": 0.0
+        },
+        "risk": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "total_cost": {
+          "mean": 71.863856,
+          "std": 0.0
+        }
+      },
+      "path": [
+        [
+          8,
+          81
+        ],
+        [
+          79,
+          26
+        ],
+        [
+          79,
+          26
+        ],
+        [
+          8,
+          81
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 71.86385563632638,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.0116
+        }
+      ],
+      "timestamp": "2026-06-03T09:37:17",
+      "config": {
+        "w1": 0.4,
+        "w2": 0.3,
+        "w3": 0.3,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "ntest": 1,
+        "distance_scale": 1000,
+        "time_limit_sec": 10,
+        "map_size": 100,
+        "checkpoints": 2,
+        "smooth": true
+      }
+    },
+    {
+      "summary": {
+        "mean_cost": 71.863856,
+        "std_cost": 0.0,
+        "best_cost": 71.863856
+      },
+      "metrics": {
+        "length": 179.621825,
+        "radiation": 0.050419,
+        "risk": 0.0,
+        "total_cost": 71.863856
+      },
+      "metrics_mean": {
+        "length": {
+          "mean": 179.621825,
+          "std": 0.0
+        },
+        "radiation": {
+          "mean": 0.050419,
+          "std": 0.0
+        },
+        "risk": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "total_cost": {
+          "mean": 71.863856,
+          "std": 0.0
+        }
+      },
+      "path": [
+        [
+          8,
+          81
+        ],
+        [
+          79,
+          26
+        ],
+        [
+          79,
+          26
+        ],
+        [
+          8,
+          81
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 71.86385563632638,
+          "length": 179.621825,
+          "radiation": 0.050419,
+          "risk": 0.0,
+          "total_cost": 71.863856,
+          "time_sec": 0.1074
+        }
+      ],
+      "timestamp": "2026-06-03T14:37:11",
+      "config": {
+        "w1": 0.4,
+        "w2": 0.3,
+        "w3": 0.3,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "ntest": 1,
+        "distance_scale": 1000,
+        "time_limit_sec": 10,
+        "map_size": 100,
+        "checkpoints": 2,
+        "smooth": true
+      }
     }
   ]
 }

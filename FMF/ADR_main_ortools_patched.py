@@ -41,7 +41,7 @@ CONFIG = {
     # --- Bước chi phí Eikonal ---
     # False → dis dùng hằng số 2 (FMF gốc).
     # True  → dis dùng 2·f(x)², f(x)=w1+w2·R̄_norm(x)+w3·(1−S(x)).  (Eikonal có trọng số |∇T|=f)
-    "cost_step": True,
+    "cost_step": False,
 
     # --- Hàm mục tiêu của TSP solver ---
     # False → ma trận TSP = chiều dài hình học (length).
@@ -51,8 +51,8 @@ CONFIG = {
 
     # --- Đường dẫn bản đồ ---
     # radiation_grid.txt trong cùng thư mục sẽ được nạp tự động.
-    #"map_path": r"E:\last_dance\LastDance\FMF\test_100\test_100.txt",
-    "map_path": r"E:\last_dance\LastDance\FMF\square400\square400.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF\test_100\test_100.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF\square400\square400.txt",
 
     # --- Bộ giải TSP ---
     # "ortools" | "aco" | "ga"
