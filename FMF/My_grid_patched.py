@@ -341,7 +341,7 @@ class GridMap():
                     if (self.dista[u2][v2] > dis):
                         self.dista[u2][v2] = dis
                         pq.put( ( dis , (u2,v2)) )
-                        nxt2 = self.spread((u2,v2),4) # 8-direction, thay 8 thành 4 nếu chỉ muốn 4-direction
+                        nxt2 = self.spread((u2,v2),8) # 8-direction, thay 8 thành 4 nếu chỉ muốn 4-direction
                         nho1 = self.mapSize*self.mapSize
                         nho2 = (-1,-1)
                         for (u3,v3),h in nxt2:

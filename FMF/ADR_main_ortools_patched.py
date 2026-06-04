@@ -51,13 +51,14 @@ CONFIG = {
 
     # --- Đường dẫn bản đồ ---
     # radiation_grid.txt trong cùng thư mục sẽ được nạp tự động.
-    "map_path": r"E:\last_dance\LastDance\FMF\test_100\test_100.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF\test_100\test_100.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\square400\square400.txt",
-
+    #"map_path": r"E:\last_dance\LastDance\FMF\triangle300\triangle300.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF\mixed200\mixed200.txt",
     # --- Bộ giải TSP ---
     # "ortools" | "aco" | "ga"
-    "tsp": "aco",
-    "ntest": 5,
+    "tsp": "ortools",
+    "ntest": 1,
 
     # --- Tham số OR-Tools TSP ---
     "distance_scale": 1000,
