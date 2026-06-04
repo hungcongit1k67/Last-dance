@@ -28,6 +28,13 @@ try:
 except ImportError:
     pygame = None
 
+try:
+    from supercover import supercover_cells
+except ImportError:  # fallback khi cwd khác thư mục module
+    import sys as _sys
+    _sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from supercover import supercover_cells
+
 
 class GridMap:
     # ---------- Color palettes cho visualization ----------
@@ -66,6 +73,12 @@ class GridMap:
         #   False → ma trận TSP = thế năng WP-FMF có trọng số f (hành vi gốc).
         self.Solver_minimize = True
 
+        # supercover=False: risk(P) & R(P) dùng công thức gốc (trung bình 2 đầu mút mỗi đoạn).
+        # supercover=True : đoạn KHÔNG kề nhau (path smooth/turning points) tính trung bình
+        #   (1−S)/R̄ trên toàn bộ ô mà đoạn thẳng cắt qua (supercover line); đoạn KỀ nhau
+        #   (cell-by-cell) vẫn dùng công thức gốc.
+        self.supercover = False
+
         # Bản đồ phóng xạ
         self.radiation_map  = None   # giá trị thô (μSv/h hoặc đơn vị tương đương)
         self.radiation_norm = None   # chuẩn hóa về [0, 1]
@@ -78,7 +91,8 @@ class GridMap:
     # Cấu hình tham số
     # =========================================================
     def config(self, w1=None, w2=None, w3=None, C1=None, a=None, v=None,
-               safety_radius=None, safety_max_distance=None, Solver_minimize=None):
+               safety_radius=None, safety_max_distance=None, Solver_minimize=None,
+               supercover=None):
         """Cấu hình tham số thuật toán.
 
         Trọng số (w1 + w2 + w3 = 1):
@@ -120,6 +134,8 @@ class GridMap:
             self.safety_max_distance = float(safety_max_distance)
         if Solver_minimize is not None:
             self.Solver_minimize = bool(Solver_minimize)
+        if supercover is not None:
+            self.supercover = bool(supercover)
 
     def setWeights(self, w1=0.7, C1=0.5):
         """Giữ lại cho tương thích ngược. Khuyến nghị dùng config() thay thế."""
@@ -692,33 +708,63 @@ class GridMap:
                                 cells[i + 1][1] - cells[i][1])
         return total
 
+    def _segment_avg(self, a, b, value_at):
+        """Giá trị trung bình của value_at(·) trên một đoạn a→b.
+
+        - supercover=True và a,b KHÔNG kề nhau (đoạn smooth/turning points)
+          → trung bình trên mọi ô supercover line mà đoạn cắt qua (gồm 2 đầu mút).
+        - ngược lại (cell-by-cell, hoặc supercover=False)
+          → trung bình hai đầu mút (công thức gốc)."""
+        adjacent = (abs(int(a[0]) - int(b[0])) <= 1
+                    and abs(int(a[1]) - int(b[1])) <= 1)
+        if self.supercover and not adjacent:
+            scl = supercover_cells(a, b)
+            return sum(value_at(p) for p in scl) / len(scl)
+        return (value_at(a) + value_at(b)) / 2.0
+
     def pathRisk(self, cells):
-        """risk(P) = Σ(1 − S(p)) với p ∈ P  — công thức (5)."""
+        """risk(P) = Σ d(p_n,p_{n+1}) · avg(1−S) trên từng đoạn.
+
+        avg = trung bình hai đầu mút (cell-by-cell, công thức 5) hoặc trung bình
+        trên supercover line khi supercover=True và đoạn không kề nhau (công thức 6)."""
         if not hasattr(self, 'safety'):
             return None
-        total = 0.0
-        for p in cells:
+
+        def risk_at(p):
             r, c = int(p[0]), int(p[1])
             if 0 <= r < self.mapSize and 0 <= c < self.mapSize:
-                total += (1.0 - self.safety[r][c])
+                return 1.0 - self.safety[r][c]
+            return 0.0
+
+        total = 0.0
+        for i in range(len(cells) - 1):
+            a, b = cells[i], cells[i + 1]
+            d = self.distant(a[0], a[1], b[0], b[1])
+            total += d * self._segment_avg(a, b, risk_at)
         return total
 
     def pathRadiation(self, cells):
-        """R(P) = Σ d(p_n,p_{n+1})·(R̄(p_n)+R̄(p_{n+1}))/2·(a/v)  — công thức (6)."""
+        """R(P) = Σ d(p_n,p_{n+1}) · avg(R̄) · (a/v) trên từng đoạn.
+
+        avg = trung bình hai đầu mút (cell-by-cell, công thức 7) hoặc trung bình
+        trên supercover line khi supercover=True và đoạn không kề nhau (công thức 8)."""
         if self.radiation_map is None:
             return None
         nrows = len(self.radiation_map)
         ncols = len(self.radiation_map[0]) if nrows > 0 else 0
+
+        def rad_at(p):
+            r, c = int(p[0]), int(p[1])
+            if 0 <= r < nrows and 0 <= c < ncols:
+                return self.radiation_map[r][c]
+            return 0.0
+
         total = 0.0
         for i in range(len(cells) - 1):
-            r0, c0 = int(cells[i][0]),     int(cells[i][1])
-            r1, c1 = int(cells[i + 1][0]), int(cells[i + 1][1])
-            R0 = (self.radiation_map[r0][c0]
-                  if 0 <= r0 < nrows and 0 <= c0 < ncols else 0.0)
-            R1 = (self.radiation_map[r1][c1]
-                  if 0 <= r1 < nrows and 0 <= c1 < ncols else 0.0)
-            d = math.hypot(r1 - r0, c1 - c0)
-            total += (d * (R0 + R1) / 2.0 * (self.a / self.v))/3600.0  # Chuyển μSv·m/s thành mSv·h
+            a, b = cells[i], cells[i + 1]
+            d = math.hypot(b[0] - a[0], b[1] - a[1])
+            total += (d * self._segment_avg(a, b, rad_at)
+                      * (self.a / self.v)) / 3600.0  # Chuyển μSv·m/s thành mSv·h
         return total
 
     def pathTotalCost(self, cells):

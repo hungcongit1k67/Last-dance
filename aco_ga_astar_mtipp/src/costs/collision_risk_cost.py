@@ -82,24 +82,29 @@ def path_collision_risk(
     radius: int = 2,
     max_distance: float = 3.0,
 ) -> float:
-    """Sum of (1 - S(c)) for ALL cells of the path, including the goal cell.
+    """risk(P) = Σ_n d(p_n, p_{n+1}) · [(1 - S(p_n)) + (1 - S(p_{n+1}))] / 2.
 
-    Khớp với FMF/FMF_new (pathRisk = sum trên MỌI ô của P của (1 - S(p))).
+    Rủi ro va chạm có trọng số theo khoảng cách giữa hai ô liên tiếp
+    (thay cho việc cộng dồn (1 - S) trên mọi ô). Khớp với FMF/FMF_new.
     """
-    if not path:
+    if not path or len(path) < 2:
         return 0.0
 
-    # Cộng mọi ô, bao gồm cả ô cuối (đích) — giống FMF.
-    cells = path
-    return float(
-        sum(
-            cell_collision_risk(
-                grid_map=grid_map,
-                cell=cell,
-                c1=c1,
-                radius=radius,
-                max_distance=max_distance,
-            )
-            for cell in cells
+    # Rủi ro (1 - S) tại từng ô, tính một lần để dùng lại ở hai đoạn kề.
+    risks = [
+        cell_collision_risk(
+            grid_map=grid_map,
+            cell=cell,
+            c1=c1,
+            radius=radius,
+            max_distance=max_distance,
         )
-    )
+        for cell in path
+    ]
+
+    total = 0.0
+    for n in range(len(path) - 1):
+        (r0, c0), (r1, c1) = path[n], path[n + 1]
+        d = math.hypot(r1 - r0, c1 - c0)
+        total += d * (risks[n] + risks[n + 1]) / 2.0
+    return float(total)

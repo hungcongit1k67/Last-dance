@@ -50,10 +50,17 @@ CONFIG = {
     # False → thế năng WP-FMF có trọng số f (hành vi gốc).
     "Solver_minimize": True,
 
+    # --- Supercover line cho hàm mục tiêu ---
+    # False → risk(P) & R(P) dùng công thức gốc (trung bình 2 đầu mút mỗi đoạn).
+    # True  → khi smooth=True, đoạn nối hai turning points tính trung bình (1−S)/R̄
+    #         trên mọi ô supercover line mà đoạn cắt qua; cell-by-cell vẫn dùng công thức gốc.
+    "supercover": True,
+
     # --- Đường dẫn bản đồ ---
     # "map_path": r"E:\last_dance\LastDance\FMF_new\square400\square400.txt",
-    "map_path": r"E:\last_dance\LastDance\FMF_new\triangle300\triangle300.txt",
-    #"map_path": r"E:\last_dance\LastDance\FMF_new\test_100\test_100.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF_new\triangle300\triangle300.txt",
+    # "map_path": r"E:\last_dance\LastDance\FMF_new\test_100\test_100.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF_new\mixed200\mixed200.txt",
 
     # --- Tham số OR-Tools TSP ---
     "ntest": 1, # Số lần chạy OR-Tools (với cùng tham số) để đánh giá độ ổn định của giải pháp
@@ -63,7 +70,7 @@ CONFIG = {
     # --- Path output ---
     # True  → in/lưu path đã smooth (turning points, ~128 bước)
     # False → in/lưu full path cell-by-cell (đi qua từng ô lưới, ~1000+ bước)
-    "smooth": False,
+    "smooth": True,
 }
 
 
@@ -461,6 +468,7 @@ def main():
         safety_radius=CONFIG["safety_radius"],
         safety_max_distance=CONFIG["safety_max_distance"],
         Solver_minimize=CONFIG["Solver_minimize"],
+        supercover=CONFIG["supercover"],
     )
 
     map_path = CONFIG["map_path"]

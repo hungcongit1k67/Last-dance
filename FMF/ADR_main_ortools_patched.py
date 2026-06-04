@@ -49,6 +49,12 @@ CONFIG = {
     #         → solver minimize đúng Total cost, và khi đó TSP cost == Total cost.
     "Solver_minimize": True,
 
+    # --- Supercover line cho hàm mục tiêu ---
+    # False → risk(P) & R(P) dùng công thức gốc (trung bình 2 đầu mút mỗi đoạn).
+    # True  → khi smooth=True, đoạn nối hai turning points tính trung bình (1−S)/R̄
+    #         trên mọi ô supercover line mà đoạn cắt qua; cell-by-cell vẫn dùng công thức gốc.
+    "supercover": True,
+
     # --- Đường dẫn bản đồ ---
     # radiation_grid.txt trong cùng thư mục sẽ được nạp tự động.
     #"map_path": r"E:\last_dance\LastDance\FMF\test_100\test_100.txt",
@@ -575,6 +581,7 @@ def main():
         safety_max_distance=CONFIG["safety_max_distance"],
         cost_step=CONFIG["cost_step"],
         Solver_minimize=CONFIG["Solver_minimize"],
+        supercover=CONFIG["supercover"],
     )
 
     # Nạp bản đồ (radiation_grid.txt trong cùng thư mục được nạp tự động)
