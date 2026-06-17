@@ -36,18 +36,18 @@ CONFIG = {
 
     # --- Tham số vật lý (công thức 6 — tính R(P)) ---
     "a": 1.0,       # Kích thước ô lưới (m)
-    "v": 1.0,       # Vận tốc robot (m/s)
+    "v": 1.0,       # Vận tốc robot (m/s)   
 
     # --- Bước chi phí Eikonal ---
     # False → dis dùng hằng số 2 (FMF gốc).
     # True  → dis dùng 2·f(x)², f(x)=w1+w2·R̄_norm(x)+w3·(1−S(x)).  (Eikonal có trọng số |∇T|=f)
-    "cost_step": False,
+    "cost_step": True,
 
     # --- Hàm mục tiêu của TSP solver ---
     # False → ma trận TSP = chiều dài hình học (length).
     # True  → ma trận TSP = Total cost (7a) w1·length+w2·R+w3·risk của từng đoạn
     #         → solver minimize đúng Total cost, và khi đó TSP cost == Total cost.
-    "Solver_minimize": True,
+    "Solver_minimize": False,
 
     # --- Supercover line cho hàm mục tiêu ---
     # False → risk(P) & R(P) dùng công thức gốc (trung bình 2 đầu mút mỗi đoạn).
@@ -60,11 +60,13 @@ CONFIG = {
     #"map_path": r"E:\last_dance\LastDance\FMF\test_100\test_100.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\square400\square400.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\triangle300\triangle300.txt",
-    "map_path": r"E:\last_dance\LastDance\FMF\mixed200\mixed200.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF\mixed200\mixed200.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF\factory400\factory400_30_10.txt",
+
     # --- Bộ giải TSP ---
     # "ortools" | "aco" | "ga"
-    "tsp": "ortools",
-    "ntest": 1,
+    "tsp": "aco",
+    "ntest": 10,
 
     # --- Tham số OR-Tools TSP ---
     "distance_scale": 1000,
@@ -361,19 +363,14 @@ def evaluation3(
         ga_generations=ga_generations,
     )
 
-    # Dời twoPointTracing(smooth=False) lên trước loop để mọi iteration
-    # đều getPath ra đúng cell-by-cell / turning points theo cấu hình.
-    if not smooth:
-        grid.twoPointTracing(smooth=False)
-        # twoPointTracing tính lại adj theo pathTrace mới (quan trọng khi Solver_minimize=True);
-        # chạy lại dijkstra để dijk/dtra khớp pathTrace → giữ TSP cost == Total cost.
-        grid.dijkstra()
-
     res_costs = []
     res_lengths = []
     res_radiations = []
     res_risks = []
     res_totals = []
+    res_t_phase1 = []   # thời gian Pha 1 (build graph + Dijkstra/FMF) mỗi iteration
+    res_t_phase2 = []   # thời gian Pha 2 (TSP solver) mỗi iteration
+    res_t_total  = []   # thời gian cả thuật toán (Pha 1 + Pha 2) mỗi iteration
     bestpath = None
     bestcost = float("inf")
     iterations_log = []
@@ -382,20 +379,36 @@ def evaluation3(
     tsp_label = tsp.upper()
     for iter in range(ntest):
         print("Iteration ", iter + 1, "/", ntest)
-        a = time.time()
 
+        # --- Pha 1: build graph trên grid + tạo ma trận chi phí (Dijkstra/FMF) ---
+        t_p1 = time.time()
+        grid.buildGraphAdvanced()
+        if not smooth:
+            # twoPointTracing tính lại adj theo pathTrace mới (quan trọng khi Solver_minimize=True);
+            # chạy lại dijkstra để dijk/dtra khớp pathTrace → giữ TSP cost == Total cost.
+            grid.twoPointTracing(smooth=False)
+            grid.dijkstra()
+        t_phase1 = time.time() - t_p1
+
+        # --- Pha 2: giải TSP ---
+        a = time.time()
         path, cost = _solve_tsp(grid, tsp, **solver_params)
+        t_phase2 = time.time() - a
+
+        t_total = t_phase1 + t_phase2
 
         # Tính metrics cho từng iteration để lấy mean/std
         points_i = grid.getPath(path)
         total_i, length_i, rad_i, risk_i = grid.pathTotalCost(points_i)
 
-        elapsed = time.time() - a
         res_costs.append(cost)
         res_lengths.append(length_i)
         res_radiations.append(rad_i if rad_i is not None else 0.0)
         res_risks.append(risk_i)
         res_totals.append(total_i)
+        res_t_phase1.append(t_phase1)
+        res_t_phase2.append(t_phase2)
+        res_t_total.append(t_total)
         iterations_log.append({
             "iteration": iter + 1,
             "cost": cost,
@@ -403,7 +416,9 @@ def evaluation3(
             "radiation": round(float(rad_i), 6) if has_radiation else None,
             "risk": round(float(risk_i), 6),
             "total_cost": round(float(total_i), 6),
-            "time_sec": round(elapsed, 4),
+            "time_phase1_sec": round(t_phase1, 4),
+            "time_phase2_sec": round(t_phase2, 4),
+            "time_total_sec": round(t_total, 4),
         })
 
         if cost < bestcost:
@@ -414,13 +429,17 @@ def evaluation3(
         print(f"Cost: {cost:.4f}   length={length_i:.4f}   "
               f"R={rad_i if rad_i is not None else 0.0:.4f}   "
               f"risk={risk_i:.4f}   total={total_i:.4f}")
-        print(f"--- Iteration {iter+1}: {elapsed} seconds ---")
+        print(f"--- Iteration {iter+1}: pha1={t_phase1:.4f}s  "
+              f"pha2={t_phase2:.4f}s  tong={t_total:.4f}s ---")
 
     res_costs      = np.array(res_costs)
     res_lengths    = np.array(res_lengths)
     res_radiations = np.array(res_radiations)
     res_risks      = np.array(res_risks)
     res_totals     = np.array(res_totals)
+    res_t_phase1   = np.array(res_t_phase1)
+    res_t_phase2   = np.array(res_t_phase2)
+    res_t_total    = np.array(res_t_total)
 
     # Path tốt nhất (theo TSP cost) — dùng cho vẽ và lưu path_tuples
     points = grid.getPath(bestpath)
@@ -446,6 +465,11 @@ def evaluation3(
     print(f"  TSP cost   : {res_costs.mean():10.4f} ± {res_costs.std():.4f}    "
           f"(best: {bestcost:.4f})")
     print(f"  (w1={grid.w1:.2f}*length + w2={grid.w2:.2f}*R + w3={grid.w3:.2f}*risk)")
+
+    print(f"\n===== Thoi gian chay  (mean ± std qua {ntest} lan chay) =====")
+    print(f"  Pha 1 (build graph)   : {res_t_phase1.mean():10.4f} ± {res_t_phase1.std():.4f} s")
+    print(f"  Pha 2 (TSP {tsp_label:<7}) : {res_t_phase2.mean():10.4f} ± {res_t_phase2.std():.4f} s")
+    print(f"  Ca thuat toan         : {res_t_total.mean():10.4f} ± {res_t_total.std():.4f} s")
 
     # Khôi phục smooth=True để drawPath hoạt động bình thường
     if not smooth:
@@ -491,6 +515,12 @@ def evaluation3(
                 "total_cost": {"mean": round(float(res_totals.mean()),     6),
                                "std":  round(float(res_totals.std()),      6),
                                "best": round(float(total),                 6)},
+                "time_phase1": {"mean": round(float(res_t_phase1.mean()),  6),
+                                "std":  round(float(res_t_phase1.std()),   6)},
+                "time_phase2": {"mean": round(float(res_t_phase2.mean()),  6),
+                                "std":  round(float(res_t_phase2.std()),   6)},
+                "time_total":  {"mean": round(float(res_t_total.mean()),   6),
+                                "std":  round(float(res_t_total.std()),    6)},
             },
             "best_metrics": {
                 "length":    round(float(length),    6),
@@ -536,8 +566,10 @@ def ADR_main(
     1) Build graph tren grid
     2) Dung Dijkstra/FMF de tao ma tran chi phi giua cac checkpoint
     3) Dung TSP solver (chon bang tham so `tsp`): ortools | aco | ga
+
+    Pha 1 (build graph + Dijkstra/FMF) duoc do thoi gian ben trong evaluation3,
+    chay lai moi iteration de lay mean/std thoi gian.
     """
-    timeEval(grid)
     return evaluation3(
         grid,
         tsp=tsp,

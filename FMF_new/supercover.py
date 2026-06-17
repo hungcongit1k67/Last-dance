@@ -31,8 +31,8 @@ def supercover_cells(start, end):
     seen = set()
     _append_unique(cells, seen, (r, c))
 
-    dc = c1 - c
-    dr = r1 - r
+    dc = c1 - c # chiều lệch theo cột --> ngang
+    dr = r1 - r # chiều lệch theo hàng --> dọc
     step_c = 1 if dc > 0 else -1 if dc < 0 else 0
     step_r = 1 if dr > 0 else -1 if dr < 0 else 0
 
@@ -40,6 +40,8 @@ def supercover_cells(start, end):
         return cells
 
     inf = float("inf")
+
+    # Tính t_delta cho mỗi trục: khoảng cách t giữa các lần cắt qua ranh giới ô theo trục đó.
     t_delta_c = abs(1.0 / dc) if dc != 0 else inf
     t_delta_r = abs(1.0 / dr) if dr != 0 else inf
 

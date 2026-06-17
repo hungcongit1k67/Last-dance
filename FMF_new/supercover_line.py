@@ -33,6 +33,7 @@ def find_twos(matrix):
     return points[0], points[1]
 
 
+# Hàm phụ để thêm cell vào danh sách cells nếu nó chưa được thấy trước đó
 def _append_unique(cells, seen, cell):
     if cell not in seen:
         cells.append(cell)
@@ -49,24 +50,29 @@ def supercover_cells(start, end):
     r, c = int(start[0]), int(start[1])
     r1, c1 = int(end[0]), int(end[1])
 
-    cells = []
+    cells = [] # danh sách các cell được chạm bởi đoạn thẳng
     seen = set()
-    _append_unique(cells, seen, (r, c))
+    _append_unique(cells, seen, (r, c)) 
 
-    dc = c1 - c
-    dr = r1 - r
-    step_c = 1 if dc > 0 else -1 if dc < 0 else 0
-    step_r = 1 if dr > 0 else -1 if dr < 0 else 0
+    # Tính độ lệch giữa hai điểm đầu và cuối
+    dc = c1 - c # độ lệch theo cột --> ngang
+    dr = r1 - r # độ lệch theo hàng --> dọc
+
+    # Xác định hướng di chuyển trên lưới
+    step_c = 1 if dc > 0 else -1 if dc < 0 else 0 # Nếu dc > 0 thì di chuyển sang phải, nếu dc < 0 thì di chuyển sang trái, nếu dc = 0 thì không di chuyển theo cột
+    step_r = 1 if dr > 0 else -1 if dr < 0 else 0 # Nếu dr > 0 thì di chuyển lên trên, nếu dr < 0 thì di chuyển xuống dưới, nếu dr = 0 thì không di chuyển theo hàng
 
     if dc == 0 and dr == 0:
         return cells
 
     inf = float("inf")
+
+    # Tính t_delta cho mỗi trục: khoảng cách t giữa các lần cắt qua ranh giới ô theo trục đó.
     t_delta_c = abs(1.0 / dc) if dc != 0 else inf
     t_delta_r = abs(1.0 / dr) if dr != 0 else inf
 
-    # From a cell center, the first boundary in an active axis is half a cell
-    # away. Parameter t runs from 0.0 at start to 1.0 at end.
+    # Từ tâm ô, biên đầu tiên theo mỗi trục cách nửa ô. t chạy từ 0.0 (start)
+    # đến 1.0 (end).
     t_max_c = 0.5 * t_delta_c if dc != 0 else inf
     t_max_r = 0.5 * t_delta_r if dr != 0 else inf
 
@@ -80,8 +86,7 @@ def supercover_cells(start, end):
             t_max_r += t_delta_r
             _append_unique(cells, seen, (r, c))
         else:
-            # Corner crossing: include both cells that share the crossed corner,
-            # then include the diagonal cell.
+            # Cắt qua góc: thêm cả hai ô chia sẻ góc đó, rồi tới ô chéo.
             side_c = (r, c + step_c)
             side_r = (r + step_r, c)
             r += step_r
@@ -120,6 +125,28 @@ def print_matrix(matrix):
         print(" ".join(str(value) for value in row))
 
 
+def draw_endpoint_rectangle(ax, start, end, color="red", linewidth=3):
+    """Draw the outline of the grid subrectangle bounded by start and end."""
+    from matplotlib.patches import Rectangle
+
+    r0, c0 = start
+    r1, c1 = end
+    min_r, max_r = sorted((r0, r1))
+    min_c, max_c = sorted((c0, c1))
+
+    rectangle = Rectangle(
+        (min_c - 0.5, min_r - 0.5),
+        max_c - min_c + 1,
+        max_r - min_r + 1,
+        fill=False,
+        edgecolor=color,
+        linewidth=linewidth,
+        zorder=5,
+    )
+    ax.add_patch(rectangle)
+    return rectangle
+
+
 def draw_grid(matrix, output_path="E:\\last_dance\\LastDance\\FMF_new\\supercover_grid.png", show=False):
     """Draw a grid matrix and the segment connecting the two value-2 cells.
 
@@ -148,7 +175,7 @@ def draw_grid(matrix, output_path="E:\\last_dance\\LastDance\\FMF_new\\supercove
     for row in matrix:
         drawn_row = []
         for value in row:
-            if value == "x":
+            if value == "x" or value == 2: # Nếu là "x" hoặc 2 thì tô màu vàng, nếu là 1 thì tô màu đen, còn lại tô màu xanh da trời
                 drawn_row.append(1)
             elif value == 1:
                 drawn_row.append(2)
@@ -169,13 +196,41 @@ def draw_grid(matrix, output_path="E:\\last_dance\\LastDance\\FMF_new\\supercove
     (r0, c0), (r1, c1) = start, end
     ax.plot([c0, c1], [r0, r1], color="red", linewidth=3, zorder=3)
     ax.scatter([c0, c1], [r0, r1], color="red", edgecolors="black", s=170, zorder=4)
+    draw_endpoint_rectangle(ax, start, end)
 
-    for r, c in (start, end):
-        ax.scatter(c, r, marker="*", color="blue", s=900, zorder=5)
-        ax.text(
-            c + 0.12,
-            r + 0.12,
-            "2",
+    # vẽ 2 ngôi sao ở hai điểm đầu cuối của đoạn thẳng
+    # for r, c in (start, end):
+    #     ax.scatter(c, r, marker="*", color="blue", s=900, zorder=5)
+
+    #     # Số "2" được vẽ ở góc trên bên phải của ô
+    #     ax.text(
+    #         c + 0.12,
+    #         r + 0.12,
+    #         "*",
+    #         color="blue",
+    #         fontsize=20,
+    #         fontweight="bold",
+    #         ha="left",
+    #         va="center",
+    #         zorder=6,
+    #     )
+    
+    ax.text(
+            c0 + 0.12,
+            r0 + 0.12,
+            "s",
+            color="blue",
+            fontsize=20,
+            fontweight="bold",
+            ha="left",
+            va="center",
+            zorder=6,
+        )
+    
+    ax.text(
+            c1 + 0.12,
+            r1 + 0.12,
+            "e",
             color="blue",
             fontsize=20,
             fontweight="bold",
@@ -205,22 +260,22 @@ if __name__ == "__main__":
     # m[0][2] = 2
     # m[1][5] = 2
 
-    # m = [[0, 0, 2, 0, 0], 
+    # m = [[0, 2, 0, 0, 0], 
     #      [0, 0, 0, 0, 0], 
     #      [0, 0, 0, 0, 0],
     #      [0, 0, 0, 0, 0], 
-    #      [0, 0, 0, 0, 2]]
+    #      [0, 0, 0, 2, 0]]
     
     # ma trận 10x10
-    m = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
+    m = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 2, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 2, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         [2, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0]]
     print("Input matrix:")
     print_matrix(m)

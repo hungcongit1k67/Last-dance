@@ -1,0 +1,748 @@
+{
+  "map": "factory400_30_5",
+  "map_path": "E:\\last_dance\\LastDance\\FMF_new\\factory400\\factory400_30_5.txt",
+  "runs": [
+    {
+      "summary": {
+        "mean_cost": 633.047809,
+        "std_cost": 0.0,
+        "best_cost": 633.047809
+      },
+      "metrics": {
+        "length": 1028.700623,
+        "radiation": 520.894914,
+        "risk": 217.66362,
+        "total_cost": 633.047809
+      },
+      "metrics_mean": {
+        "length": {
+          "mean": 1028.700623,
+          "std": 0.0
+        },
+        "radiation": {
+          "mean": 520.894914,
+          "std": 0.0
+        },
+        "risk": {
+          "mean": 217.66362,
+          "std": 0.0
+        },
+        "total_cost": {
+          "mean": 633.047809,
+          "std": 0.0
+        }
+      },
+      "path": [
+        [
+          148,
+          349
+        ],
+        [
+          211,
+          364
+        ],
+        [
+          324,
+          359
+        ],
+        [
+          352,
+          366
+        ],
+        [
+          353,
+          367
+        ],
+        [
+          353,
+          367
+        ],
+        [
+          355,
+          174
+        ],
+        [
+          355,
+          174
+        ],
+        [
+          348,
+          123
+        ],
+        [
+          350,
+          55
+        ],
+        [
+          346,
+          51
+        ],
+        [
+          340,
+          48
+        ],
+        [
+          326,
+          34
+        ],
+        [
+          326,
+          16
+        ],
+        [
+          326,
+          16
+        ],
+        [
+          281,
+          53
+        ],
+        [
+          214,
+          99
+        ],
+        [
+          199,
+          99
+        ],
+        [
+          199,
+          99
+        ],
+        [
+          153,
+          118
+        ],
+        [
+          143,
+          157
+        ],
+        [
+          120,
+          180
+        ],
+        [
+          120,
+          204
+        ],
+        [
+          154,
+          248
+        ],
+        [
+          148,
+          349
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 633.0478093964562,
+          "length": 1028.700623,
+          "radiation": 520.894914,
+          "risk": 217.66362,
+          "total_cost": 633.047809,
+          "time_sec": 10.142
+        }
+      ],
+      "timestamp": "2026-06-16T15:15:01",
+      "config": {
+        "w1": 0.4,
+        "w2": 0.3,
+        "w3": 0.3,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "Solver_minimize": true,
+        "supercover": true,
+        "bresenham": true,
+        "ntest": 1,
+        "distance_scale": 1000,
+        "time_limit_sec": 10,
+        "map_size": 400,
+        "checkpoints": 5,
+        "smooth": true
+      }
+    },
+    {
+      "summary": {
+        "mean_cost": 633.047809,
+        "std_cost": 0.0,
+        "best_cost": 633.047809,
+        "time_phase1": {
+          "mean": 3.221502,
+          "std": 0.0
+        },
+        "time_phase2": {
+          "mean": 10.007617,
+          "std": 0.0
+        },
+        "time_total": {
+          "mean": 13.22912,
+          "std": 0.0
+        }
+      },
+      "metrics": {
+        "length": 1028.700623,
+        "radiation": 520.894914,
+        "risk": 217.66362,
+        "total_cost": 633.047809
+      },
+      "metrics_mean": {
+        "length": {
+          "mean": 1028.700623,
+          "std": 0.0
+        },
+        "radiation": {
+          "mean": 520.894914,
+          "std": 0.0
+        },
+        "risk": {
+          "mean": 217.66362,
+          "std": 0.0
+        },
+        "total_cost": {
+          "mean": 633.047809,
+          "std": 0.0
+        }
+      },
+      "path": [
+        [
+          148,
+          349
+        ],
+        [
+          211,
+          364
+        ],
+        [
+          324,
+          359
+        ],
+        [
+          352,
+          366
+        ],
+        [
+          353,
+          367
+        ],
+        [
+          353,
+          367
+        ],
+        [
+          355,
+          174
+        ],
+        [
+          355,
+          174
+        ],
+        [
+          348,
+          123
+        ],
+        [
+          350,
+          55
+        ],
+        [
+          346,
+          51
+        ],
+        [
+          340,
+          48
+        ],
+        [
+          326,
+          34
+        ],
+        [
+          326,
+          16
+        ],
+        [
+          326,
+          16
+        ],
+        [
+          281,
+          53
+        ],
+        [
+          214,
+          99
+        ],
+        [
+          199,
+          99
+        ],
+        [
+          199,
+          99
+        ],
+        [
+          153,
+          118
+        ],
+        [
+          143,
+          157
+        ],
+        [
+          120,
+          180
+        ],
+        [
+          120,
+          204
+        ],
+        [
+          154,
+          248
+        ],
+        [
+          148,
+          349
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 633.0478093964562,
+          "length": 1028.700623,
+          "radiation": 520.894914,
+          "risk": 217.66362,
+          "total_cost": 633.047809,
+          "time_phase1_sec": 3.2215,
+          "time_phase2_sec": 10.0076,
+          "time_total_sec": 13.2291
+        }
+      ],
+      "timestamp": "2026-06-16T15:19:43",
+      "config": {
+        "w1": 0.4,
+        "w2": 0.3,
+        "w3": 0.3,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "Solver_minimize": true,
+        "supercover": true,
+        "bresenham": true,
+        "ntest": 1,
+        "distance_scale": 1000,
+        "time_limit_sec": 10,
+        "map_size": 400,
+        "checkpoints": 5,
+        "smooth": true
+      }
+    },
+    {
+      "summary": {
+        "mean_cost": 633.047809,
+        "std_cost": 0.0,
+        "best_cost": 633.047809,
+        "time_phase1": {
+          "mean": 3.266793,
+          "std": 0.045183
+        },
+        "time_phase2": {
+          "mean": 10.003577,
+          "std": 0.002713
+        },
+        "time_total": {
+          "mean": 13.27037,
+          "std": 0.047789
+        }
+      },
+      "metrics": {
+        "length": 1028.700623,
+        "radiation": 520.894914,
+        "risk": 217.66362,
+        "total_cost": 633.047809
+      },
+      "metrics_mean": {
+        "length": {
+          "mean": 1028.700623,
+          "std": 0.0
+        },
+        "radiation": {
+          "mean": 520.894914,
+          "std": 0.0
+        },
+        "risk": {
+          "mean": 217.66362,
+          "std": 0.0
+        },
+        "total_cost": {
+          "mean": 633.047809,
+          "std": 0.0
+        }
+      },
+      "path": [
+        [
+          148,
+          349
+        ],
+        [
+          211,
+          364
+        ],
+        [
+          324,
+          359
+        ],
+        [
+          352,
+          366
+        ],
+        [
+          353,
+          367
+        ],
+        [
+          353,
+          367
+        ],
+        [
+          355,
+          174
+        ],
+        [
+          355,
+          174
+        ],
+        [
+          348,
+          123
+        ],
+        [
+          350,
+          55
+        ],
+        [
+          346,
+          51
+        ],
+        [
+          340,
+          48
+        ],
+        [
+          326,
+          34
+        ],
+        [
+          326,
+          16
+        ],
+        [
+          326,
+          16
+        ],
+        [
+          281,
+          53
+        ],
+        [
+          214,
+          99
+        ],
+        [
+          199,
+          99
+        ],
+        [
+          199,
+          99
+        ],
+        [
+          153,
+          118
+        ],
+        [
+          143,
+          157
+        ],
+        [
+          120,
+          180
+        ],
+        [
+          120,
+          204
+        ],
+        [
+          154,
+          248
+        ],
+        [
+          148,
+          349
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 633.0478093964562,
+          "length": 1028.700623,
+          "radiation": 520.894914,
+          "risk": 217.66362,
+          "total_cost": 633.047809,
+          "time_phase1_sec": 3.3296,
+          "time_phase2_sec": 10.0074,
+          "time_total_sec": 13.337
+        },
+        {
+          "iteration": 2,
+          "cost": 633.0478093964562,
+          "length": 1028.700623,
+          "radiation": 520.894914,
+          "risk": 217.66362,
+          "total_cost": 633.047809,
+          "time_phase1_sec": 3.2254,
+          "time_phase2_sec": 10.002,
+          "time_total_sec": 13.2274
+        },
+        {
+          "iteration": 3,
+          "cost": 633.0478093964562,
+          "length": 1028.700623,
+          "radiation": 520.894914,
+          "risk": 217.66362,
+          "total_cost": 633.047809,
+          "time_phase1_sec": 3.2454,
+          "time_phase2_sec": 10.0013,
+          "time_total_sec": 13.2467
+        }
+      ],
+      "timestamp": "2026-06-16T15:21:13",
+      "config": {
+        "w1": 0.4,
+        "w2": 0.3,
+        "w3": 0.3,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "Solver_minimize": true,
+        "supercover": true,
+        "bresenham": true,
+        "ntest": 3,
+        "distance_scale": 1000,
+        "time_limit_sec": 10,
+        "map_size": 400,
+        "checkpoints": 5,
+        "smooth": true
+      }
+    },
+    {
+      "summary": {
+        "mean_cost": 633.047809,
+        "std_cost": 0.0,
+        "best_cost": 633.047809,
+        "time_phase1": {
+          "mean": 3.242872,
+          "std": 0.037935
+        },
+        "time_phase2": {
+          "mean": 5.003541,
+          "std": 0.003247
+        },
+        "time_total": {
+          "mean": 8.246413,
+          "std": 0.037648
+        }
+      },
+      "metrics": {
+        "length": 1028.700623,
+        "radiation": 520.894914,
+        "risk": 217.66362,
+        "total_cost": 633.047809
+      },
+      "metrics_mean": {
+        "length": {
+          "mean": 1028.700623,
+          "std": 0.0
+        },
+        "radiation": {
+          "mean": 520.894914,
+          "std": 0.0
+        },
+        "risk": {
+          "mean": 217.66362,
+          "std": 0.0
+        },
+        "total_cost": {
+          "mean": 633.047809,
+          "std": 0.0
+        }
+      },
+      "path": [
+        [
+          148,
+          349
+        ],
+        [
+          211,
+          364
+        ],
+        [
+          324,
+          359
+        ],
+        [
+          352,
+          366
+        ],
+        [
+          353,
+          367
+        ],
+        [
+          353,
+          367
+        ],
+        [
+          355,
+          174
+        ],
+        [
+          355,
+          174
+        ],
+        [
+          348,
+          123
+        ],
+        [
+          350,
+          55
+        ],
+        [
+          346,
+          51
+        ],
+        [
+          340,
+          48
+        ],
+        [
+          326,
+          34
+        ],
+        [
+          326,
+          16
+        ],
+        [
+          326,
+          16
+        ],
+        [
+          281,
+          53
+        ],
+        [
+          214,
+          99
+        ],
+        [
+          199,
+          99
+        ],
+        [
+          199,
+          99
+        ],
+        [
+          153,
+          118
+        ],
+        [
+          143,
+          157
+        ],
+        [
+          120,
+          180
+        ],
+        [
+          120,
+          204
+        ],
+        [
+          154,
+          248
+        ],
+        [
+          148,
+          349
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 633.0478093964562,
+          "length": 1028.700623,
+          "radiation": 520.894914,
+          "risk": 217.66362,
+          "total_cost": 633.047809,
+          "time_phase1_sec": 3.2327,
+          "time_phase2_sec": 5.0081,
+          "time_total_sec": 8.2408
+        },
+        {
+          "iteration": 2,
+          "cost": 633.0478093964562,
+          "length": 1028.700623,
+          "radiation": 520.894914,
+          "risk": 217.66362,
+          "total_cost": 633.047809,
+          "time_phase1_sec": 3.2936,
+          "time_phase2_sec": 5.0015,
+          "time_total_sec": 8.2951
+        },
+        {
+          "iteration": 3,
+          "cost": 633.0478093964562,
+          "length": 1028.700623,
+          "radiation": 520.894914,
+          "risk": 217.66362,
+          "total_cost": 633.047809,
+          "time_phase1_sec": 3.2024,
+          "time_phase2_sec": 5.001,
+          "time_total_sec": 8.2034
+        }
+      ],
+      "timestamp": "2026-06-16T15:26:01",
+      "config": {
+        "w1": 0.4,
+        "w2": 0.3,
+        "w3": 0.3,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "Solver_minimize": true,
+        "supercover": true,
+        "bresenham": true,
+        "ntest": 3,
+        "distance_scale": 1000,
+        "time_limit_sec": 5,
+        "map_size": 400,
+        "checkpoints": 5,
+        "smooth": true
+      }
+    }
+  ]
+}

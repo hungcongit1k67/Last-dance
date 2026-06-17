@@ -1103,7 +1103,7 @@ class GridMap():
             a, b = cells[i], cells[i + 1]
             d = math.hypot(b[0] - a[0], b[1] - a[1])
             total += (d * self._segment_avg(a, b, rad_at)
-                      * (self.a / self.v)) / 3600.0  # convert seconds to hours
+                      * (self.a / self.v))  # /3600.0 to convert seconds to hours
         return total
 
     def pathTotalCost(self, cells):

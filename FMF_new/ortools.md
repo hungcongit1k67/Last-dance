@@ -109,6 +109,32 @@ routing.SetArcCostEvaluatorOfAllVehicles(transit_cb_idx)   # gán c_ij cho hàm 
 > liên thông" được bảo đảm bởi chính cách biểu diễn `next(·)` + lan truyền ràng buộc, không cần
 > biến thứ tự.
 
+Đây là phần khác biệt cốt lõi. OR-Tools không có biến $x_{ij}$, không có $u_i$, không có cả hai họ ràng buộc trên. Nó dùng biến successor $\text{next}(i) \in V$ và đặt một ràng buộc CP toàn cục:
+
+$$
+\textsf{AllDifferent}\big(\text{next}(0), \text{next}(1), \dots, \text{next}(n-1)\big)
+$$
+
+$$
+\textsf{NoSubtour / Circuit}\big(\text{next}(\cdot)\big) = \text{true}
+$$
+
+Phát biểu toán học của ràng buộc circuit (còn gọi là Hamiltonian-circuit constraint, Caseau–Laburthe): với hàm successor $\sigma(i) = \text{next}(i)$, yêu cầu $\sigma$ là một hoán vị có đúng một quỹ đạo (single cycle) phủ toàn bộ $V$:
+
+$$
+\{i,\sigma(i),\sigma^2(i),\dots,\sigma^{n-1}(i)\} = V,\qquad \forall i \in V
+$$
+
+Tức là: xuất phát từ bất kỳ node nào, áp dụng $\sigma$ liên tiếp phải duyệt hết $n$ node trước khi quay về điểm đầu. Nếu tồn tại subtour độ dài $k < n$ thì $\sigma^k(i) = i$ với $k<n$ — vi phạm.
+
+Cách thực thi (propagation, không phải bất đẳng thức tuyến tính): solver duy trì các chuỗi đường đi (path chains) từ Start tới End. Mỗi khi gán $\text{next}(i)=j$, nó cập nhật hai đầu mút chuỗi và áp luật cấm: với một chuỗi đang nối từ đầu $h$ đến đuôi $t$ (chưa phủ hết node), cấm gán cung đóng vòng sớm
+
+$$
+\text{next}(t) \neq h \quad \text{khi chuỗi } h \rightsquigarrow t \text{ chưa chứa đủ } n \text{ node}
+$$
+
+Đây chính là cơ chế "duy trì cây/đường đi từ Start tới End" mà dòng 103 mô tả. Nó tương đương về mặt loại nghiệm với DFJ nhưng được cài bằng lan truyền ràng buộc (constraint propagation) trong CP, nên:
+
 ### 2.5. Chuẩn hóa chi phí về số nguyên
 
 OR-Tools routing solver **yêu cầu chi phí là số nguyên**. Code nhân ma trận float với
@@ -163,8 +189,11 @@ $$
 
 Sau khi có lời giải ban đầu $s_0$, solver lặp lại việc **biến đổi nhẹ lộ trình** (di chuyển sang
 "hàng xóm" $s' \in N(s)$) để giảm chi phí. Tập hàng xóm $N(s)$ được sinh bởi các **toán tử lân cận**
-(neighborhood operators). Trong OR-Tools các toán tử áp dụng cho TSP gồm (xác nhận từ
-`routing_parameters_pb2.pyi`):
+(neighborhood operators). Tập hàng xóm là **hợp** của mọi toán tử đang bật,
+$N(s)=\bigcup_{o}N_o(s)$, và mỗi bước local search chọn move tốt nhất trên toàn bộ hợp này — tức
+**dùng đồng thời cả bộ**, không phải chỉ 2-opt. Mặc định OR-Tools bật cả bộ phù hợp với TSP (các toán
+tử cho node tùy chọn / pickup-delivery không kích hoạt vì bài toán không có). Các toán tử áp dụng cho
+TSP gồm (xác nhận từ `routing_parameters_pb2.pyi`):
 
 | Toán tử | Phép biến đổi lộ trình |
 |---|---|
@@ -175,6 +204,28 @@ Sau khi có lời giải ban đầu $s_0$, solver lặp lại việc **biến đ
 | **Cross / Cross-exchange** (`use_cross`) | Trao đổi đoạn đuôi giữa 2 phần lộ trình |
 | **Lin–Kernighan** (`use_lin_kernighan`) | Chuỗi k-opt biến thiên (mạnh, kinh điển cho TSP) |
 | **TSP-opt** (`use_tsp_opt`) | Tối ưu lại trọn vẹn một đoạn con bằng giải TSP nhỏ trên DAG |
+
+### 4.0. Nguyên lý chung: mọi toán tử = "gỡ vài cung, nối vài cung"
+
+Tất cả các toán tử dưới đây đều là **move cục bộ**: chúng chỉ thay đổi một số ít cung của lộ trình
+và giữ nguyên phần còn lại. Gọi $R$ là **tập cung bị gỡ** và $A$ là **tập cung được nối thêm**.
+Vì mọi node bên trong các đoạn không đổi vẫn nối với nhau như cũ, độ thay đổi chi phí (delta) **chỉ
+phụ thuộc các cung ở hai biên**:
+
+$$
+\boxed{\;\Delta \;=\; \sum_{(i,j)\in A} c_{ij} \;-\; \sum_{(i,j)\in R} c_{ij}\;}
+$$
+
+Một move được **chấp nhận khi $\Delta < 0$** (rẻ hơn). Lưu ý hai điều kiện hợp lệ kèm theo:
+1. **Bảo toàn chu trình Hamilton** — sau khi nối lại vẫn phải là **một** vòng kín duy nhất phủ hết
+   $V$ (chính ràng buộc no-subtour ở mục 2.4). Toán tử nào đảo chiều một đoạn thì trên TSP **bất đối
+   xứng** ($c_{ij}\neq c_{ji}$) còn phải cộng thêm chênh lệch chi phí của các cung **bên trong** đoạn
+   bị đảo (xem ghi chú ở 4.1).
+2. Số cung gỡ = số cung nối, để bậc vào/ra của mỗi node vẫn bằng 1.
+
+Quy ước ký hiệu dùng chung: trên lộ trình, với một node $v$ ta gọi $p=\text{pred}(v)$ là node liền
+trước và $q=\text{succ}(v)$ là node liền sau (tức đang có $p\to v\to q$). Các chữ $a,b,c,d,\dots$ ký
+hiệu các node tại điểm chèn/cắt.
 
 ### 4.1. 2-opt — toán tử quan trọng nhất cho TSP
 
@@ -188,7 +239,118 @@ $$
 Chỉ chấp nhận khi $\Delta < 0$ (làm rẻ hơn). Lặp đến khi không còn cặp cung nào cho $\Delta<0$
 ⇒ đạt **cực tiểu địa phương 2-opt**.
 
-### 4.2. Cơ chế greedy descent
+> **Bất đối xứng (ATSP):** 2-opt đảo ngược chiều đoạn $b\dots c$, nên mọi cung bên trong đoạn cũng
+> bị **đảo chiều**. Với chi phí đối xứng ($c_{ij}=c_{ji}$) phần bên trong không đổi nên công thức
+> trên đủ dùng. Nhưng `grid.dijk` của bạn **bất đối xứng**, nên delta đầy đủ phải cộng thêm chênh
+> lệch chiều của các cung trong đoạn:
+> $$
+> \Delta = \big[c_{ac}+c_{bd}\big]-\big[c_{ab}+c_{cd}\big] \;+\; \sum_{(u,v)\,\in\, b\dots c}\big(c_{vu}-c_{uv}\big)
+> $$
+> Đây là lý do trên ATSP các toán tử **không đảo chiều** (Relocate, Or-opt, Exchange) thường rẻ hơn
+> để đánh giá so với 2-opt.
+
+### 4.2. Relocate (`use_relocate`) — dời 1 node
+
+Gỡ node $v$ ra khỏi vị trí hiện tại ($p\to v\to q$) rồi chèn vào giữa một cung $(a,b)$ ở chỗ khác
+($a\to b$ trở thành $a\to v\to b$).
+
+- **Gỡ:** $R=\{(p,v),\,(v,q),\,(a,b)\}$
+- **Nối:** $A=\{(p,q),\,(a,v),\,(v,b)\}$
+
+$$
+\Delta = \big[c_{pq}+c_{av}+c_{vb}\big] - \big[c_{pv}+c_{vq}+c_{ab}\big]
+$$
+
+Không đảo chiều đoạn nào ⇒ công thức đúng nguyên vẹn cả với chi phí bất đối xứng.
+
+### 4.3. Or-opt (`use_or_opt`) — dời một chuỗi 1–3 node
+
+Tổng quát hóa Relocate: dời cả một **chuỗi liên tiếp** $\langle v_1,\dots,v_L\rangle$ ($L\in\{1,2,3\}$)
+đang nằm giữa $p$ và $q$ ($p\to v_1\to\cdots\to v_L\to q$), chèn vào giữa cung $(a,b)$.
+
+- **Gỡ:** $R=\{(p,v_1),\,(v_L,q),\,(a,b)\}$
+- **Nối (giữ nguyên chiều chuỗi):** $A=\{(p,q),\,(a,v_1),\,(v_L,b)\}$
+
+$$
+\Delta = \big[c_{pq}+c_{a,v_1}+c_{v_L,b}\big] - \big[c_{p,v_1}+c_{v_L,q}+c_{ab}\big]
+$$
+
+Các cung **bên trong** chuỗi ($v_1\!\to\!v_2\!\to\!\cdots\!\to\!v_L$) không đổi nên không xuất hiện trong
+$\Delta$. Khi $L=1$ thì Or-opt **trùng** Relocate. (OR-Tools còn thử cả phương án chèn chuỗi **đảo
+chiều** $\langle v_L,\dots,v_1\rangle$; khi đó thêm số hạng đảo chiều như ở 4.1.)
+
+### 4.4. Exchange (`use_exchange`) — hoán đổi 2 node
+
+Tráo vị trí hai node $v$ (đang ở $p\to v\to q$) và $w$ (đang ở $r\to w\to s$), giả thiết **không kề
+nhau**. Sau move: $p\to w\to q$ và $r\to v\to s$.
+
+- **Gỡ:** $R=\{(p,v),(v,q),(r,w),(w,s)\}$
+- **Nối:** $A=\{(p,w),(w,q),(r,v),(v,s)\}$
+
+$$
+\Delta = \big[c_{pw}+c_{wq}+c_{rv}+c_{vs}\big]-\big[c_{pv}+c_{vq}+c_{rw}+c_{ws}\big]
+$$
+
+(Trường hợp $v,w$ **kề nhau**, ví dụ $q=w$, một số cung trùng nhau và phải rút gọn lại — đó là một
+case biên solver xử lý riêng.)
+
+### 4.5. Cross-exchange (`use_cross` / `use_cross_exchange`) — trao đổi 2 đoạn
+
+Cắt hai **đoạn con** rồi tráo chỗ cho nhau. Cho đoạn $S_1=\langle b\dots e\rangle$ nằm sau $a$ và
+trước $f$ ($a\to[b\dots e]\to f$), và đoạn $S_2=\langle g\dots h\rangle$ nằm sau $c$ và trước $i$
+($c\to[g\dots h]\to i$). Sau move: $a\to[g\dots h]\to f$ và $c\to[b\dots e]\to i$.
+
+- **Gỡ:** $R=\{(a,b),(e,f),(c,g),(h,i)\}$
+- **Nối:** $A=\{(a,g),(h,f),(c,b),(e,i)\}$
+
+$$
+\Delta = \big[c_{ag}+c_{hf}+c_{cb}+c_{ei}\big]-\big[c_{ab}+c_{ef}+c_{cg}+c_{hi}\big]
+$$
+
+Bên trong mỗi đoạn giữ nguyên (không đảo) nên không vào $\Delta$. Đây là toán tử "đa cung" — đụng tới
+4 cung biên cùng lúc, mạnh hơn Relocate/Exchange nhưng không gian hàng xóm lớn hơn.
+
+### 4.6. Lin–Kernighan (`use_lin_kernighan`) — k-opt độ sâu biến thiên
+
+Không cố định $k$. LK xây một **dãy trao đổi cung tuần tự**: lần lượt gỡ cung $x_1,x_2,\dots$ và nối
+cung $y_1,y_2,\dots$ xen kẽ, theo dõi **độ lợi tích lũy**
+
+$$
+G_k=\sum_{m=1}^{k}\big(c_{x_m}-c_{y_m}\big)
+$$
+
+LK tiếp tục kéo dài chuỗi chừng nào **độ lợi riêng phần dương** ($g_m=c_{x_m}-c_{y_m}$, tổng cộng
+dồn $>0$), và tại mỗi bước thử "đóng" chuỗi thành một tour hợp lệ. Move cuối cùng được chọn là độ sâu
+$k^\*$ cho độ lợi lớn nhất:
+
+$$
+k^\*=\arg\max_{k}\;G_k,\qquad \text{nhận nếu } G_{k^\*}>0\;(\Leftrightarrow \Delta=-G_{k^\*}<0)
+$$
+
+Bản chất LK = tổng quát của 2-opt ($k=2$) và 3-opt ($k=3$) với $k$ tự thích nghi ⇒ thoát được nhiều
+cực tiểu địa phương mà 2-opt một mình bị kẹt.
+
+### 4.7. TSP-opt (`use_tsp_opt`) — tối ưu lại trọn một đoạn
+
+Chọn một đoạn con với **hai đầu mút cố định** $a$ (đầu) và $z$ (cuối), tập node bên trong $U$. Toán tử
+giải **chính xác** bài toán đường Hamilton ngắn nhất đi từ $a$ qua tất cả node của $U$ tới $z$ (một TSP
+con nhỏ, cài bằng quy hoạch động trên DAG — Held–Karp):
+
+$$
+\pi^\*=\arg\min_{\pi\in\Pi(U)}\Big[c_{a,\pi_1}+\sum_{t=1}^{|U|-1}c_{\pi_t,\pi_{t+1}}+c_{\pi_{|U|},z}\Big]
+$$
+
+với $\Pi(U)$ là tập mọi hoán vị của $U$. Delta là chênh lệch giữa thứ tự tối ưu $\pi^\*$ và thứ tự hiện
+tại của đoạn:
+
+$$
+\Delta = c(\pi^\*) - c(\text{đoạn hiện tại})\;\le\;0
+$$
+
+Vì là tối ưu cục bộ **chính xác** trên đoạn, $\Delta$ luôn $\le 0$. Chỉ áp dụng cho đoạn ngắn (độ
+phức tạp Held–Karp $O(2^{|U|}|U|^2)$ tăng theo hàm mũ theo độ dài đoạn).
+
+### 4.8. Cơ chế greedy descent
 
 Bước cơ bản của local search (chính là `GREEDY_DESCENT`):
 

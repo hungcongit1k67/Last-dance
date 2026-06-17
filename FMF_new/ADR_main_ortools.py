@@ -56,16 +56,25 @@ CONFIG = {
     #         trên mọi ô supercover line mà đoạn cắt qua; cell-by-cell vẫn dùng công thức gốc.
     "supercover": True,
 
+    # --- Phép kiểm tra tầm nhìn khi làm mượt path (smooth) ---
+    # False → connectable(): xấp xỉ "dải chéo" bằng tổng tiền tố 2D (hành vi gốc).
+    # True  → connectable_bresenham(): duyệt từng ô đoạn thẳng đi qua (kiểu Theta*),
+    #         phủ gần đủ như supercover (chỉ bỏ phần nhân đôi ô ở góc) ⇒ đảm bảo path
+    #         mượt gần như không xuyên vật cản. (Đây là tham số LOS cho việc làm mượt,
+    #         độc lập với "supercover" ở trên — vốn dùng cho hàm mục tiêu risk/R.)
+    "bresenham": True,
+
     # --- Đường dẫn bản đồ ---
     # "map_path": r"E:\last_dance\LastDance\FMF_new\square400\square400.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF_new\triangle300\triangle300.txt",
     # "map_path": r"E:\last_dance\LastDance\FMF_new\test_100\test_100.txt",
-    "map_path": r"E:\last_dance\LastDance\FMF_new\mixed200\mixed200.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF_new\mixed200\mixed200.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF_new\factory400\factory400_30_10.txt",
 
     # --- Tham số OR-Tools TSP ---
-    "ntest": 1, # Số lần chạy OR-Tools (với cùng tham số) để đánh giá độ ổn định của giải pháp
+    "ntest": 3, # Số lần chạy OR-Tools (với cùng tham số) để đánh giá độ ổn định của giải pháp
     "distance_scale": 1000, # Scale ma trận chi phí từ float sang int cho OR-Tools (ví dụ: 1.0 -> 1000, sqrt(2) -> 1414)
-    "time_limit_sec": 10, # Thời gian tối đa cho mỗi lần chạy OR-Tools (giây)
+    "time_limit_sec": 5, # Thời gian tối đa cho mỗi lần chạy OR-Tools (giây)
 
     # --- Path output ---
     # True  → in/lưu path đã smooth (turning points, ~128 bước)
@@ -210,11 +219,18 @@ def evaluation_wpfmf(grid,
                     local_search_metaheuristic=None,
                     draw=True,
                     map_path=None,
-                    smooth=True):
+                    smooth=True,
+                    w1=None,
+                    w2=None,
+                    w3=None,
+                    C1=None):
     """
     Chay OR-Tools ntest lan tren grid.dijk (da duoc tinh bang WP-FMF).
     Tra ve (best_path, best_cost).
     In ra: chieu dai, phong xa, rui ro va cham, va total cost.
+
+    Pha 1 (WP-FMF build graph) duoc do thoi gian ben trong moi iteration de
+    lay mean/std thoi gian chay cua Pha 1 va cua ca thuat toan (Pha 1 + Pha 2).
     """
     _require_ortools()
 
@@ -223,20 +239,29 @@ def evaluation_wpfmf(grid,
     res_radiations = []
     res_risks = []
     res_totals = []
+    res_t_phase1 = []   # thời gian Pha 1 (WP-FMF build graph) mỗi iteration
+    res_t_phase2 = []   # thời gian Pha 2 (OR-Tools TSP) mỗi iteration
+    res_t_total  = []   # thời gian cả thuật toán (Pha 1 + Pha 2) mỗi iteration
     best_path = None
     best_cost = float("inf")
     iterations_log = []
     has_radiation = grid.radiation_map is not None
 
-    # Cần cell-by-cell để getPath/pathTotalCost cho từng iteration
-    if not smooth:
-        grid.twoPointTracing(smooth=False)
-        # twoPointTracing tính lại adj theo pathTrace mới (khi Solver_minimize=True);
-        # chạy lại dijkstra để dijk/dtra khớp pathTrace → giữ TSP cost == Total cost.
-        grid.dijkstra()
-
     for it in range(ntest):
         print(f"Iteration {it + 1}/{ntest}")
+
+        # --- Pha 1: WP-FMF -> ma trận chi phí giữa các checkpoint ---
+        t_p1 = time.time()
+        grid.buildGraphAdvanced(w1=w1, w2=w2, w3=w3, C1=C1)
+        if not smooth:
+            # Cần cell-by-cell để getPath/pathTotalCost. twoPointTracing tính lại adj
+            # theo pathTrace mới (khi Solver_minimize=True); chạy lại dijkstra để
+            # dijk/dtra khớp pathTrace → giữ TSP cost == Total cost.
+            grid.twoPointTracing(smooth=False)
+            grid.dijkstra()
+        t_phase1 = time.time() - t_p1
+
+        # --- Pha 2: OR-Tools TSP ---
         t0 = time.time()
         path, cost = solve_tsp_ortools(
             grid.dijk,
@@ -245,7 +270,8 @@ def evaluation_wpfmf(grid,
             first_solution_strategy=first_solution_strategy,
             local_search_metaheuristic=local_search_metaheuristic,
         )
-        elapsed = time.time() - t0
+        t_phase2 = time.time() - t0
+        t_total = t_phase1 + t_phase2
 
         cells_i = grid.getPath(path)
         total_i, length_i, rad_i, risk_i = grid.pathTotalCost(cells_i)
@@ -255,6 +281,9 @@ def evaluation_wpfmf(grid,
         res_radiations.append(float(rad_i) if rad_i is not None else 0.0)
         res_risks.append(float(risk_i))
         res_totals.append(float(total_i))
+        res_t_phase1.append(t_phase1)
+        res_t_phase2.append(t_phase2)
+        res_t_total.append(t_total)
         iterations_log.append({
             "iteration": it + 1,
             "cost": cost,
@@ -262,7 +291,9 @@ def evaluation_wpfmf(grid,
             "radiation":  round(float(rad_i), 6) if has_radiation else None,
             "risk":       round(float(risk_i), 6),
             "total_cost": round(float(total_i), 6),
-            "time_sec":   round(elapsed, 4),
+            "time_phase1_sec": round(t_phase1, 4),
+            "time_phase2_sec": round(t_phase2, 4),
+            "time_total_sec":  round(t_total, 4),
         })
         if cost < best_cost:
             best_cost = cost
@@ -273,13 +304,17 @@ def evaluation_wpfmf(grid,
               f"length={length_i:.4f}   "
               f"R={(rad_i if rad_i is not None else 0.0):.4f}   "
               f"risk={risk_i:.4f}   total={total_i:.4f}")
-        print(f"  --- Iteration {it + 1}: {elapsed:.3f} seconds ---")
+        print(f"  --- Iteration {it + 1}: pha1={t_phase1:.3f}s  "
+              f"pha2={t_phase2:.3f}s  tong={t_total:.3f}s ---")
 
     res_arr        = np.array(res)
     res_lengths    = np.array(res_lengths)
     res_radiations = np.array(res_radiations)
     res_risks      = np.array(res_risks)
     res_totals     = np.array(res_totals)
+    res_t_phase1   = np.array(res_t_phase1)
+    res_t_phase2   = np.array(res_t_phase2)
+    res_t_total    = np.array(res_t_total)
 
     print("\n===== Phase 2 summary =====")
     print(f"Mean weighted cost: {res_arr.mean():.4f}")
@@ -294,6 +329,11 @@ def evaluation_wpfmf(grid,
         print(f"  R(P)       : N/A  (chưa nạp radiation_map)")
     print(f"  risk(P)    : {res_risks.mean():10.4f} ± {res_risks.std():.4f}")
     print(f"  Total cost : {res_totals.mean():10.4f} ± {res_totals.std():.4f}")
+
+    print(f"\n===== Thoi gian chay  (mean ± std qua {ntest} lần chạy) =====")
+    print(f"  Pha 1 (WP-FMF)    : {res_t_phase1.mean():10.4f} ± {res_t_phase1.std():.4f} s")
+    print(f"  Pha 2 (OR-Tools)  : {res_t_phase2.mean():10.4f} ± {res_t_phase2.std():.4f} s")
+    print(f"  Cả thuật toán     : {res_t_total.mean():10.4f} ± {res_t_total.std():.4f} s")
 
     # Best path metrics (theo TSP cost)
     cells = grid.getPath(best_path)
@@ -325,6 +365,9 @@ def evaluation_wpfmf(grid,
             "C1": grid.C1, "a": grid.a, "v": grid.v,
             "safety_radius": grid.safety_radius,
             "safety_max_distance": grid.safety_max_distance,
+            "Solver_minimize": grid.Solver_minimize,
+            "supercover": grid.supercover,
+            "bresenham": grid.bresenham,
             "ntest": ntest, "distance_scale": distance_scale,
             "time_limit_sec": time_limit_sec,
             "map_size": grid.mapSize, "checkpoints": grid.npos,
@@ -335,6 +378,12 @@ def evaluation_wpfmf(grid,
                 "mean_cost": round(float(res_arr.mean()), 6),
                 "std_cost":  round(float(res_arr.std()),  6),
                 "best_cost": round(float(best_cost),      6),
+                "time_phase1": {"mean": round(float(res_t_phase1.mean()), 6),
+                                "std":  round(float(res_t_phase1.std()),  6)},
+                "time_phase2": {"mean": round(float(res_t_phase2.mean()), 6),
+                                "std":  round(float(res_t_phase2.std()),  6)},
+                "time_total":  {"mean": round(float(res_t_total.mean()),  6),
+                                "std":  round(float(res_t_total.std()),   6)},
             },
             "metrics": {
                 "length":     round(float(length),    6),
@@ -404,10 +453,10 @@ def run_wpfmf_pipeline(grid,
     """
     print(f"===== WP-FMF Pipeline (w1={w1 or grid.w1}, w2={w2 or grid.w2}, "
           f"w3={w3 or grid.w3}, C1={C1 or grid.C1}) =====")
-    print("[Phase 1] Building WP-FMF cost matrix ...")
-    timeEval(grid, w1=w1, w2=w2, w3=w3, C1=C1)
-
-    print("\n[Phase 2] OR-Tools TSP on cost matrix ...")
+    print("[Phase 1 + Phase 2] WP-FMF cost matrix + OR-Tools TSP "
+          f"({ntest} lần chạy, đo thời gian mỗi pha) ...")
+    # Pha 1 (buildGraphAdvanced) được chạy lại & đo thời gian bên trong
+    # evaluation_wpfmf để lấy mean/std cho Pha 1 và cả thuật toán.
     return evaluation_wpfmf(
         grid,
         ntest=ntest,
@@ -418,6 +467,7 @@ def run_wpfmf_pipeline(grid,
         draw=draw,
         map_path=map_path,
         smooth=smooth,
+        w1=w1, w2=w2, w3=w3, C1=C1,
     )
 
 
@@ -469,6 +519,7 @@ def main():
         safety_max_distance=CONFIG["safety_max_distance"],
         Solver_minimize=CONFIG["Solver_minimize"],
         supercover=CONFIG["supercover"],
+        bresenham=CONFIG["bresenham"],
     )
 
     map_path = CONFIG["map_path"]

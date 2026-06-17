@@ -79,6 +79,12 @@ class GridMap:
         #   (cell-by-cell) vẫn dùng công thức gốc.
         self.supercover = False
 
+        # bresenham=False: làm mượt path dùng connectable() (xấp xỉ "dải chéo" bằng
+        #   tổng tiền tố 2D, O(1)/truy vấn — hành vi gốc).
+        # bresenham=True : làm mượt path dùng connectable_bresenham() (kiểm tra tầm
+        #   nhìn CHÍNH XÁC bằng đường supercover/Bresenham, tinh thần LineOfSight Theta*).
+        self.bresenham = False
+
         # Bản đồ phóng xạ
         self.radiation_map  = None   # giá trị thô (μSv/h hoặc đơn vị tương đương)
         self.radiation_norm = None   # chuẩn hóa về [0, 1]
@@ -92,7 +98,7 @@ class GridMap:
     # =========================================================
     def config(self, w1=None, w2=None, w3=None, C1=None, a=None, v=None,
                safety_radius=None, safety_max_distance=None, Solver_minimize=None,
-               supercover=None):
+               supercover=None, bresenham=None):
         """Cấu hình tham số thuật toán.
 
         Trọng số (w1 + w2 + w3 = 1):
@@ -136,6 +142,8 @@ class GridMap:
             self.Solver_minimize = bool(Solver_minimize)
         if supercover is not None:
             self.supercover = bool(supercover)
+        if bresenham is not None:
+            self.bresenham = bool(bresenham)
 
     def setWeights(self, w1=0.7, C1=0.5):
         """Giữ lại cho tương thích ngược. Khuyến nghị dùng config() thay thế."""
@@ -290,6 +298,53 @@ class GridMap:
                 t1 = self.countBlock(x2 - dx + 1, y1, x2, y1 + dy - 1)
                 t2 = self.countBlock(x1, y2 - dy + 1, x1 + dx - 1, y2)
         return tot - t1 - t2
+
+    def connectable_bresenham(self, x1, y1, x2, y2):
+        """Kiểm tra tầm nhìn CHÍNH XÁC theo kiểu Theta* (duyệt từng ô đoạn thẳng cắt qua).
+
+        Trả về số ô vật cản mà đoạn thẳng nối tâm ô (x1,y1)->(x2,y2) đi qua
+        (0 => nhìn thẳng được).
+
+        KHÁC connectable() (xấp xỉ "dải chéo" bằng tổng tiền tố) và KHÁC đường Bresenham
+        mảnh thuần: hàm này duyệt từng bước theo từng trục (so sánh số nguyên
+        (1+2ix)·ny vs (1+2iy)·nx), nên đi qua đầy đủ các ô mà đoạn thẳng quệt vào ruột
+        (gần như supercover, chỉ bỏ phần NHÂN ĐÔI hai ô kề ở góc lưới). Nhờ đó đảm bảo
+        path mượt gần như không xuyên vật cản. Chỉ dùng phép toán số nguyên.
+
+        Khi đoạn đi đúng qua một điểm góc lưới (bước chéo), nếu CẢ HAI ô kề bên tại góc
+        đó đều là vật cản thì coi như bị chặn (không cho "lách khe" giữa hai vật cản
+        chạm góc nhau).
+        """
+        sz = self.mapSize
+
+        def is_block(r, c):
+            return 0 <= r < sz and 0 <= c < sz and self.gridMap[r][c] == 1
+
+        x0, y0 = int(x1), int(y1)
+        xe, ye = int(x2), int(y2)
+        nx = abs(xe - x0)
+        ny = abs(ye - y0)
+        sx = 1 if xe >= x0 else -1
+        sy = 1 if ye >= y0 else -1
+
+        count = 1 if is_block(x0, y0) else 0  # ô xuất phát
+        x, y = x0, y0
+        ix = iy = 0
+        while ix < nx or iy < ny:
+            # so sánh (1+2ix)*ny  vs  (1+2iy)*nx  — toàn số nguyên
+            decision = (1 + 2 * ix) * ny - (1 + 2 * iy) * nx
+            if decision == 0:          # đi đúng qua góc lưới -> bước chéo
+                if is_block(x + sx, y) and is_block(x, y + sy):
+                    count += 1         # bị chặn ở khe chéo
+                x += sx; y += sy
+                ix += 1; iy += 1
+            elif decision < 0:         # bước ngang
+                x += sx; ix += 1
+            else:                      # bước dọc
+                y += sy; iy += 1
+            if is_block(x, y):
+                count += 1
+        return count
 
     # =========================================================
     # WP-FMF bước 1: tính S(c), chuẩn hoá phóng xạ, rồi f(x)
@@ -550,13 +605,20 @@ class GridMap:
         return path
 
     def _smooth_path(self, cells):
-        """Làm mịn đường đi bằng line-of-sight check."""
+        """Làm mịn đường đi bằng line-of-sight check.
+
+        bresenham=False (mặc định): dùng connectable() — xấp xỉ "dải chéo" bằng
+          tổng tiền tố 2D (hành vi gốc).
+        bresenham=True            : dùng connectable_bresenham() — kiểm tra tầm nhìn
+          CHÍNH XÁC bằng đường supercover/Bresenham (tinh thần LineOfSight Theta*).
+        """
+        los = self.connectable_bresenham if self.bresenham else self.connectable
         if len(cells) <= 2:
             return [list(c) for c in cells]
         out = [list(cells[0])]
         anchor = cells[0]
         for i in range(1, len(cells)):
-            if self.connectable(anchor[0], anchor[1], cells[i][0], cells[i][1]) != 0:
+            if los(anchor[0], anchor[1], cells[i][0], cells[i][1]) != 0:
                 out.append(list(cells[i - 1]))
                 anchor = cells[i - 1]
         out.append(list(cells[-1]))
@@ -764,7 +826,7 @@ class GridMap:
             a, b = cells[i], cells[i + 1]
             d = math.hypot(b[0] - a[0], b[1] - a[1])
             total += (d * self._segment_avg(a, b, rad_at)
-                      * (self.a / self.v)) / 3600.0  # Chuyển μSv·m/s thành mSv·h
+                      * (self.a / self.v))  # /3600.0 để Chuyển μSv·m/s thành mSv·h
         return total
 
     def pathTotalCost(self, cells):

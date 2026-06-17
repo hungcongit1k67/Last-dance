@@ -1,0 +1,884 @@
+{
+  "model": "superposition of gamma point sources with inverse-square decay",
+  "formula": "R(x,y) = sum_k peak_k / max(distance_k, epsilon)^2",
+  "accepted_attempt": 2,
+  "sources": [
+    {
+      "row": 244,
+      "col": 240,
+      "peak_radiation": 19.216852583745247
+    },
+    {
+      "row": 358,
+      "col": 103,
+      "peak_radiation": 16.41583191280297
+    },
+    {
+      "row": 21,
+      "col": 176,
+      "peak_radiation": 13.763267427907298
+    },
+    {
+      "row": 114,
+      "col": 27,
+      "peak_radiation": 15.65513223449409
+    },
+    {
+      "row": 291,
+      "col": 250,
+      "peak_radiation": 10.355419949483174
+    },
+    {
+      "row": 240,
+      "col": 168,
+      "peak_radiation": 15.73188523472373
+    },
+    {
+      "row": 290,
+      "col": 206,
+      "peak_radiation": 19.013011489529504
+    },
+    {
+      "row": 212,
+      "col": 177,
+      "peak_radiation": 15.683582906474548
+    },
+    {
+      "row": 23,
+      "col": 216,
+      "peak_radiation": 13.92704122002019
+    },
+    {
+      "row": 25,
+      "col": 201,
+      "peak_radiation": 16.913849462848596
+    },
+    {
+      "row": 317,
+      "col": 17,
+      "peak_radiation": 18.449801887905668
+    },
+    {
+      "row": 355,
+      "col": 182,
+      "peak_radiation": 13.052211120099344
+    },
+    {
+      "row": 126,
+      "col": 107,
+      "peak_radiation": 11.987657897272367
+    },
+    {
+      "row": 91,
+      "col": 51,
+      "peak_radiation": 11.944380510155662
+    },
+    {
+      "row": 243,
+      "col": 386,
+      "peak_radiation": 14.067428423365783
+    },
+    {
+      "row": 255,
+      "col": 136,
+      "peak_radiation": 17.232337792939127
+    },
+    {
+      "row": 328,
+      "col": 171,
+      "peak_radiation": 13.708992604479368
+    },
+    {
+      "row": 336,
+      "col": 187,
+      "peak_radiation": 16.753731722705535
+    },
+    {
+      "row": 239,
+      "col": 179,
+      "peak_radiation": 12.96050721415422
+    },
+    {
+      "row": 11,
+      "col": 258,
+      "peak_radiation": 13.32996933873633
+    },
+    {
+      "row": 113,
+      "col": 365,
+      "peak_radiation": 16.080231745585085
+    },
+    {
+      "row": 157,
+      "col": 363,
+      "peak_radiation": 11.612592690128992
+    },
+    {
+      "row": 18,
+      "col": 60,
+      "peak_radiation": 12.774985408833569
+    },
+    {
+      "row": 36,
+      "col": 270,
+      "peak_radiation": 18.99389384515701
+    },
+    {
+      "row": 378,
+      "col": 250,
+      "peak_radiation": 14.273939078830155
+    },
+    {
+      "row": 212,
+      "col": 107,
+      "peak_radiation": 11.143512215576674
+    },
+    {
+      "row": 130,
+      "col": 84,
+      "peak_radiation": 13.450304426810673
+    },
+    {
+      "row": 122,
+      "col": 242,
+      "peak_radiation": 17.223169689863784
+    },
+    {
+      "row": 247,
+      "col": 141,
+      "peak_radiation": 19.830789784080018
+    },
+    {
+      "row": 117,
+      "col": 249,
+      "peak_radiation": 12.93374622132203
+    },
+    {
+      "row": 348,
+      "col": 202,
+      "peak_radiation": 14.424606447116071
+    },
+    {
+      "row": 5,
+      "col": 223,
+      "peak_radiation": 12.231817817790317
+    },
+    {
+      "row": 261,
+      "col": 114,
+      "peak_radiation": 15.220661047763166
+    },
+    {
+      "row": 83,
+      "col": 203,
+      "peak_radiation": 15.290534587185714
+    },
+    {
+      "row": 234,
+      "col": 304,
+      "peak_radiation": 15.497013954984876
+    },
+    {
+      "row": 373,
+      "col": 336,
+      "peak_radiation": 12.636226613280844
+    },
+    {
+      "row": 176,
+      "col": 164,
+      "peak_radiation": 10.007568649183847
+    },
+    {
+      "row": 124,
+      "col": 224,
+      "peak_radiation": 15.82198917342549
+    },
+    {
+      "row": 139,
+      "col": 268,
+      "peak_radiation": 10.512508266100346
+    },
+    {
+      "row": 191,
+      "col": 392,
+      "peak_radiation": 10.337067158154367
+    },
+    {
+      "row": 256,
+      "col": 4,
+      "peak_radiation": 18.695030027909237
+    },
+    {
+      "row": 261,
+      "col": 247,
+      "peak_radiation": 12.056587959797314
+    },
+    {
+      "row": 46,
+      "col": 380,
+      "peak_radiation": 14.969156302537117
+    },
+    {
+      "row": 272,
+      "col": 296,
+      "peak_radiation": 10.480093657864261
+    },
+    {
+      "row": 32,
+      "col": 39,
+      "peak_radiation": 19.518198527258605
+    },
+    {
+      "row": 196,
+      "col": 249,
+      "peak_radiation": 14.229499243343803
+    },
+    {
+      "row": 309,
+      "col": 107,
+      "peak_radiation": 15.882351511674361
+    },
+    {
+      "row": 224,
+      "col": 352,
+      "peak_radiation": 10.18768386254289
+    },
+    {
+      "row": 299,
+      "col": 317,
+      "peak_radiation": 9.699489518005375
+    },
+    {
+      "row": 171,
+      "col": 385,
+      "peak_radiation": 11.370761011915928
+    },
+    {
+      "row": 306,
+      "col": 81,
+      "peak_radiation": 15.781532342650934
+    },
+    {
+      "row": 174,
+      "col": 366,
+      "peak_radiation": 13.718965971107504
+    },
+    {
+      "row": 128,
+      "col": 31,
+      "peak_radiation": 14.832241826309389
+    },
+    {
+      "row": 255,
+      "col": 101,
+      "peak_radiation": 17.227338099246047
+    },
+    {
+      "row": 157,
+      "col": 11,
+      "peak_radiation": 10.381743603514437
+    },
+    {
+      "row": 101,
+      "col": 10,
+      "peak_radiation": 16.92966399481916
+    },
+    {
+      "row": 6,
+      "col": 175,
+      "peak_radiation": 19.512521875329398
+    },
+    {
+      "row": 207,
+      "col": 388,
+      "peak_radiation": 19.10927903786069
+    },
+    {
+      "row": 155,
+      "col": 291,
+      "peak_radiation": 10.857207744091069
+    },
+    {
+      "row": 92,
+      "col": 359,
+      "peak_radiation": 10.044036855862112
+    },
+    {
+      "row": 183,
+      "col": 37,
+      "peak_radiation": 11.10057428995539
+    },
+    {
+      "row": 230,
+      "col": 179,
+      "peak_radiation": 13.536997757492816
+    },
+    {
+      "row": 338,
+      "col": 246,
+      "peak_radiation": 13.51927787132524
+    },
+    {
+      "row": 189,
+      "col": 219,
+      "peak_radiation": 18.6330723486264
+    },
+    {
+      "row": 303,
+      "col": 25,
+      "peak_radiation": 19.854964855538775
+    },
+    {
+      "row": 326,
+      "col": 273,
+      "peak_radiation": 16.969296695943118
+    },
+    {
+      "row": 257,
+      "col": 153,
+      "peak_radiation": 17.493179173553674
+    },
+    {
+      "row": 339,
+      "col": 371,
+      "peak_radiation": 13.626881914783258
+    },
+    {
+      "row": 117,
+      "col": 382,
+      "peak_radiation": 16.04967827936426
+    },
+    {
+      "row": 316,
+      "col": 165,
+      "peak_radiation": 18.8675763393369
+    },
+    {
+      "row": 4,
+      "col": 274,
+      "peak_radiation": 18.873054581147976
+    },
+    {
+      "row": 396,
+      "col": 123,
+      "peak_radiation": 15.876106823994842
+    },
+    {
+      "row": 41,
+      "col": 266,
+      "peak_radiation": 19.894135321102624
+    },
+    {
+      "row": 270,
+      "col": 101,
+      "peak_radiation": 13.191027748010232
+    },
+    {
+      "row": 315,
+      "col": 117,
+      "peak_radiation": 14.09850157840478
+    },
+    {
+      "row": 351,
+      "col": 81,
+      "peak_radiation": 10.413219660418223
+    },
+    {
+      "row": 332,
+      "col": 132,
+      "peak_radiation": 16.41284472081967
+    },
+    {
+      "row": 394,
+      "col": 104,
+      "peak_radiation": 13.161080518467397
+    },
+    {
+      "row": 148,
+      "col": 27,
+      "peak_radiation": 10.826728221863034
+    },
+    {
+      "row": 371,
+      "col": 218,
+      "peak_radiation": 19.268066831643594
+    },
+    {
+      "row": 175,
+      "col": 377,
+      "peak_radiation": 14.725759099715246
+    },
+    {
+      "row": 246,
+      "col": 297,
+      "peak_radiation": 10.782176597187958
+    },
+    {
+      "row": 11,
+      "col": 62,
+      "peak_radiation": 19.217430691302262
+    },
+    {
+      "row": 94,
+      "col": 179,
+      "peak_radiation": 18.57175339816199
+    },
+    {
+      "row": 121,
+      "col": 12,
+      "peak_radiation": 17.69221398616549
+    },
+    {
+      "row": 73,
+      "col": 355,
+      "peak_radiation": 16.882372702502682
+    },
+    {
+      "row": 73,
+      "col": 88,
+      "peak_radiation": 14.250528624297177
+    },
+    {
+      "row": 371,
+      "col": 248,
+      "peak_radiation": 11.519854611291859
+    },
+    {
+      "row": 297,
+      "col": 53,
+      "peak_radiation": 19.852244268381494
+    },
+    {
+      "row": 202,
+      "col": 23,
+      "peak_radiation": 15.10040516612213
+    },
+    {
+      "row": 233,
+      "col": 360,
+      "peak_radiation": 19.119201299836625
+    },
+    {
+      "row": 303,
+      "col": 395,
+      "peak_radiation": 15.636731092074566
+    },
+    {
+      "row": 230,
+      "col": 108,
+      "peak_radiation": 10.489864108606158
+    },
+    {
+      "row": 283,
+      "col": 240,
+      "peak_radiation": 12.087106040562096
+    },
+    {
+      "row": 5,
+      "col": 182,
+      "peak_radiation": 19.601135083443197
+    },
+    {
+      "row": 345,
+      "col": 139,
+      "peak_radiation": 11.837307826909404
+    },
+    {
+      "row": 105,
+      "col": 277,
+      "peak_radiation": 16.84451846774621
+    },
+    {
+      "row": 11,
+      "col": 208,
+      "peak_radiation": 19.156457227373874
+    },
+    {
+      "row": 289,
+      "col": 194,
+      "peak_radiation": 18.131015023794333
+    },
+    {
+      "row": 386,
+      "col": 394,
+      "peak_radiation": 10.62798535642081
+    },
+    {
+      "row": 31,
+      "col": 271,
+      "peak_radiation": 14.672448452159578
+    },
+    {
+      "row": 361,
+      "col": 320,
+      "peak_radiation": 16.580583613573147
+    },
+    {
+      "row": 164,
+      "col": 360,
+      "peak_radiation": 15.463726929206132
+    },
+    {
+      "row": 64,
+      "col": 162,
+      "peak_radiation": 9.642425033117355
+    },
+    {
+      "row": 35,
+      "col": 72,
+      "peak_radiation": 17.539183780268406
+    },
+    {
+      "row": 262,
+      "col": 312,
+      "peak_radiation": 12.804796737173639
+    },
+    {
+      "row": 105,
+      "col": 317,
+      "peak_radiation": 18.841577058934043
+    },
+    {
+      "row": 144,
+      "col": 361,
+      "peak_radiation": 17.248886554482894
+    },
+    {
+      "row": 216,
+      "col": 93,
+      "peak_radiation": 18.24584621951056
+    },
+    {
+      "row": 29,
+      "col": 158,
+      "peak_radiation": 17.814077926244074
+    },
+    {
+      "row": 249,
+      "col": 28,
+      "peak_radiation": 9.62447948833768
+    },
+    {
+      "row": 396,
+      "col": 171,
+      "peak_radiation": 18.052732709768115
+    },
+    {
+      "row": 397,
+      "col": 40,
+      "peak_radiation": 17.635590480889064
+    },
+    {
+      "row": 161,
+      "col": 228,
+      "peak_radiation": 14.931530009322866
+    },
+    {
+      "row": 223,
+      "col": 18,
+      "peak_radiation": 14.564371003112672
+    },
+    {
+      "row": 328,
+      "col": 107,
+      "peak_radiation": 13.247025807054152
+    },
+    {
+      "row": 1,
+      "col": 21,
+      "peak_radiation": 16.49935906893716
+    },
+    {
+      "row": 193,
+      "col": 105,
+      "peak_radiation": 13.637549540832612
+    },
+    {
+      "row": 170,
+      "col": 284,
+      "peak_radiation": 19.29715079630573
+    },
+    {
+      "row": 125,
+      "col": 229,
+      "peak_radiation": 15.162680911038242
+    },
+    {
+      "row": 270,
+      "col": 67,
+      "peak_radiation": 18.66947273374371
+    },
+    {
+      "row": 209,
+      "col": 350,
+      "peak_radiation": 18.581805903254136
+    },
+    {
+      "row": 174,
+      "col": 37,
+      "peak_radiation": 9.627645860229594
+    },
+    {
+      "row": 377,
+      "col": 182,
+      "peak_radiation": 9.635185662961556
+    },
+    {
+      "row": 141,
+      "col": 396,
+      "peak_radiation": 13.17464055381728
+    },
+    {
+      "row": 337,
+      "col": 21,
+      "peak_radiation": 18.55500336361903
+    },
+    {
+      "row": 179,
+      "col": 387,
+      "peak_radiation": 13.680327238435622
+    },
+    {
+      "row": 207,
+      "col": 270,
+      "peak_radiation": 14.141401506623197
+    },
+    {
+      "row": 146,
+      "col": 158,
+      "peak_radiation": 12.484156800645014
+    },
+    {
+      "row": 272,
+      "col": 184,
+      "peak_radiation": 10.055698328900029
+    },
+    {
+      "row": 148,
+      "col": 307,
+      "peak_radiation": 13.03436303719413
+    },
+    {
+      "row": 302,
+      "col": 244,
+      "peak_radiation": 11.563992461606848
+    },
+    {
+      "row": 251,
+      "col": 301,
+      "peak_radiation": 10.322064720203075
+    },
+    {
+      "row": 21,
+      "col": 299,
+      "peak_radiation": 19.784715214416465
+    },
+    {
+      "row": 55,
+      "col": 317,
+      "peak_radiation": 10.212289246063069
+    },
+    {
+      "row": 299,
+      "col": 176,
+      "peak_radiation": 10.412108938608927
+    },
+    {
+      "row": 302,
+      "col": 85,
+      "peak_radiation": 17.80532549374348
+    },
+    {
+      "row": 289,
+      "col": 41,
+      "peak_radiation": 13.314859607742454
+    },
+    {
+      "row": 357,
+      "col": 394,
+      "peak_radiation": 12.724415806659195
+    },
+    {
+      "row": 72,
+      "col": 244,
+      "peak_radiation": 19.017960002291023
+    },
+    {
+      "row": 354,
+      "col": 100,
+      "peak_radiation": 17.213587744953436
+    },
+    {
+      "row": 243,
+      "col": 357,
+      "peak_radiation": 17.473862802979152
+    },
+    {
+      "row": 22,
+      "col": 352,
+      "peak_radiation": 15.681597360149034
+    },
+    {
+      "row": 28,
+      "col": 358,
+      "peak_radiation": 16.353473932979973
+    },
+    {
+      "row": 307,
+      "col": 150,
+      "peak_radiation": 13.58411995318534
+    },
+    {
+      "row": 117,
+      "col": 199,
+      "peak_radiation": 18.23400273906426
+    },
+    {
+      "row": 150,
+      "col": 6,
+      "peak_radiation": 9.829775484771366
+    },
+    {
+      "row": 296,
+      "col": 156,
+      "peak_radiation": 9.997432144967537
+    },
+    {
+      "row": 64,
+      "col": 19,
+      "peak_radiation": 19.03610908700395
+    },
+    {
+      "row": 217,
+      "col": 27,
+      "peak_radiation": 15.177202757787086
+    },
+    {
+      "row": 311,
+      "col": 283,
+      "peak_radiation": 16.576487766123464
+    },
+    {
+      "row": 23,
+      "col": 94,
+      "peak_radiation": 18.398195091838865
+    },
+    {
+      "row": 263,
+      "col": 303,
+      "peak_radiation": 14.65067699846648
+    },
+    {
+      "row": 373,
+      "col": 106,
+      "peak_radiation": 17.84635686258027
+    },
+    {
+      "row": 275,
+      "col": 178,
+      "peak_radiation": 16.149779744603247
+    },
+    {
+      "row": 51,
+      "col": 272,
+      "peak_radiation": 11.314158795952832
+    },
+    {
+      "row": 221,
+      "col": 362,
+      "peak_radiation": 12.158761724579648
+    },
+    {
+      "row": 357,
+      "col": 280,
+      "peak_radiation": 14.683720529006116
+    },
+    {
+      "row": 182,
+      "col": 383,
+      "peak_radiation": 12.108083958103437
+    },
+    {
+      "row": 399,
+      "col": 1,
+      "peak_radiation": 12.035903790422733
+    },
+    {
+      "row": 41,
+      "col": 313,
+      "peak_radiation": 9.642411542335044
+    },
+    {
+      "row": 274,
+      "col": 82,
+      "peak_radiation": 18.263389918524243
+    },
+    {
+      "row": 191,
+      "col": 211,
+      "peak_radiation": 10.970601471699098
+    },
+    {
+      "row": 312,
+      "col": 71,
+      "peak_radiation": 13.010514477362156
+    },
+    {
+      "row": 47,
+      "col": 256,
+      "peak_radiation": 18.723670547347865
+    },
+    {
+      "row": 132,
+      "col": 326,
+      "peak_radiation": 13.080626454138638
+    },
+    {
+      "row": 267,
+      "col": 325,
+      "peak_radiation": 18.91211024355043
+    },
+    {
+      "row": 87,
+      "col": 386,
+      "peak_radiation": 19.36318260204444
+    }
+  ],
+  "statistics": {
+    "rows": 400,
+    "cols": 400,
+    "minimum_radiation": 0.066284318115841,
+    "maximum_radiation": 20.981746943391222,
+    "mean_radiation": 0.6356693475478895,
+    "high_risk_cell_count": 1137,
+    "high_risk_ratio": 0.010151785714285714,
+    "medium_risk_cell_count": 27976,
+    "medium_risk_ratio": 0.24978571428571428,
+    "low_risk_cell_count": 82887,
+    "low_risk_ratio": 0.7400625,
+    "target_count": 30,
+    "maximum_target_radiation": 1.2657462915413464
+  },
+  "config": {
+    "obstacle_map_path": "data/maps/factory400/factory400_30.txt",
+    "output_path": "data/maps/generated_radiation_grid.txt",
+    "source_metadata_path": "data/maps/generated_radiation_sources.json",
+    "RI_max": 8.0,
+    "source_cell_ratio": 0.0015,
+    "random_seed": 42,
+    "source_peak_min_ratio": 1.2,
+    "source_peak_max_ratio": 2.5,
+    "minimum_source_distance": 5.0,
+    "minimum_target_distance": 3.0,
+    "distance_epsilon": 1.0,
+    "max_radiation_ratio": 4.0,
+    "minimum_high_risk_ratio": 0.01,
+    "maximum_high_risk_ratio": 0.15,
+    "low_risk_threshold": 0.5,
+    "minimum_low_risk_ratio": 0.4,
+    "maximum_low_risk_ratio": 0.8,
+    "max_generation_attempts": 200,
+    "allow_diagonal": true,
+    "prevent_corner_cutting": true
+  }
+}

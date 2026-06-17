@@ -1,0 +1,244 @@
+{
+  "obstacle_map_path": "data/maps/factory400/factory400_30.txt",
+  "radiation_map_path": "data/maps/factory400/radiation_grid_30.txt",
+  "desired_waypoint_count": 40,
+  "final_waypoints": [
+    [
+      55,
+      84
+    ],
+    [
+      80,
+      57
+    ],
+    [
+      100,
+      123
+    ],
+    [
+      125,
+      73
+    ],
+    [
+      144,
+      241
+    ],
+    [
+      148,
+      349
+    ],
+    [
+      151,
+      19
+    ],
+    [
+      160,
+      286
+    ],
+    [
+      162,
+      56
+    ],
+    [
+      181,
+      275
+    ],
+    [
+      184,
+      295
+    ],
+    [
+      185,
+      96
+    ],
+    [
+      199,
+      99
+    ],
+    [
+      204,
+      351
+    ],
+    [
+      215,
+      33
+    ],
+    [
+      217,
+      38
+    ],
+    [
+      232,
+      36
+    ],
+    [
+      241,
+      78
+    ],
+    [
+      251,
+      105
+    ],
+    [
+      260,
+      118
+    ],
+    [
+      264,
+      103
+    ],
+    [
+      274,
+      253
+    ],
+    [
+      289,
+      171
+    ],
+    [
+      316,
+      201
+    ],
+    [
+      326,
+      16
+    ],
+    [
+      353,
+      367
+    ],
+    [
+      355,
+      174
+    ],
+    [
+      360,
+      259
+    ],
+    [
+      370,
+      211
+    ],
+    [
+      370,
+      284
+    ],
+    [
+      0,
+      399
+    ],
+    [
+      0,
+      228
+    ],
+    [
+      399,
+      84
+    ],
+    [
+      55,
+      310
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      274,
+      399
+    ],
+    [
+      205,
+      183
+    ],
+    [
+      0,
+      145
+    ],
+    [
+      82,
+      398
+    ],
+    [
+      75,
+      200
+    ]
+  ],
+  "info": {
+    "red_threshold": 8.0,
+    "blue_threshold": 0.5,
+    "main_component": 0,
+    "main_component_size": 110863,
+    "existing_count": 30,
+    "valid_existing_count": 30,
+    "invalid_existing": [],
+    "added": [
+      [
+        0,
+        399
+      ],
+      [
+        0,
+        228
+      ],
+      [
+        399,
+        84
+      ],
+      [
+        55,
+        310
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        274,
+        399
+      ],
+      [
+        205,
+        183
+      ],
+      [
+        0,
+        145
+      ],
+      [
+        82,
+        398
+      ],
+      [
+        75,
+        200
+      ]
+    ],
+    "removed": [],
+    "final_count": 40,
+    "final_blue_count": 33,
+    "final_yellow_count": 7,
+    "yellow_cap": 8,
+    "shortfall": 0,
+    "min_pairwise_distance": 5.385164807134504
+  },
+  "config": {
+    "obstacle_map_path": "data/maps/factory400/factory400_30.txt",
+    "radiation_map_path": "data/maps/factory400/radiation_grid_30.txt",
+    "desired_waypoint_count": 40,
+    "output_map_path": "data/maps/factory400/factory400_30_40.txt",
+    "metadata_path": "data/maps/factory400/factory400_waypoints.json",
+    "RI_max": 8.0,
+    "waypoint_radiation_ratio": 1.0,
+    "low_risk_threshold": 0.5,
+    "prefer_low_risk": true,
+    "max_medium_risk_ratio": 0.2,
+    "minimum_waypoint_distance": 5.0,
+    "strict_spacing": false,
+    "border_margin": 0,
+    "removal_strategy": "spread",
+    "allow_diagonal": true,
+    "prevent_corner_cutting": true,
+    "random_seed": 42
+  }
+}

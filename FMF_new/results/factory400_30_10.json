@@ -1,0 +1,250 @@
+{
+  "map": "factory400_30_10",
+  "map_path": "E:\\last_dance\\LastDance\\FMF_new\\factory400\\factory400_30_10.txt",
+  "runs": [
+    {
+      "summary": {
+        "mean_cost": 797.58445,
+        "std_cost": 0.0,
+        "best_cost": 797.58445,
+        "time_phase1": {
+          "mean": 4.291762,
+          "std": 0.791141
+        },
+        "time_phase2": {
+          "mean": 5.004006,
+          "std": 0.002821
+        },
+        "time_total": {
+          "mean": 9.295768,
+          "std": 0.788478
+        }
+      },
+      "metrics": {
+        "length": 1401.750147,
+        "radiation": 605.667283,
+        "risk": 183.888018,
+        "total_cost": 797.566649
+      },
+      "metrics_mean": {
+        "length": {
+          "mean": 1401.750147,
+          "std": 0.0
+        },
+        "radiation": {
+          "mean": 605.667283,
+          "std": 0.0
+        },
+        "risk": {
+          "mean": 183.888018,
+          "std": 0.0
+        },
+        "total_cost": {
+          "mean": 797.566649,
+          "std": 0.0
+        }
+      },
+      "path": [
+        [
+          55,
+          84
+        ],
+        [
+          123,
+          54
+        ],
+        [
+          151,
+          19
+        ],
+        [
+          151,
+          19
+        ],
+        [
+          137,
+          98
+        ],
+        [
+          169,
+          112
+        ],
+        [
+          199,
+          99
+        ],
+        [
+          199,
+          99
+        ],
+        [
+          214,
+          99
+        ],
+        [
+          281,
+          53
+        ],
+        [
+          326,
+          16
+        ],
+        [
+          326,
+          16
+        ],
+        [
+          326,
+          34
+        ],
+        [
+          340,
+          48
+        ],
+        [
+          346,
+          51
+        ],
+        [
+          350,
+          55
+        ],
+        [
+          348,
+          123
+        ],
+        [
+          355,
+          174
+        ],
+        [
+          355,
+          174
+        ],
+        [
+          360,
+          259
+        ],
+        [
+          360,
+          259
+        ],
+        [
+          353,
+          367
+        ],
+        [
+          353,
+          367
+        ],
+        [
+          351,
+          335
+        ],
+        [
+          274,
+          253
+        ],
+        [
+          274,
+          253
+        ],
+        [
+          150,
+          316
+        ],
+        [
+          148,
+          349
+        ],
+        [
+          148,
+          349
+        ],
+        [
+          154,
+          251
+        ],
+        [
+          144,
+          241
+        ],
+        [
+          144,
+          241
+        ],
+        [
+          89,
+          182
+        ],
+        [
+          74,
+          153
+        ],
+        [
+          72,
+          106
+        ],
+        [
+          55,
+          84
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 797.5844496412378,
+          "length": 1401.750147,
+          "radiation": 605.667283,
+          "risk": 183.888018,
+          "total_cost": 797.566649,
+          "time_phase1_sec": 3.2231,
+          "time_phase2_sec": 5.008,
+          "time_total_sec": 8.2311
+        },
+        {
+          "iteration": 2,
+          "cost": 797.5844496412378,
+          "length": 1401.750147,
+          "radiation": 605.667283,
+          "risk": 183.888018,
+          "total_cost": 797.566649,
+          "time_phase1_sec": 4.539,
+          "time_phase2_sec": 5.0019,
+          "time_total_sec": 9.5409
+        },
+        {
+          "iteration": 3,
+          "cost": 797.5844496412378,
+          "length": 1401.750147,
+          "radiation": 605.667283,
+          "risk": 183.888018,
+          "total_cost": 797.566649,
+          "time_phase1_sec": 5.1131,
+          "time_phase2_sec": 5.0021,
+          "time_total_sec": 10.1153
+        }
+      ],
+      "timestamp": "2026-06-16T17:53:10",
+      "config": {
+        "w1": 0.4,
+        "w2": 0.3,
+        "w3": 0.3,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "Solver_minimize": true,
+        "supercover": true,
+        "bresenham": true,
+        "ntest": 3,
+        "distance_scale": 1000,
+        "time_limit_sec": 5,
+        "map_size": 400,
+        "checkpoints": 10,
+        "smooth": true
+      }
+    }
+  ]
+}

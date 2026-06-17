@@ -13,7 +13,7 @@ def segment_risk(grid_map: GridMap, a: GridPosition, b: GridPosition) -> float:
     Time is converted from seconds to hours using robot_velocity.
     """
     length_m = segment_length(a, b, grid_map.grid_size)
-    time_hours = (length_m / grid_map.robot_velocity) / 3600.0
+    time_hours = (length_m / grid_map.robot_velocity) # Có thể / 3600.0 để chuyển từ giây sang giờ
     avg_dose_rate = (grid_map.radiation_at(a) + grid_map.radiation_at(b)) / 2.0
     return avg_dose_rate * time_hours
 
