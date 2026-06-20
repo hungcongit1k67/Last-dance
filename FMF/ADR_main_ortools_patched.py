@@ -41,13 +41,13 @@ CONFIG = {
     # --- Bước chi phí Eikonal ---
     # False → dis dùng hằng số 2 (FMF gốc).
     # True  → dis dùng 2·f(x)², f(x)=w1+w2·R̄_norm(x)+w3·(1−S(x)).  (Eikonal có trọng số |∇T|=f)
-    "cost_step": True,
+    "cost_step": False,
 
     # --- Hàm mục tiêu của TSP solver ---
     # False → ma trận TSP = chiều dài hình học (length).
     # True  → ma trận TSP = Total cost (7a) w1·length+w2·R+w3·risk của từng đoạn
     #         → solver minimize đúng Total cost, và khi đó TSP cost == Total cost.
-    "Solver_minimize": False,
+    "Solver_minimize": True,
 
     # --- Supercover line cho hàm mục tiêu ---
     # False → risk(P) & R(P) dùng công thức gốc (trung bình 2 đầu mút mỗi đoạn).
@@ -61,7 +61,7 @@ CONFIG = {
     #"map_path": r"E:\last_dance\LastDance\FMF\square400\square400.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\triangle300\triangle300.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\mixed200\mixed200.txt",
-    "map_path": r"E:\last_dance\LastDance\FMF\factory400\factory400_30_10.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF\scenario4\scenario4_grid.txt",
 
     # --- Bộ giải TSP ---
     # "ortools" | "aco" | "ga"

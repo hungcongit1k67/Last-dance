@@ -97,6 +97,8 @@ python eval.py --config configs/scenario_custom_200x200.yaml --n 5 --independent
 
 python eval.py --config configs/factory400_30.yaml --n 5 --independent
 
+python eval.py --config configs/scenario4.yaml --n 2 --independent
+
 # Dùng config khác
 python eval.py --config configs/scenario_small.yaml --n 15
 ```

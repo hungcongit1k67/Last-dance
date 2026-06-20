@@ -1,23 +1,23 @@
 project:
   name: aco_ga_astar_mtipp_factory400_30
-  output_dir: results/factory400_30_10
+  output_dir: results/factory400_30
 
 map:
-  obstacle_file: data/maps/factory400/factory400_30_10.txt
+  obstacle_file: data/maps/factory400/factory400_30.txt
   radiation_file: data/maps/factory400/radiation_grid_30.txt
   target_file: data/targets/targets.json
   target_source: map
   grid_size: 1.0
   robot_velocity: 1.0
-  ri_max: 21.0
+  ri_max: 8.0
   allow_diagonal: true
   prevent_corner_cutting: true
 
 cost_weights:
-  omega_length: 0.4
-  omega_risk: 0.3
+  omega_length: 0.7
+  omega_risk: 0.15
   omega_energy: 0.0
-  omega_collision_risk: 0.3
+  omega_collision_risk: 0.15
   turn_angle_weight: 0.7
   turn_count_weight: 0.3
   safety_c1: 0.5

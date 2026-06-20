@@ -6,8 +6,11 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
+from src.environment.map_loader import load_grid_map
 from src.planner.mtipp_solver import solve_mtipp
-from src.utils.io_utils import load_yaml
+from src.utils.io_utils import load_yaml, save_json, save_matrix, ensure_dir
+from src.visualization.plot_path import plot_path
+from src.visualization.plot_convergence import plot_convergence
 
 
 @dataclass
@@ -24,6 +27,46 @@ class RunRecord:
     num_targets: int
     visit_order: list[str]          # target ids in the order they are visited (closed tour)
     per_target_cost: dict[str, float]  # arrival segment cost for each target id
+    result: object                  # raw solver result, kept so the best run can be saved
+    run_cfg: dict                   # config actually used for this run (resolved seed)
+
+
+def route_target_ids(result) -> list[str]:
+    return [result.targets[i].id for i in result.aco_route]
+
+
+def _save_best_run(rec: RunRecord, config: dict) -> Path:
+    """Persist the best run's full results to disk, mirroring run.py."""
+    result = rec.result
+    out_dir = Path(config.get("project", {}).get("output_dir", "results"))
+    ensure_dir(out_dir / "paths")
+    ensure_dir(out_dir / "figures")
+    ensure_dir(out_dir / "logs")
+    ensure_dir(out_dir / "cost_matrices")
+
+    grid_map = load_grid_map(rec.run_cfg)
+
+    save_matrix(result.cost_matrices.length, out_dir / "cost_matrices" / "length_matrix.txt")
+    save_matrix(result.cost_matrices.risk, out_dir / "cost_matrices" / "risk_matrix.txt")
+    save_matrix(result.cost_matrices.energy, out_dir / "cost_matrices" / "energy_matrix.txt")
+    save_matrix(result.cost_matrices.total, out_dir / "cost_matrices" / "total_cost_matrix.txt")
+
+    summary = {
+        "ga_route_index": result.ga_route,
+        "ga_cost": result.ga_cost,
+        "aco_route_index": result.aco_route,
+        "aco_route_target_ids": route_target_ids(result),
+        "aco_cost_from_matrix": result.aco_cost,
+        "full_path_components": result.full_path_components,
+        "timings": result.timings,
+        "full_path": result.full_path,
+        "targets": [{"id": t.id, "row": t.row, "col": t.col} for t in result.targets],
+    }
+    save_json(summary, out_dir / "paths" / "route_summary.json")
+    plot_path(grid_map, result.full_path, out_dir / "figures" / "path_result.png")
+    plot_convergence(result.aco_history, out_dir / "figures" / "aco_convergence.png", title="ACO-GA-A* convergence")
+    plot_convergence(result.ga_history, out_dir / "figures" / "ga_convergence.png", title="GA initial search convergence")
+    return out_dir
 
 
 def _run_once(config: dict, run_index: int, base_seed: int | None, independent: bool) -> RunRecord:
@@ -63,6 +106,8 @@ def _run_once(config: dict, run_index: int, base_seed: int | None, independent: 
         num_targets=len(targets),
         visit_order=visit_order,
         per_target_cost=per_target_cost,
+        result=result,
+        run_cfg=run_cfg,
     )
 
 
@@ -178,6 +223,18 @@ def main() -> None:
         vals = [r.per_target_cost[tid] for r in records if tid in r.per_target_cost]
         m, s = _mean_std(vals)
         print(f"    {tid:<10s}{m:>14.6f}{s:>14.6f}{len(vals):>6d}")
+    print("=" * 70)
+
+    # ---- Save the best run (lowest total cost) to results, like run.py ----
+    best_index = min(range(len(records)), key=lambda i: records[i].total_cost)
+    best = records[best_index]
+    out_dir = _save_best_run(best, config)
+
+    print()
+    print(f"  Best run                   : #{best_index + 1} (total_cost = {best.total_cost:.6f})")
+    print("    visit order              :", " -> ".join(best.visit_order))
+    print("    saved summary to         :", out_dir / "paths" / "route_summary.json")
+    print("    saved path figure to     :", out_dir / "figures" / "path_result.png")
     print("=" * 70)
 
 

@@ -1,0 +1,420 @@
+{
+  "map": "scenario4_grid",
+  "map_path": "E:\\last_dance\\LastDance\\FMF\\scenario4\\scenario4_grid.txt",
+  "runs": [
+    {
+      "summary": {
+        "tsp_cost": {
+          "mean": 186.065538,
+          "std": 0.870049,
+          "best": 185.214829
+        },
+        "length": {
+          "mean": 181.396916,
+          "std": 2.810543,
+          "best": 186.140412
+        },
+        "radiation": {
+          "mean": 306.743657,
+          "std": 5.288831,
+          "best": 296.165995
+        },
+        "risk": {
+          "mean": 71.951779,
+          "std": 0.876319,
+          "best": 73.372197
+        },
+        "total_cost": {
+          "mean": 186.167397,
+          "std": 0.868242,
+          "best": 185.317623
+        },
+        "time_phase1": {
+          "mean": 0.103123,
+          "std": 0.005477
+        },
+        "time_phase2": {
+          "mean": 0.51946,
+          "std": 0.017939
+        },
+        "time_total": {
+          "mean": 0.622583,
+          "std": 0.016863
+        }
+      },
+      "best_metrics": {
+        "length": 186.140412,
+        "radiation": 296.165995,
+        "risk": 73.372197,
+        "total_cost": 185.317623
+      },
+      "path": [
+        [
+          11,
+          20
+        ],
+        [
+          19,
+          23
+        ],
+        [
+          19,
+          23
+        ],
+        [
+          26,
+          24
+        ],
+        [
+          26,
+          27
+        ],
+        [
+          26,
+          27
+        ],
+        [
+          26,
+          24
+        ],
+        [
+          25,
+          17
+        ],
+        [
+          25,
+          17
+        ],
+        [
+          25,
+          15
+        ],
+        [
+          22,
+          11
+        ],
+        [
+          22,
+          11
+        ],
+        [
+          19,
+          6
+        ],
+        [
+          18,
+          6
+        ],
+        [
+          18,
+          6
+        ],
+        [
+          12,
+          2
+        ],
+        [
+          12,
+          2
+        ],
+        [
+          25,
+          3
+        ],
+        [
+          25,
+          3
+        ],
+        [
+          31,
+          5
+        ],
+        [
+          31,
+          5
+        ],
+        [
+          32,
+          5
+        ],
+        [
+          32,
+          9
+        ],
+        [
+          30,
+          13
+        ],
+        [
+          30,
+          13
+        ],
+        [
+          32,
+          20
+        ],
+        [
+          32,
+          21
+        ],
+        [
+          32,
+          21
+        ],
+        [
+          33,
+          26
+        ],
+        [
+          33,
+          32
+        ],
+        [
+          33,
+          32
+        ],
+        [
+          26,
+          37
+        ],
+        [
+          24,
+          37
+        ],
+        [
+          24,
+          37
+        ],
+        [
+          23,
+          37
+        ],
+        [
+          20,
+          31
+        ],
+        [
+          20,
+          31
+        ],
+        [
+          17,
+          33
+        ],
+        [
+          13,
+          33
+        ],
+        [
+          13,
+          33
+        ],
+        [
+          6,
+          36
+        ],
+        [
+          6,
+          36
+        ],
+        [
+          2,
+          27
+        ],
+        [
+          2,
+          27
+        ],
+        [
+          4,
+          20
+        ],
+        [
+          4,
+          20
+        ],
+        [
+          5,
+          20
+        ],
+        [
+          7,
+          17
+        ],
+        [
+          13,
+          16
+        ],
+        [
+          13,
+          16
+        ],
+        [
+          7,
+          8
+        ],
+        [
+          5,
+          8
+        ],
+        [
+          5,
+          8
+        ],
+        [
+          7,
+          8
+        ],
+        [
+          11,
+          17
+        ],
+        [
+          11,
+          20
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 185.21482861681903,
+          "length": 186.140412,
+          "radiation": 296.165995,
+          "risk": 73.372197,
+          "total_cost": 185.317623,
+          "time_phase1_sec": 0.0993,
+          "time_phase2_sec": 0.5644,
+          "time_total_sec": 0.6637
+        },
+        {
+          "iteration": 2,
+          "cost": 185.21482861681903,
+          "length": 186.140412,
+          "radiation": 296.165995,
+          "risk": 73.372197,
+          "total_cost": 185.317623,
+          "time_phase1_sec": 0.0994,
+          "time_phase2_sec": 0.5061,
+          "time_total_sec": 0.6055
+        },
+        {
+          "iteration": 3,
+          "cost": 185.788292209707,
+          "length": 179.237654,
+          "radiation": 309.388112,
+          "risk": 71.265302,
+          "total_cost": 185.891086,
+          "time_phase1_sec": 0.1015,
+          "time_phase2_sec": 0.5193,
+          "time_total_sec": 0.6207
+        },
+        {
+          "iteration": 4,
+          "cost": 185.788292209707,
+          "length": 179.237654,
+          "radiation": 309.388112,
+          "risk": 71.265302,
+          "total_cost": 185.891086,
+          "time_phase1_sec": 0.1156,
+          "time_phase2_sec": 0.511,
+          "time_total_sec": 0.6266
+        },
+        {
+          "iteration": 5,
+          "cost": 187.74798455514522,
+          "length": 183.131206,
+          "radiation": 309.387953,
+          "risk": 72.590792,
+          "total_cost": 187.846106,
+          "time_phase1_sec": 0.1057,
+          "time_phase2_sec": 0.5114,
+          "time_total_sec": 0.6171
+        },
+        {
+          "iteration": 6,
+          "cost": 185.788292209707,
+          "length": 179.237654,
+          "radiation": 309.388112,
+          "risk": 71.265302,
+          "total_cost": 185.891086,
+          "time_phase1_sec": 0.1078,
+          "time_phase2_sec": 0.5098,
+          "time_total_sec": 0.6176
+        },
+        {
+          "iteration": 7,
+          "cost": 187.74798455514522,
+          "length": 183.131206,
+          "radiation": 309.387953,
+          "risk": 72.590792,
+          "total_cost": 187.846106,
+          "time_phase1_sec": 0.1069,
+          "time_phase2_sec": 0.5104,
+          "time_total_sec": 0.6173
+        },
+        {
+          "iteration": 8,
+          "cost": 185.788292209707,
+          "length": 179.237654,
+          "radiation": 309.388112,
+          "risk": 71.265302,
+          "total_cost": 185.891086,
+          "time_phase1_sec": 0.0988,
+          "time_phase2_sec": 0.542,
+          "time_total_sec": 0.6409
+        },
+        {
+          "iteration": 9,
+          "cost": 185.788292209707,
+          "length": 179.237654,
+          "radiation": 309.388112,
+          "risk": 71.265302,
+          "total_cost": 185.891086,
+          "time_phase1_sec": 0.0992,
+          "time_phase2_sec": 0.507,
+          "time_total_sec": 0.6062
+        },
+        {
+          "iteration": 10,
+          "cost": 185.788292209707,
+          "length": 179.237654,
+          "radiation": 309.388112,
+          "risk": 71.265302,
+          "total_cost": 185.891086,
+          "time_phase1_sec": 0.0971,
+          "time_phase2_sec": 0.5132,
+          "time_total_sec": 0.6103
+        }
+      ],
+      "timestamp": "2026-06-21T00:08:11",
+      "config": {
+        "w1": 0.4,
+        "w2": 0.3,
+        "w3": 0.3,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "cost_step": false,
+        "Solver_minimize": true,
+        "tsp": "aco",
+        "ntest": 10,
+        "distance_scale": 1000,
+        "time_limit_sec": 5,
+        "aco_ant_count": 20,
+        "aco_generations": 100,
+        "aco_alpha": 1.0,
+        "aco_beta": 5.0,
+        "aco_rho": 0.5,
+        "aco_q": 10,
+        "aco_strategy": 0,
+        "ga_population": 300,
+        "ga_generations": 300,
+        "map_size": 40,
+        "checkpoints": 20,
+        "smooth": true
+      }
+    }
+  ]
+}

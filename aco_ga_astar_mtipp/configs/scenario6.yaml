@@ -1,6 +1,11 @@
+# Scenario 6 - Zhang et al. (2025), 50x50 m, 20 sources (equal intensity),
+# dense obstacles, 40 targets.
+# Algorithm parameters: Table 7 (ACO-GA-A*, scenarios 5-7 row).
+# Cost weights (w1,w2,w3): Table 8 (scenario 6 reliability run).
 project:
   name: aco_ga_astar_mtipp_scenario6
   output_dir: results/scenario6
+
 map:
   obstacle_file: data/scenario6/scenario6_grid.txt
   radiation_file: data/scenario6/radiation_grid.txt
@@ -11,35 +16,40 @@ map:
   ri_max: 8.0
   allow_diagonal: true
   prevent_corner_cutting: true
+
 cost_weights:
-  omega_length: 0.5
-  omega_risk: 0.0
-  omega_energy: 0.0
-  omega_collision_risk: 0.5
-  turn_angle_weight: 0.7
-  turn_count_weight: 0.3
-  safety_c1: 0.5
+  omega_length: 1.0          # w1 (Table 8, scenario 6)
+  omega_risk: 4.0            # w2
+  omega_energy: 2.0          # w3
+  omega_collision_risk: 0.0  # not in paper: high-risk is a hard constraint (astar.high_risk_avoidance)
+  turn_angle_weight: 0.01    # e1  (paper sensitivity default; Eq.9 states e1+e2=1)
+  turn_count_weight: 0.09    # e2
+  safety_c1: 0.5             # project-only (unused while omega_collision_risk = 0)
   safety_radius: 5.0
   safety_max_distance: 7.0
+
 astar:
-  high_risk_avoidance: true
-GA:
-  population_size: 120
-  max_generation: 220
-  crossover_rate: 0.9
-  mutation_rate: 0.06
-  elite_size: 3
-  gap: 0.9
-ACO:
-  num_ants: 70
-  max_iteration: 260
-  alpha: 1.0
-  beta: 5.0
-  rho: 0.12
-  q: 100.0
-  q0: 0.85
-  initial_pheromone: 0.5
-  ga_pheromone_bonus: 0.6
-  min_pheromone: 1.0e-06
-  max_pheromone: 12.0
+  high_risk_avoidance: true  # Section 5.2.2 high-risk area avoidance strategy
+
+GA:                          # Table 7, scenarios 5-7
+  population_size: 200       # np
+  max_generation: 500        # Gmax
+  crossover_rate: 0.9        # pc
+  mutation_rate: 0.05        # pm
+  gap: 0.9                   # gap
+  elite_size: 3              # project-only (not specified in paper)
+
+ACO:                         # Table 7, scenarios 5-7
+  num_ants: 200              # Nmax
+  max_iteration: 500         # Imax
+  alpha: 1.0                 # alpha
+  beta: 5.0                  # beta
+  rho: 0.1                   # rho
+  q: 1.0                     # Q (from sensitivity study; not given in Table 7)
+  q0: 0.85                   # pseudo-random q0 (value not given in paper)
+  initial_pheromone: 0.5     # tau0
+  ga_pheromone_bonus: 0.5    # C of Eq.10 (0.5 <= c <= 1; exact value not fixed in paper)
+  min_pheromone: 1.0e-06     # project-only
+  max_pheromone: 12.0        # project-only
+
 random_seed: 42

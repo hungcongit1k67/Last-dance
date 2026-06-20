@@ -1108,6 +1108,1212 @@
         "checkpoints": 5,
         "smooth": true
       }
+    },
+    {
+      "summary": {
+        "tsp_cost": {
+          "mean": 1053.282482,
+          "std": 0.0,
+          "best": 1053.282482
+        },
+        "length": {
+          "mean": 1053.282482,
+          "std": 0.0,
+          "best": 1053.282482
+        },
+        "radiation": {
+          "mean": 724.929554,
+          "std": 4.987709,
+          "best": 728.194776
+        },
+        "risk": {
+          "mean": 208.261524,
+          "std": 0.835095,
+          "best": 207.714826
+        },
+        "total_cost": {
+          "mean": 759.93901,
+          "std": 1.038153,
+          "best": 760.618641
+        },
+        "time_phase1": {
+          "mean": 12.495189,
+          "std": 2.654818
+        },
+        "time_phase2": {
+          "mean": 0.060589,
+          "std": 0.016928
+        },
+        "time_total": {
+          "mean": 12.555778,
+          "std": 2.669763
+        }
+      },
+      "best_metrics": {
+        "length": 1053.282482,
+        "radiation": 728.194776,
+        "risk": 207.714826,
+        "total_cost": 760.618641
+      },
+      "path": [
+        [
+          199,
+          99
+        ],
+        [
+          232,
+          88
+        ],
+        [
+          288,
+          51
+        ],
+        [
+          326,
+          16
+        ],
+        [
+          326,
+          16
+        ],
+        [
+          309,
+          53
+        ],
+        [
+          315,
+          105
+        ],
+        [
+          332,
+          119
+        ],
+        [
+          352,
+          170
+        ],
+        [
+          355,
+          174
+        ],
+        [
+          355,
+          174
+        ],
+        [
+          350,
+          239
+        ],
+        [
+          334,
+          258
+        ],
+        [
+          332,
+          309
+        ],
+        [
+          341,
+          321
+        ],
+        [
+          346,
+          328
+        ],
+        [
+          353,
+          367
+        ],
+        [
+          353,
+          367
+        ],
+        [
+          330,
+          359
+        ],
+        [
+          311,
+          359
+        ],
+        [
+          289,
+          360
+        ],
+        [
+          157,
+          357
+        ],
+        [
+          148,
+          349
+        ],
+        [
+          148,
+          349
+        ],
+        [
+          155,
+          317
+        ],
+        [
+          156,
+          314
+        ],
+        [
+          157,
+          313
+        ],
+        [
+          158,
+          312
+        ],
+        [
+          241,
+          260
+        ],
+        [
+          241,
+          187
+        ],
+        [
+          240,
+          186
+        ],
+        [
+          236,
+          153
+        ],
+        [
+          226,
+          127
+        ],
+        [
+          223,
+          124
+        ],
+        [
+          199,
+          99
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 1053.2824822066882,
+          "length": 1053.282482,
+          "radiation": 728.194776,
+          "risk": 207.714826,
+          "total_cost": 760.618641,
+          "time_phase1_sec": 12.675,
+          "time_phase2_sec": 0.0672,
+          "time_total_sec": 12.7422
+        },
+        {
+          "iteration": 2,
+          "cost": 1053.2824822066882,
+          "length": 1053.282482,
+          "radiation": 728.194776,
+          "risk": 207.714826,
+          "total_cost": 760.618641,
+          "time_phase1_sec": 14.5987,
+          "time_phase2_sec": 0.0773,
+          "time_total_sec": 14.676
+        },
+        {
+          "iteration": 3,
+          "cost": 1053.2824822066882,
+          "length": 1053.282482,
+          "radiation": 717.310702,
+          "risk": 209.537153,
+          "total_cost": 758.353205,
+          "time_phase1_sec": 14.5263,
+          "time_phase2_sec": 0.0604,
+          "time_total_sec": 14.5868
+        },
+        {
+          "iteration": 4,
+          "cost": 1053.2824822066882,
+          "length": 1053.282482,
+          "radiation": 717.310702,
+          "risk": 209.537153,
+          "total_cost": 758.353205,
+          "time_phase1_sec": 14.4897,
+          "time_phase2_sec": 0.0637,
+          "time_total_sec": 14.5533
+        },
+        {
+          "iteration": 5,
+          "cost": 1053.2824822066882,
+          "length": 1053.282482,
+          "radiation": 728.194776,
+          "risk": 207.714826,
+          "total_cost": 760.618641,
+          "time_phase1_sec": 14.373,
+          "time_phase2_sec": 0.0888,
+          "time_total_sec": 14.4618
+        },
+        {
+          "iteration": 6,
+          "cost": 1053.2824822066882,
+          "length": 1053.282482,
+          "radiation": 728.194776,
+          "risk": 207.714826,
+          "total_cost": 760.618641,
+          "time_phase1_sec": 14.4735,
+          "time_phase2_sec": 0.0672,
+          "time_total_sec": 14.5408
+        },
+        {
+          "iteration": 7,
+          "cost": 1053.2824822066882,
+          "length": 1053.282482,
+          "radiation": 728.194776,
+          "risk": 207.714826,
+          "total_cost": 760.618641,
+          "time_phase1_sec": 14.1502,
+          "time_phase2_sec": 0.0693,
+          "time_total_sec": 14.2194
+        },
+        {
+          "iteration": 8,
+          "cost": 1053.2824822066882,
+          "length": 1053.282482,
+          "radiation": 728.194776,
+          "risk": 207.714826,
+          "total_cost": 760.618641,
+          "time_phase1_sec": 9.4331,
+          "time_phase2_sec": 0.0368,
+          "time_total_sec": 9.4699
+        },
+        {
+          "iteration": 9,
+          "cost": 1053.2824822066882,
+          "length": 1053.282482,
+          "radiation": 717.310702,
+          "risk": 209.537153,
+          "total_cost": 758.353205,
+          "time_phase1_sec": 8.0352,
+          "time_phase2_sec": 0.037,
+          "time_total_sec": 8.0722
+        },
+        {
+          "iteration": 10,
+          "cost": 1053.2824822066882,
+          "length": 1053.282482,
+          "radiation": 728.194776,
+          "risk": 207.714826,
+          "total_cost": 760.618641,
+          "time_phase1_sec": 8.1971,
+          "time_phase2_sec": 0.0383,
+          "time_total_sec": 8.2354
+        }
+      ],
+      "timestamp": "2026-06-18T09:50:02",
+      "config": {
+        "w1": 0.5,
+        "w2": 0.25,
+        "w3": 0.25,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "cost_step": true,
+        "Solver_minimize": false,
+        "tsp": "aco",
+        "ntest": 10,
+        "distance_scale": 1000,
+        "time_limit_sec": 5,
+        "aco_ant_count": 20,
+        "aco_generations": 100,
+        "aco_alpha": 1.0,
+        "aco_beta": 5.0,
+        "aco_rho": 0.5,
+        "aco_q": 10,
+        "aco_strategy": 0,
+        "ga_population": 300,
+        "ga_generations": 300,
+        "map_size": 400,
+        "checkpoints": 5,
+        "smooth": true
+      }
+    },
+    {
+      "summary": {
+        "tsp_cost": {
+          "mean": 840.284524,
+          "std": 0.0,
+          "best": 840.284524
+        },
+        "length": {
+          "mean": 1026.66987,
+          "std": 0.0,
+          "best": 1026.66987
+        },
+        "radiation": {
+          "mean": 568.791076,
+          "std": 0.0,
+          "best": 568.791076
+        },
+        "risk": {
+          "mean": 245.769632,
+          "std": 0.0,
+          "best": 245.769632
+        },
+        "total_cost": {
+          "mean": 840.853015,
+          "std": 0.0,
+          "best": 840.853015
+        },
+        "time_phase1": {
+          "mean": 6.874715,
+          "std": 0.09985
+        },
+        "time_phase2": {
+          "mean": 0.037054,
+          "std": 0.001502
+        },
+        "time_total": {
+          "mean": 6.911769,
+          "std": 0.099553
+        }
+      },
+      "best_metrics": {
+        "length": 1026.66987,
+        "radiation": 568.791076,
+        "risk": 245.769632,
+        "total_cost": 840.853015
+      },
+      "path": [
+        [
+          199,
+          99
+        ],
+        [
+          239,
+          91
+        ],
+        [
+          288,
+          48
+        ],
+        [
+          326,
+          16
+        ],
+        [
+          326,
+          16
+        ],
+        [
+          339,
+          48
+        ],
+        [
+          349,
+          53
+        ],
+        [
+          352,
+          156
+        ],
+        [
+          355,
+          174
+        ],
+        [
+          355,
+          174
+        ],
+        [
+          353,
+          367
+        ],
+        [
+          353,
+          367
+        ],
+        [
+          330,
+          360
+        ],
+        [
+          252,
+          359
+        ],
+        [
+          179,
+          357
+        ],
+        [
+          177,
+          356
+        ],
+        [
+          174,
+          355
+        ],
+        [
+          172,
+          354
+        ],
+        [
+          170,
+          353
+        ],
+        [
+          168,
+          352
+        ],
+        [
+          167,
+          351
+        ],
+        [
+          166,
+          350
+        ],
+        [
+          148,
+          349
+        ],
+        [
+          148,
+          349
+        ],
+        [
+          151,
+          305
+        ],
+        [
+          151,
+          270
+        ],
+        [
+          146,
+          232
+        ],
+        [
+          135,
+          221
+        ],
+        [
+          132,
+          218
+        ],
+        [
+          131,
+          217
+        ],
+        [
+          130,
+          216
+        ],
+        [
+          129,
+          215
+        ],
+        [
+          128,
+          214
+        ],
+        [
+          127,
+          213
+        ],
+        [
+          126,
+          212
+        ],
+        [
+          125,
+          211
+        ],
+        [
+          123,
+          209
+        ],
+        [
+          120,
+          205
+        ],
+        [
+          120,
+          185
+        ],
+        [
+          121,
+          182
+        ],
+        [
+          122,
+          179
+        ],
+        [
+          123,
+          178
+        ],
+        [
+          124,
+          176
+        ],
+        [
+          125,
+          174
+        ],
+        [
+          126,
+          173
+        ],
+        [
+          127,
+          172
+        ],
+        [
+          128,
+          171
+        ],
+        [
+          129,
+          170
+        ],
+        [
+          130,
+          169
+        ],
+        [
+          132,
+          167
+        ],
+        [
+          133,
+          166
+        ],
+        [
+          138,
+          163
+        ],
+        [
+          152,
+          121
+        ],
+        [
+          168,
+          107
+        ],
+        [
+          172,
+          106
+        ],
+        [
+          174,
+          105
+        ],
+        [
+          176,
+          104
+        ],
+        [
+          178,
+          103
+        ],
+        [
+          179,
+          102
+        ],
+        [
+          180,
+          101
+        ],
+        [
+          181,
+          100
+        ],
+        [
+          199,
+          99
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 840.2845239281045,
+          "length": 1026.66987,
+          "radiation": 568.791076,
+          "risk": 245.769632,
+          "total_cost": 840.853015,
+          "time_phase1_sec": 6.7976,
+          "time_phase2_sec": 0.0352,
+          "time_total_sec": 6.8328
+        },
+        {
+          "iteration": 2,
+          "cost": 840.2845239281045,
+          "length": 1026.66987,
+          "radiation": 568.791076,
+          "risk": 245.769632,
+          "total_cost": 840.853015,
+          "time_phase1_sec": 6.7828,
+          "time_phase2_sec": 0.0372,
+          "time_total_sec": 6.8201
+        },
+        {
+          "iteration": 3,
+          "cost": 840.2845239281045,
+          "length": 1026.66987,
+          "radiation": 568.791076,
+          "risk": 245.769632,
+          "total_cost": 840.853015,
+          "time_phase1_sec": 6.7752,
+          "time_phase2_sec": 0.0387,
+          "time_total_sec": 6.8139
+        },
+        {
+          "iteration": 4,
+          "cost": 840.2845239281045,
+          "length": 1026.66987,
+          "radiation": 568.791076,
+          "risk": 245.769632,
+          "total_cost": 840.853015,
+          "time_phase1_sec": 6.8364,
+          "time_phase2_sec": 0.0362,
+          "time_total_sec": 6.8726
+        },
+        {
+          "iteration": 5,
+          "cost": 840.2845239281045,
+          "length": 1026.66987,
+          "radiation": 568.791076,
+          "risk": 245.769632,
+          "total_cost": 840.853015,
+          "time_phase1_sec": 7.1155,
+          "time_phase2_sec": 0.0368,
+          "time_total_sec": 7.1522
+        },
+        {
+          "iteration": 6,
+          "cost": 840.2845239281045,
+          "length": 1026.66987,
+          "radiation": 568.791076,
+          "risk": 245.769632,
+          "total_cost": 840.853015,
+          "time_phase1_sec": 6.9046,
+          "time_phase2_sec": 0.0387,
+          "time_total_sec": 6.9433
+        },
+        {
+          "iteration": 7,
+          "cost": 840.2845239281045,
+          "length": 1026.66987,
+          "radiation": 568.791076,
+          "risk": 245.769632,
+          "total_cost": 840.853015,
+          "time_phase1_sec": 6.843,
+          "time_phase2_sec": 0.0397,
+          "time_total_sec": 6.8826
+        },
+        {
+          "iteration": 8,
+          "cost": 840.2845239281045,
+          "length": 1026.66987,
+          "radiation": 568.791076,
+          "risk": 245.769632,
+          "total_cost": 840.853015,
+          "time_phase1_sec": 6.9887,
+          "time_phase2_sec": 0.035,
+          "time_total_sec": 7.0238
+        },
+        {
+          "iteration": 9,
+          "cost": 840.2845239281045,
+          "length": 1026.66987,
+          "radiation": 568.791076,
+          "risk": 245.769632,
+          "total_cost": 840.853015,
+          "time_phase1_sec": 6.8524,
+          "time_phase2_sec": 0.0373,
+          "time_total_sec": 6.8896
+        },
+        {
+          "iteration": 10,
+          "cost": 840.2845239281045,
+          "length": 1026.66987,
+          "radiation": 568.791076,
+          "risk": 245.769632,
+          "total_cost": 840.853015,
+          "time_phase1_sec": 6.851,
+          "time_phase2_sec": 0.0358,
+          "time_total_sec": 6.8868
+        }
+      ],
+      "timestamp": "2026-06-19T13:38:33",
+      "config": {
+        "w1": 0.7,
+        "w2": 0.15,
+        "w3": 0.15,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "cost_step": false,
+        "Solver_minimize": true,
+        "tsp": "aco",
+        "ntest": 10,
+        "distance_scale": 1000,
+        "time_limit_sec": 5,
+        "aco_ant_count": 20,
+        "aco_generations": 100,
+        "aco_alpha": 1.0,
+        "aco_beta": 5.0,
+        "aco_rho": 0.5,
+        "aco_q": 10,
+        "aco_strategy": 0,
+        "ga_population": 300,
+        "ga_generations": 300,
+        "map_size": 400,
+        "checkpoints": 5,
+        "smooth": true
+      }
+    },
+    {
+      "summary": {
+        "tsp_cost": {
+          "mean": 820.496787,
+          "std": 0.0,
+          "best": 820.496787
+        },
+        "length": {
+          "mean": 1026.029374,
+          "std": 0.0,
+          "best": 1026.029374
+        },
+        "radiation": {
+          "mean": 383.524824,
+          "std": 0.0,
+          "best": 383.524824
+        },
+        "risk": {
+          "mean": 298.316676,
+          "std": 0.0,
+          "best": 298.316676
+        },
+        "total_cost": {
+          "mean": 820.496787,
+          "std": 0.0,
+          "best": 820.496787
+        },
+        "time_phase1": {
+          "mean": 11.259775,
+          "std": 0.956451
+        },
+        "time_phase2": {
+          "mean": 0.061095,
+          "std": 0.003251
+        },
+        "time_total": {
+          "mean": 11.32087,
+          "std": 0.957954
+        }
+      },
+      "best_metrics": {
+        "length": 1026.029374,
+        "radiation": 383.524824,
+        "risk": 298.316676,
+        "total_cost": 820.496787
+      },
+      "path": [
+        [
+          199,
+          99
+        ],
+        [
+          242,
+          88
+        ],
+        [
+          288,
+          48
+        ],
+        [
+          326,
+          16
+        ],
+        [
+          326,
+          16
+        ],
+        [
+          339,
+          48
+        ],
+        [
+          349,
+          53
+        ],
+        [
+          352,
+          156
+        ],
+        [
+          355,
+          174
+        ],
+        [
+          355,
+          174
+        ],
+        [
+          353,
+          367
+        ],
+        [
+          353,
+          367
+        ],
+        [
+          330,
+          360
+        ],
+        [
+          252,
+          359
+        ],
+        [
+          179,
+          357
+        ],
+        [
+          177,
+          356
+        ],
+        [
+          174,
+          355
+        ],
+        [
+          172,
+          354
+        ],
+        [
+          170,
+          353
+        ],
+        [
+          168,
+          352
+        ],
+        [
+          167,
+          351
+        ],
+        [
+          166,
+          350
+        ],
+        [
+          148,
+          349
+        ],
+        [
+          148,
+          349
+        ],
+        [
+          151,
+          305
+        ],
+        [
+          151,
+          270
+        ],
+        [
+          146,
+          232
+        ],
+        [
+          135,
+          221
+        ],
+        [
+          132,
+          218
+        ],
+        [
+          131,
+          217
+        ],
+        [
+          130,
+          216
+        ],
+        [
+          129,
+          215
+        ],
+        [
+          128,
+          214
+        ],
+        [
+          127,
+          213
+        ],
+        [
+          126,
+          212
+        ],
+        [
+          125,
+          211
+        ],
+        [
+          123,
+          209
+        ],
+        [
+          120,
+          205
+        ],
+        [
+          120,
+          185
+        ],
+        [
+          121,
+          182
+        ],
+        [
+          122,
+          179
+        ],
+        [
+          123,
+          178
+        ],
+        [
+          124,
+          176
+        ],
+        [
+          125,
+          174
+        ],
+        [
+          126,
+          173
+        ],
+        [
+          127,
+          172
+        ],
+        [
+          128,
+          171
+        ],
+        [
+          129,
+          170
+        ],
+        [
+          130,
+          169
+        ],
+        [
+          132,
+          167
+        ],
+        [
+          133,
+          166
+        ],
+        [
+          138,
+          163
+        ],
+        [
+          152,
+          121
+        ],
+        [
+          168,
+          107
+        ],
+        [
+          172,
+          106
+        ],
+        [
+          174,
+          105
+        ],
+        [
+          176,
+          104
+        ],
+        [
+          178,
+          103
+        ],
+        [
+          179,
+          102
+        ],
+        [
+          180,
+          101
+        ],
+        [
+          181,
+          100
+        ],
+        [
+          199,
+          99
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 820.496787098152,
+          "length": 1026.029374,
+          "radiation": 383.524824,
+          "risk": 298.316676,
+          "total_cost": 820.496787,
+          "time_phase1_sec": 9.26,
+          "time_phase2_sec": 0.0575,
+          "time_total_sec": 9.3175
+        },
+        {
+          "iteration": 2,
+          "cost": 820.496787098152,
+          "length": 1026.029374,
+          "radiation": 383.524824,
+          "risk": 298.316676,
+          "total_cost": 820.496787,
+          "time_phase1_sec": 11.822,
+          "time_phase2_sec": 0.0637,
+          "time_total_sec": 11.8856
+        },
+        {
+          "iteration": 3,
+          "cost": 820.496787098152,
+          "length": 1026.029374,
+          "radiation": 383.524824,
+          "risk": 298.316676,
+          "total_cost": 820.496787,
+          "time_phase1_sec": 11.6878,
+          "time_phase2_sec": 0.065,
+          "time_total_sec": 11.7528
+        },
+        {
+          "iteration": 4,
+          "cost": 820.496787098152,
+          "length": 1026.029374,
+          "radiation": 383.524824,
+          "risk": 298.316676,
+          "total_cost": 820.496787,
+          "time_phase1_sec": 11.4491,
+          "time_phase2_sec": 0.0672,
+          "time_total_sec": 11.5163
+        },
+        {
+          "iteration": 5,
+          "cost": 820.496787098152,
+          "length": 1026.029374,
+          "radiation": 383.524824,
+          "risk": 298.316676,
+          "total_cost": 820.496787,
+          "time_phase1_sec": 11.727,
+          "time_phase2_sec": 0.0573,
+          "time_total_sec": 11.7843
+        },
+        {
+          "iteration": 6,
+          "cost": 820.496787098152,
+          "length": 1026.029374,
+          "radiation": 383.524824,
+          "risk": 298.316676,
+          "total_cost": 820.496787,
+          "time_phase1_sec": 12.0648,
+          "time_phase2_sec": 0.059,
+          "time_total_sec": 12.1237
+        },
+        {
+          "iteration": 7,
+          "cost": 820.496787098152,
+          "length": 1026.029374,
+          "radiation": 383.524824,
+          "risk": 298.316676,
+          "total_cost": 820.496787,
+          "time_phase1_sec": 9.4896,
+          "time_phase2_sec": 0.0578,
+          "time_total_sec": 9.5473
+        },
+        {
+          "iteration": 8,
+          "cost": 820.496787098152,
+          "length": 1026.029374,
+          "radiation": 383.524824,
+          "risk": 298.316676,
+          "total_cost": 820.496787,
+          "time_phase1_sec": 11.5569,
+          "time_phase2_sec": 0.0601,
+          "time_total_sec": 11.6171
+        },
+        {
+          "iteration": 9,
+          "cost": 820.496787098152,
+          "length": 1026.029374,
+          "radiation": 383.524824,
+          "risk": 298.316676,
+          "total_cost": 820.496787,
+          "time_phase1_sec": 11.7238,
+          "time_phase2_sec": 0.0607,
+          "time_total_sec": 11.7845
+        },
+        {
+          "iteration": 10,
+          "cost": 820.496787098152,
+          "length": 1026.029374,
+          "radiation": 383.524824,
+          "risk": 298.316676,
+          "total_cost": 820.496787,
+          "time_phase1_sec": 11.8168,
+          "time_phase2_sec": 0.0627,
+          "time_total_sec": 11.8795
+        }
+      ],
+      "timestamp": "2026-06-19T18:07:00",
+      "config": {
+        "w1": 0.7,
+        "w2": 0.15,
+        "w3": 0.15,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "cost_step": false,
+        "Solver_minimize": true,
+        "tsp": "aco",
+        "ntest": 10,
+        "distance_scale": 1000,
+        "time_limit_sec": 5,
+        "aco_ant_count": 20,
+        "aco_generations": 100,
+        "aco_alpha": 1.0,
+        "aco_beta": 5.0,
+        "aco_rho": 0.5,
+        "aco_q": 10,
+        "aco_strategy": 0,
+        "ga_population": 300,
+        "ga_generations": 300,
+        "map_size": 400,
+        "checkpoints": 5,
+        "smooth": true
+      }
     }
   ]
 }

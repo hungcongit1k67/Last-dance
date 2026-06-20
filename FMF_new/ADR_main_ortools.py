@@ -32,8 +32,8 @@ except ImportError:
 CONFIG = {
     # --- Trọng số tổng hợp (bắt buộc: w1 + w2 + w3 = 1.0) ---
     "w1": 0.4,      # Chiều dài đường đi  length(P)
-    "w2": 0.3,      # Độ rủi ro phóng xạ  R(P)
-    "w3": 0.3,      # Độ rủi ro va chạm   risk(P)
+    "w2": 0.3,     # Độ rủi ro phóng xạ  R(P)
+    "w3": 0.3,     # Độ rủi ro va chạm   risk(P)
 
     # --- Tham số an toàn va chạm (công thức 4) ---
     "C1": 0.5,      # C1→1: ưu tiên N_obs;  C1→0: ưu tiên d_min
@@ -69,7 +69,7 @@ CONFIG = {
     #"map_path": r"E:\last_dance\LastDance\FMF_new\triangle300\triangle300.txt",
     # "map_path": r"E:\last_dance\LastDance\FMF_new\test_100\test_100.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF_new\mixed200\mixed200.txt",
-    "map_path": r"E:\last_dance\LastDance\FMF_new\factory400\factory400_30_10.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF_new\scenario5\scenario5_grid.txt",
 
     # --- Tham số OR-Tools TSP ---
     "ntest": 3, # Số lần chạy OR-Tools (với cùng tham số) để đánh giá độ ổn định của giải pháp
