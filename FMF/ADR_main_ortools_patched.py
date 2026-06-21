@@ -61,7 +61,7 @@ CONFIG = {
     #"map_path": r"E:\last_dance\LastDance\FMF\square400\square400.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\triangle300\triangle300.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\mixed200\mixed200.txt",
-    "map_path": r"E:\last_dance\LastDance\FMF\scenario4\scenario4_grid.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF\scenario5\scenario5_grid.txt",
 
     # --- Bộ giải TSP ---
     # "ortools" | "aco" | "ga"
