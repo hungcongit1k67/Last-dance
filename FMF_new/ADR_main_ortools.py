@@ -25,6 +25,8 @@ except ImportError:
     pywrapcp = None
     routing_enums_pb2 = None
 
+from aco_ga import solve_tsp_aco, solve_tsp_aco_ga
+
 
 # =========================================================
 # CONFIG — Chỉnh sửa tất cả tham số tại đây
@@ -43,6 +45,13 @@ CONFIG = {
     # --- Tham số vật lý (công thức 6) ---
     "a": 1.0,       # Kích thước ô lưới (m)
     "v": 1.0,       # Vận tốc robot (m/s)
+
+    # --- Vùng đỏ phóng xạ (red flag) ---
+    "RI_max": 8,        # Ngưỡng nồng độ phóng xạ tối đa
+    # False → không thay đổi gì (hành vi gốc).
+    # True  → mọi ô có nồng độ phóng xạ >= RI_max bị coi là vật cản,
+    #         robot không được phép đi qua.
+    "red_flag": True,
 
     # --- Hàm mục tiêu của TSP solver ---
     # True  → ma trận TSP = Total cost (7a) → solver minimize đúng
@@ -69,10 +78,18 @@ CONFIG = {
     #"map_path": r"E:\last_dance\LastDance\FMF_new\triangle300\triangle300.txt",
     # "map_path": r"E:\last_dance\LastDance\FMF_new\test_100\test_100.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF_new\mixed200\mixed200.txt",
-    "map_path": r"E:\last_dance\LastDance\FMF_new\scenario5\scenario5_grid.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF_new\scenario6\scenario6_grid.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF_new\factory400\factory400_30.txt",
+
+    # --- Chọn bộ giải TSP (Pha 2) ---
+    # "ortools" → OR-Tools Routing Solver (mặc định)
+    # "aco"     → ACO thuần (class ACO/Graph trong aco.py)
+    # "aco-ga"  → ACO-GA bi-level (GA khởi tạo pheromone rồi ACO tinh chỉnh, aco_ga.py)
+    # Tham số của aco / aco-ga chỉnh trong file aco_ga.py (ACO_CONFIG / ACO_GA_CONFIG).
+    "tsp": "ortools",
 
     # --- Tham số OR-Tools TSP ---
-    "ntest": 3, # Số lần chạy OR-Tools (với cùng tham số) để đánh giá độ ổn định của giải pháp
+    "ntest": 3  , # Số lần chạy OR-Tools (với cùng tham số) để đánh giá độ ổn định của giải pháp
     "distance_scale": 1000, # Scale ma trận chi phí từ float sang int cho OR-Tools (ví dụ: 1.0 -> 1000, sqrt(2) -> 1414)
     "time_limit_sec": 5, # Thời gian tối đa cho mỗi lần chạy OR-Tools (giây)
 
@@ -209,6 +226,37 @@ def solve_tsp_ortools(dist_matrix,
 
 
 # =========================================================
+# Dispatcher: chon bo giai TSP theo tham so `tsp`
+# =========================================================
+def solve_tsp(tsp,
+              dist_matrix,
+              distance_scale=1000,
+              time_limit_sec=5,
+              first_solution_strategy=None,
+              local_search_metaheuristic=None):
+    """Giai TSP theo phuong phap `tsp` in {"ortools", "aco", "aco-ga"}.
+    Tra ve (route, real_cost_float) — route la permutation 0..n-1.
+    """
+    method = str(tsp).lower().strip()
+    if method == "ortools":
+        return solve_tsp_ortools(
+            dist_matrix,
+            distance_scale=distance_scale,
+            time_limit_sec=time_limit_sec,
+            first_solution_strategy=first_solution_strategy,
+            local_search_metaheuristic=local_search_metaheuristic,
+        )
+    elif method == "aco":
+        return solve_tsp_aco(dist_matrix)
+    elif method in ("aco-ga", "aco_ga", "acoga"):
+        return solve_tsp_aco_ga(dist_matrix)
+    else:
+        raise ValueError(
+            f"tsp khong hop le: {tsp!r}. Chon mot trong: 'ortools', 'aco', 'aco-ga'."
+        )
+
+
+# =========================================================
 # Danh gia toan bo pipeline (phase 2 + metric)
 # =========================================================
 def evaluation_wpfmf(grid,
@@ -220,19 +268,21 @@ def evaluation_wpfmf(grid,
                     draw=True,
                     map_path=None,
                     smooth=True,
+                    tsp="ortools",
                     w1=None,
                     w2=None,
                     w3=None,
                     C1=None):
     """
-    Chay OR-Tools ntest lan tren grid.dijk (da duoc tinh bang WP-FMF).
+    Chay bo giai TSP (`tsp`) ntest lan tren grid.dijk (da duoc tinh bang WP-FMF).
     Tra ve (best_path, best_cost).
     In ra: chieu dai, phong xa, rui ro va cham, va total cost.
 
     Pha 1 (WP-FMF build graph) duoc do thoi gian ben trong moi iteration de
     lay mean/std thoi gian chay cua Pha 1 va cua ca thuat toan (Pha 1 + Pha 2).
     """
-    _require_ortools()
+    if str(tsp).lower().strip() == "ortools":
+        _require_ortools()
 
     res = []
     res_lengths = []
@@ -261,9 +311,10 @@ def evaluation_wpfmf(grid,
             grid.dijkstra()
         t_phase1 = time.time() - t_p1
 
-        # --- Pha 2: OR-Tools TSP ---
+        # --- Pha 2: TSP solver (ortools / aco / aco-ga) ---
         t0 = time.time()
-        path, cost = solve_tsp_ortools(
+        path, cost = solve_tsp(
+            tsp,
             grid.dijk,
             distance_scale=distance_scale,
             time_limit_sec=time_limit_sec,
@@ -299,7 +350,7 @@ def evaluation_wpfmf(grid,
             best_cost = cost
             best_path = list(path)
 
-        print("  Route (OR-Tools):", path)
+        print(f"  Route ({tsp}):", path)
         print(f"  Weighted cost:   {cost:.4f}   "
               f"length={length_i:.4f}   "
               f"R={(rad_i if rad_i is not None else 0.0):.4f}   "
@@ -332,7 +383,7 @@ def evaluation_wpfmf(grid,
 
     print(f"\n===== Thoi gian chay  (mean ± std qua {ntest} lần chạy) =====")
     print(f"  Pha 1 (WP-FMF)    : {res_t_phase1.mean():10.4f} ± {res_t_phase1.std():.4f} s")
-    print(f"  Pha 2 (OR-Tools)  : {res_t_phase2.mean():10.4f} ± {res_t_phase2.std():.4f} s")
+    print(f"  Pha 2 ({tsp})  : {res_t_phase2.mean():10.4f} ± {res_t_phase2.std():.4f} s")
     print(f"  Cả thuật toán     : {res_t_total.mean():10.4f} ± {res_t_total.std():.4f} s")
 
     # Best path metrics (theo TSP cost)
@@ -368,6 +419,9 @@ def evaluation_wpfmf(grid,
             "Solver_minimize": grid.Solver_minimize,
             "supercover": grid.supercover,
             "bresenham": grid.bresenham,
+            "RI_max": grid.RI_max,
+            "red_flag": grid.red_flag,
+            "tsp": tsp,
             "ntest": ntest, "distance_scale": distance_scale,
             "time_limit_sec": time_limit_sec,
             "map_size": grid.mapSize, "checkpoints": grid.npos,
@@ -437,7 +491,8 @@ def run_wpfmf_pipeline(grid,
                       local_search_metaheuristic=None,
                       draw=True,
                       map_path=None,
-                      smooth=True):
+                      smooth=True,
+                      tsp="ortools"):
     """
     Pipeline đầy đủ:
       Pha 1: WP-FMF   -> grid.dijk (ma trận chi phí giữa các checkpoint)
@@ -453,7 +508,7 @@ def run_wpfmf_pipeline(grid,
     """
     print(f"===== WP-FMF Pipeline (w1={w1 or grid.w1}, w2={w2 or grid.w2}, "
           f"w3={w3 or grid.w3}, C1={C1 or grid.C1}) =====")
-    print("[Phase 1 + Phase 2] WP-FMF cost matrix + OR-Tools TSP "
+    print(f"[Phase 1 + Phase 2] WP-FMF cost matrix + TSP={tsp} "
           f"({ntest} lần chạy, đo thời gian mỗi pha) ...")
     # Pha 1 (buildGraphAdvanced) được chạy lại & đo thời gian bên trong
     # evaluation_wpfmf để lấy mean/std cho Pha 1 và cả thuật toán.
@@ -467,6 +522,7 @@ def run_wpfmf_pipeline(grid,
         draw=draw,
         map_path=map_path,
         smooth=smooth,
+        tsp=tsp,
         w1=w1, w2=w2, w3=w3, C1=C1,
     )
 
@@ -483,7 +539,8 @@ def ADR_main(grid,
              w3=None,
              C1=None,
              map_path=None,
-             smooth=True):
+             smooth=True,
+             tsp="ortools"):
     return run_wpfmf_pipeline(
         grid,
         w1=w1, w2=w2, w3=w3, C1=C1,
@@ -494,6 +551,7 @@ def ADR_main(grid,
         local_search_metaheuristic=local_search_metaheuristic,
         map_path=map_path,
         smooth=smooth,
+        tsp=tsp,
     )
 
 
@@ -520,6 +578,8 @@ def main():
         Solver_minimize=CONFIG["Solver_minimize"],
         supercover=CONFIG["supercover"],
         bresenham=CONFIG["bresenham"],
+        RI_max=CONFIG["RI_max"],
+        red_flag=CONFIG["red_flag"],
     )
 
     map_path = CONFIG["map_path"]
@@ -542,6 +602,7 @@ def main():
             if routing_enums_pb2 is not None else None),
         map_path=map_path,
         smooth=CONFIG["smooth"],
+        tsp=CONFIG["tsp"],
     )
 
 

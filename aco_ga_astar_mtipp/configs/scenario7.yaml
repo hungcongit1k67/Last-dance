@@ -4,11 +4,11 @@
 # Cost weights (w1,w2,w3): Table 8 (scenario 7 reliability run).
 project:
   name: aco_ga_astar_mtipp_scenario7
-  output_dir: results/scenario7
+  output_dir: results/scenario7_2
 
 map:
-  obstacle_file: data/scenario7/scenario7_grid.txt
-  radiation_file: data/scenario7/radiation_grid.txt
+  obstacle_file: data/scenario7/scenario7_grid2.txt
+  radiation_file: data/scenario7/radiation_grid2.txt
   target_file: data/targets/targets.json
   target_source: map
   grid_size: 1.0
@@ -18,10 +18,10 @@ map:
   prevent_corner_cutting: true
 
 cost_weights:
-  omega_length: 1.0          # w1 (Table 8, scenario 7)
-  omega_risk: 23.7           # w2
-  omega_energy: 2.7          # w3
-  omega_collision_risk: 0.0  # not in paper: high-risk is a hard constraint (astar.high_risk_avoidance)
+  omega_length: 0.4          # w1 (Table 8, scenario 7)
+  omega_risk: 0.3            # w2
+  omega_energy: 0.0          # w3
+  omega_collision_risk: 0.3  # not in paper: high-risk is a hard constraint (astar.high_risk_avoidance)
   turn_angle_weight: 0.01    # e1  (paper sensitivity default; Eq.9 states e1+e2=1)
   turn_count_weight: 0.09    # e2
   safety_c1: 0.5             # project-only (unused while omega_collision_risk = 0)

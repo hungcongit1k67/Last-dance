@@ -55,13 +55,21 @@ CONFIG = {
     #         trên mọi ô supercover line mà đoạn cắt qua; cell-by-cell vẫn dùng công thức gốc.
     "supercover": True,
 
+    # --- Vùng đỏ phóng xạ (red flag) ---
+    "RI_max": 8,        # Ngưỡng nồng độ phóng xạ tối đa
+    # False → không thay đổi gì (hành vi gốc).
+    # True  → mọi ô có nồng độ phóng xạ >= RI_max bị coi là vật cản,
+    #         robot không được phép đi qua.
+    "red_flag": True,
+
     # --- Đường dẫn bản đồ ---
     # radiation_grid.txt trong cùng thư mục sẽ được nạp tự động.
     #"map_path": r"E:\last_dance\LastDance\FMF\test_100\test_100.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\square400\square400.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\triangle300\triangle300.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\mixed200\mixed200.txt",
-    "map_path": r"E:\last_dance\LastDance\FMF\scenario5\scenario5_grid.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF\scenario7_2\scenario7_grid2.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF\factory400\factory400_30.txt",
 
     # --- Bộ giải TSP ---
     # "ortools" | "aco" | "ga"
@@ -73,8 +81,8 @@ CONFIG = {
     "time_limit_sec": 5,
 
     # --- Tham số ACO TSP ---
-    "aco_ant_count": 20,
-    "aco_generations": 100,
+    "aco_ant_count": 50,
+    "aco_generations": 200,
     "aco_alpha": 1.0,
     "aco_beta": 5.0,
     "aco_rho": 0.5,
@@ -484,6 +492,8 @@ def evaluation3(
             "safety_max_distance": grid.safety_max_distance,
             "cost_step": grid.cost_step,
             "Solver_minimize": grid.Solver_minimize,
+            "RI_max": grid.RI_max,
+            "red_flag": grid.red_flag,
             "tsp": tsp, "ntest": ntest,
             "distance_scale": distance_scale,
             "time_limit_sec": time_limit_sec,
@@ -614,6 +624,8 @@ def main():
         cost_step=CONFIG["cost_step"],
         Solver_minimize=CONFIG["Solver_minimize"],
         supercover=CONFIG["supercover"],
+        RI_max=CONFIG["RI_max"],
+        red_flag=CONFIG["red_flag"],
     )
 
     # Nạp bản đồ (radiation_grid.txt trong cùng thư mục được nạp tự động)

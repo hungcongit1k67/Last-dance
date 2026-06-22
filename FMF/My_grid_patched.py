@@ -83,6 +83,13 @@ class GridMap():
         self.radiation_norm = None
         self.f_cost = None
 
+        # Ngưỡng phóng xạ "vùng đỏ" (red flag)
+        #   red_flag=False → không thay đổi gì (hành vi gốc).
+        #   red_flag=True  → mọi ô có nồng độ phóng xạ >= RI_max bị coi là vật cản,
+        #                    robot không được phép đi qua.
+        self.RI_max   = 8.0
+        self.red_flag = False
+
 
 
     def create_grid_map(self,npos):
@@ -599,7 +606,29 @@ class GridMap():
         self.DFType = "Fast marching"
 
 
+    def _apply_radiation_obstacles(self):
+        """red_flag=True: mọi ô có nồng độ phóng xạ >= RI_max bị coi là vật cản.
+
+        Chỉ chuyển các ô trống (giá trị 0); giữ nguyên checkpoint (giá trị 2) để
+        vẫn bắt buộc phải thăm. red_flag=False → không làm gì (hành vi gốc).
+        Hàm idempotent: ô đã là vật cản thì giữ nguyên.
+        """
+        if not self.red_flag or self.radiation_map is None:
+            return
+        sz = self.mapSize
+        nrows = len(self.radiation_map)
+        ncols = len(self.radiation_map[0]) if nrows > 0 else 0
+        count = 0
+        for i in range(min(sz, nrows)):
+            for j in range(min(sz, ncols)):
+                if self.gridMap[i][j] == 0 and self.radiation_map[i][j] >= self.RI_max:
+                    self.gridMap[i][j] = 1
+                    count += 1
+        if count:
+            print(f"  red_flag=True: {count} ô có R >= {self.RI_max} -> chuyển thành vật cản")
+
     def buildGraphAdvanced(self):
+        self._apply_radiation_obstacles()
         self.computeSafety()
         if self.cost_step:
             self._normalize_radiation()
@@ -646,7 +675,7 @@ class GridMap():
     # =========================================================
     def config(self, w1=None, w2=None, w3=None, C1=None, a=None, v=None,
                safety_radius=None, safety_max_distance=None, cost_step=None,
-               Solver_minimize=None, supercover=None):
+               Solver_minimize=None, supercover=None, RI_max=None, red_flag=None):
         """Cấu hình trọng số báo cáo và tham số vật lý.
 
         w1+w2+w3 = 1.
@@ -680,6 +709,8 @@ class GridMap():
         if cost_step           is not None: self.cost_step           = bool(cost_step)
         if Solver_minimize     is not None: self.Solver_minimize     = bool(Solver_minimize)
         if supercover          is not None: self.supercover          = bool(supercover)
+        if RI_max              is not None: self.RI_max              = float(RI_max)
+        if red_flag            is not None: self.red_flag            = bool(red_flag)
 
     # =========================================================
     # I/O bản đồ

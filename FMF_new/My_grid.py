@@ -89,6 +89,13 @@ class GridMap:
         self.radiation_map  = None   # giá trị thô (μSv/h hoặc đơn vị tương đương)
         self.radiation_norm = None   # chuẩn hóa về [0, 1]
 
+        # Ngưỡng phóng xạ "vùng đỏ" (red flag)
+        #   red_flag=False → không thay đổi gì (hành vi gốc).
+        #   red_flag=True  → mọi ô có nồng độ phóng xạ >= RI_max bị coi là vật cản,
+        #                    robot không được phép đi qua.
+        self.RI_max   = 8.0
+        self.red_flag = False
+
         self.window_size = [mapSize * square_width + (mapSize + 1) * margin,
                             mapSize * square_height + (mapSize + 1) * margin]
         self.DFType = "WP-FMF"
@@ -98,7 +105,7 @@ class GridMap:
     # =========================================================
     def config(self, w1=None, w2=None, w3=None, C1=None, a=None, v=None,
                safety_radius=None, safety_max_distance=None, Solver_minimize=None,
-               supercover=None, bresenham=None):
+               supercover=None, bresenham=None, RI_max=None, red_flag=None):
         """Cấu hình tham số thuật toán.
 
         Trọng số (w1 + w2 + w3 = 1):
@@ -144,6 +151,10 @@ class GridMap:
             self.supercover = bool(supercover)
         if bresenham is not None:
             self.bresenham = bool(bresenham)
+        if RI_max is not None:
+            self.RI_max = float(RI_max)
+        if red_flag is not None:
+            self.red_flag = bool(red_flag)
 
     def setWeights(self, w1=0.7, C1=0.5):
         """Giữ lại cho tương thích ngược. Khuyến nghị dùng config() thay thế."""
@@ -345,6 +356,27 @@ class GridMap:
             if is_block(x, y):
                 count += 1
         return count
+
+    def _apply_radiation_obstacles(self):
+        """red_flag=True: mọi ô có nồng độ phóng xạ >= RI_max bị coi là vật cản.
+
+        Chỉ chuyển các ô trống (giá trị 0); giữ nguyên checkpoint (giá trị 2) để
+        vẫn bắt buộc phải thăm. red_flag=False → không làm gì (hành vi gốc).
+        Hàm idempotent: ô đã là vật cản thì giữ nguyên.
+        """
+        if not self.red_flag or self.radiation_map is None:
+            return
+        sz = self.mapSize
+        nrows = len(self.radiation_map)
+        ncols = len(self.radiation_map[0]) if nrows > 0 else 0
+        count = 0
+        for i in range(min(sz, nrows)):
+            for j in range(min(sz, ncols)):
+                if self.gridMap[i][j] == 0 and self.radiation_map[i][j] >= self.RI_max:
+                    self.gridMap[i][j] = 1
+                    count += 1
+        if count:
+            print(f"  red_flag=True: {count} ô có R >= {self.RI_max} -> chuyển thành vật cản")
 
     # =========================================================
     # WP-FMF bước 1: tính S(c), chuẩn hoá phóng xạ, rồi f(x)
@@ -720,6 +752,7 @@ class GridMap:
         self.DFType = (f"WP-FMF (w1={self.w1:.2f}, w2={self.w2:.2f}, "
                        f"w3={self.w3:.2f}, C1={self.C1:.2f})")
 
+        self._apply_radiation_obstacles()
         self.computeSafety()
         self._normalize_radiation()
         self.computeFCost()
