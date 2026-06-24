@@ -67,9 +67,10 @@ CONFIG = {
     #"map_path": r"E:\last_dance\LastDance\FMF\test_100\test_100.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\square400\square400.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\triangle300\triangle300.txt",
-    #"map_path": r"E:\last_dance\LastDance\FMF\mixed200\mixed200.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF\mixed2002\mixed2002.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\scenario7_2\scenario7_grid2.txt",
-    "map_path": r"E:\last_dance\LastDance\FMF\factory400\factory400_30.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF\factory400\factory400_30.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF\mixed500\mixed500.txt",
 
     # --- Bộ giải TSP ---
     # "ortools" | "aco" | "ga"
@@ -81,8 +82,8 @@ CONFIG = {
     "time_limit_sec": 5,
 
     # --- Tham số ACO TSP ---
-    "aco_ant_count": 50,
-    "aco_generations": 200,
+    "aco_ant_count": 50, # sửa chỗ này để nặn 20
+    "aco_generations": 200, # sửa chỗ này để nặn 100
     "aco_alpha": 1.0,
     "aco_beta": 5.0,
     "aco_rho": 0.5,
@@ -96,7 +97,7 @@ CONFIG = {
     # --- Path output ---
     # True  → in/lưu path đã smooth (turning points, ~128 bước)
     # False → in/lưu full path cell-by-cell (đi qua từng ô lưới, ~1000+ bước)
-    "smooth": True,
+    "smooth": False,
 }
 
 

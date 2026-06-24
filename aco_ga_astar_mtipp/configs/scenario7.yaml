@@ -4,11 +4,11 @@
 # Cost weights (w1,w2,w3): Table 8 (scenario 7 reliability run).
 project:
   name: aco_ga_astar_mtipp_scenario7
-  output_dir: results/scenario7_2
+  output_dir: results/scenario7_60
 
 map:
-  obstacle_file: data/scenario7/scenario7_grid2.txt
-  radiation_file: data/scenario7/radiation_grid2.txt
+  obstacle_file: data/scenario7/scenario7_grid.txt
+  radiation_file: data/scenario7/radiation_grid.txt
   target_file: data/targets/targets.json
   target_source: map
   grid_size: 1.0
@@ -18,10 +18,10 @@ map:
   prevent_corner_cutting: true
 
 cost_weights:
-  omega_length: 0.4          # w1 (Table 8, scenario 7)
-  omega_risk: 0.3            # w2
+  omega_length: 0.6          # w1 (Table 8, scenario 7)
+  omega_risk: 0.2            # w2
   omega_energy: 0.0          # w3
-  omega_collision_risk: 0.3  # not in paper: high-risk is a hard constraint (astar.high_risk_avoidance)
+  omega_collision_risk: 0.2  # not in paper: high-risk is a hard constraint (astar.high_risk_avoidance)
   turn_angle_weight: 0.01    # e1  (paper sensitivity default; Eq.9 states e1+e2=1)
   turn_count_weight: 0.09    # e2
   safety_c1: 0.5             # project-only (unused while omega_collision_risk = 0)
@@ -32,16 +32,16 @@ astar:
   high_risk_avoidance: true  # Section 5.2.2 high-risk area avoidance strategy
 
 GA:                          # Table 7, scenarios 5-7
-  population_size: 200       # np
-  max_generation: 500        # Gmax
+  population_size: 100       # np
+  max_generation: 200        # Gmax
   crossover_rate: 0.9        # pc
   mutation_rate: 0.05        # pm
   gap: 0.9                   # gap
   elite_size: 3              # project-only (not specified in paper)
 
 ACO:                         # Table 7, scenarios 5-7
-  num_ants: 200              # Nmax
-  max_iteration: 500         # Imax
+  num_ants: 50              # Nmax
+  max_iteration: 100         # Imax
   alpha: 1.0                 # alpha
   beta: 5.0                  # beta
   rho: 0.1                   # rho

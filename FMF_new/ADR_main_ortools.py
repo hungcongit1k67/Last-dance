@@ -74,12 +74,13 @@ CONFIG = {
     "bresenham": True,
 
     # --- Đường dẫn bản đồ ---
-    # "map_path": r"E:\last_dance\LastDance\FMF_new\square400\square400.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF_new\square400\square400.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF_new\triangle300\triangle300.txt",
     # "map_path": r"E:\last_dance\LastDance\FMF_new\test_100\test_100.txt",
-    #"map_path": r"E:\last_dance\LastDance\FMF_new\mixed200\mixed200.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF_new\mixed2002\mixed2002.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF_new\scenario6\scenario6_grid.txt",
-    "map_path": r"E:\last_dance\LastDance\FMF_new\factory400\factory400_30.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF_new\factory400\factory400_30.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF_new\mixed500\mixed500.txt",
 
     # --- Chọn bộ giải TSP (Pha 2) ---
     # "ortools" → OR-Tools Routing Solver (mặc định)

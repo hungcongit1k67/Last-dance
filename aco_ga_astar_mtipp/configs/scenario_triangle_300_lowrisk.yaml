@@ -1,6 +1,6 @@
 project:
   name: aco_ga_astar_mtipp_triangle_300_lowrisk
-  output_dir: results/triangle_300_lowrisk
+  output_dir: results/triangle_300_lowrisk_60
 
 map:
   obstacle_file: data/maps/triangle300/triangle300.txt
@@ -14,10 +14,10 @@ map:
   prevent_corner_cutting: true
 
 cost_weights:
-  omega_length: 0.4
-  omega_risk: 0.3
+  omega_length: 0.6
+  omega_risk: 0.2
   omega_energy: 0.0
-  omega_collision_risk: 0.3
+  omega_collision_risk: 0.2
   turn_angle_weight: 0.7
   turn_count_weight: 0.3
   safety_c1: 0.5
@@ -36,8 +36,8 @@ GA:
   gap: 0.9
 
 ACO:
-  num_ants: 80
-  max_iteration: 300
+  num_ants: 100
+  max_iteration: 200
   alpha: 1.0
   beta: 5.0
   rho: 0.12

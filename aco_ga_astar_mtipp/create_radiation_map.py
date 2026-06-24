@@ -22,7 +22,11 @@ import numpy as np
 CONFIG = {
     # Duong dan den obstacle map. Quy uoc cua project:
     # 0 = o trong, 1 = vat can, 2 = target.
-    "obstacle_map_path": "data/maps/factory400/factory400_30.txt",
+    #"obstacle_map_path": "data/maps/factory400/factory400_30.txt",
+    #"obstacle_map_path": "data/maps/mixed500/mixed500.txt",
+    #"obstacle_map_path": "data/maps/triangle300/triangle300.txt",
+    #"obstacle_map_path": "data/maps/mixed200/mixed2002.txt",
+    "obstacle_map_path": "data/maps/square400/square400.txt",
 
     # Noi luu radiation grid sau khi sinh. File nay co cung kich thuoc voi
     # obstacle map va co the gan truc tiep vao radiation_file trong YAML.

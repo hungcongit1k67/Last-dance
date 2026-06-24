@@ -93,14 +93,27 @@ python eval.py --config configs/default.yaml --n 10
 
 # Chạy 20 lần với seed ngẫu nhiên hoàn toàn độc lập (đảm bảo không trùng seed nào --> nên dùng khi muốn đánh giá tổng thể, không cần so sánh seed cụ thể)
 python eval.py --config configs/default.yaml --n 20 --independent
-python eval.py --config configs/scenario_custom_200x200.yaml --n 5 --independent
+python eval.py --config configs/scenario_custom_200x200.yaml --n 3 --independent
 
 python eval.py --config configs/factory400_30.yaml --n 5 --independent
 
 python eval.py --config configs/scenario4.yaml --n 2 --independent
 
+python eval.py --config configs/scenario_triangle_300_lowrisk.yaml --n 2 --independent
+
+python eval.py --config configs/scenario_square_400_lowrisk.yaml --n 2 --independent
+
+python eval.py --config configs/mixed500.yaml --n 2 --independent
+
 # Dùng config khác
 python eval.py --config configs/scenario_small.yaml --n 15
+
+# Chạy nhiều kịch bản cùng lúc
+python eval.py --config configs/scenario7.yaml --n 3 --independent
+python eval.py --config configs/scenario_custom_200x200.yaml --n 3 --independent
+python eval.py --config configs/scenario_triangle_300_lowrisk.yaml --n 3 --independent
+python eval.py --config configs/scenario_square_400_lowrisk.yaml --n 3 --independent
+python eval.py --config configs/mixed500.yaml --n 3 --independent
 ```
 
 

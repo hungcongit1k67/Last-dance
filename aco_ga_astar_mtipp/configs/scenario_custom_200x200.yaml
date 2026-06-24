@@ -1,10 +1,10 @@
 project:
-  name: aco_ga_astar_mtipp_mixed_200_lowrisk
-  output_dir: results/mixed_200_lowrisk
+  name: aco_ga_astar_mtipp_mixed_2002_lowrisk
+  output_dir: results/mixed_2002_lowrisk_60
 
 map:
-  obstacle_file: data/maps/mixed200/mixed200.txt
-  radiation_file: data/maps/mixed200/radiation_grid.txt
+  obstacle_file: data/maps/mixed200/mixed2002.txt
+  radiation_file: data/maps/mixed200/radiation_grid2.txt
   target_file: data/targets/targets.json
   target_source: map
   grid_size: 1.0
@@ -14,10 +14,10 @@ map:
   prevent_corner_cutting: true
 
 cost_weights:
-  omega_length: 0.4
-  omega_risk: 0.3
+  omega_length: 0.6
+  omega_risk: 0.2
   omega_energy: 0.0
-  omega_collision_risk: 0.3
+  omega_collision_risk: 0.2
   turn_angle_weight: 0.7
   turn_count_weight: 0.3
   safety_c1: 0.5
@@ -28,16 +28,16 @@ astar:
   high_risk_avoidance: true
 
 GA:
-  population_size: 120
-  max_generation: 220
+  population_size: 100
+  max_generation: 200
   crossover_rate: 0.9
   mutation_rate: 0.06
   elite_size: 3
   gap: 0.9
 
 ACO:
-  num_ants: 70
-  max_iteration: 260
+  num_ants: 100
+  max_iteration: 200
   alpha: 1.0
   beta: 5.0
   rho: 0.12
