@@ -89,6 +89,11 @@ class GridMap:
         self.radiation_map  = None   # giá trị thô (μSv/h hoặc đơn vị tương đương)
         self.radiation_norm = None   # chuẩn hóa về [0, 1]
 
+        # Chuẩn hóa R̄(x) trong thế năng f(x) (công thức 11):
+        #   True  → f(x) = w1 + w2·R̄_norm(x) + w3·(1−S(x))   (dùng radiation_norm ∈ [0,1])
+        #   False → f(x) = w1 + w2·R̄(x)      + w3·(1−S(x))   (dùng radiation_map giá trị thô)
+        self.normalize_radiation = True
+
         # Ngưỡng phóng xạ "vùng đỏ" (red flag)
         #   red_flag=False → không thay đổi gì (hành vi gốc).
         #   red_flag=True  → mọi ô có nồng độ phóng xạ >= RI_max bị coi là vật cản,
@@ -105,7 +110,8 @@ class GridMap:
     # =========================================================
     def config(self, w1=None, w2=None, w3=None, C1=None, a=None, v=None,
                safety_radius=None, safety_max_distance=None, Solver_minimize=None,
-               supercover=None, bresenham=None, RI_max=None, red_flag=None):
+               supercover=None, bresenham=None, RI_max=None, red_flag=None,
+               radiation_norm=None):
         """Cấu hình tham số thuật toán.
 
         Trọng số (w1 + w2 + w3 = 1):
@@ -155,6 +161,8 @@ class GridMap:
             self.RI_max = float(RI_max)
         if red_flag is not None:
             self.red_flag = bool(red_flag)
+        if radiation_norm is not None:
+            self.normalize_radiation = bool(radiation_norm)
 
     def setWeights(self, w1=0.7, C1=0.5):
         """Giữ lại cho tương thích ngược. Khuyến nghị dùng config() thay thế."""
@@ -436,19 +444,28 @@ class GridMap:
                     self.radiation_norm[i][j] = self.radiation_map[i][j] / rmax
 
     def computeFCost(self):
-        """Công thức (11): f(x) = w1 + w2·R̄_norm(x) + w3·(1−S(x))."""
+        """Công thức (11): f(x) = w1 + w2·R̄(x) + w3·(1−S(x)).
+
+        normalize_radiation=True  → R̄(x) = R̄_norm(x) ∈ [0,1] (radiation_norm).
+        normalize_radiation=False → R̄(x) = giá trị thô (radiation_map).
+        """
         sz = self.mapSize
         INF = float('inf')
+        # Chọn nguồn R̄(x): bản đồ chuẩn hóa hay bản đồ thô.
+        rad_src = (self.radiation_norm if self.normalize_radiation
+                   else self.radiation_map)
+        nrows = len(rad_src) if rad_src is not None else 0
+        ncols = len(rad_src[0]) if nrows > 0 else 0
         self.f_cost = [[INF] * sz for _ in range(sz)]
         for i in range(sz):
             for j in range(sz):
                 if self.gridMap[i][j] == 1:
                     self.f_cost[i][j] = INF
                 else:
-                    r_norm = (self.radiation_norm[i][j]
-                              if self.radiation_norm is not None else 0.0)
+                    r_val = (rad_src[i][j]
+                             if i < nrows and j < ncols else 0.0)
                     self.f_cost[i][j] = (self.w1
-                                         + self.w2 * r_norm
+                                         + self.w2 * r_val
                                          + self.w3 * (1.0 - self.safety[i][j]))
 
     # =========================================================

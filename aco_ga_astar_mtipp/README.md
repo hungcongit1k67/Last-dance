@@ -114,6 +114,11 @@ python eval.py --config configs/scenario_custom_200x200.yaml --n 3 --independent
 python eval.py --config configs/scenario_triangle_300_lowrisk.yaml --n 3 --independent
 python eval.py --config configs/scenario_square_400_lowrisk.yaml --n 3 --independent
 python eval.py --config configs/mixed500.yaml --n 3 --independent
+
+python eval.py --config configs/scenario4.yaml --n 3 --independent
+python eval.py --config configs/scenario5.yaml --n 3 --independent
+python eval.py --config configs/scenario6.yaml --n 3 --independent
+python eval.py --config configs/scenario7.yaml --n 3 --independent
 ```
 
 

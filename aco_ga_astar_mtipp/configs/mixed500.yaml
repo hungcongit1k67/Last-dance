@@ -1,6 +1,6 @@
 project:
   name: aco_ga_astar_mtipp_mixed500
-  output_dir: results/mixed500_60
+  output_dir: results/mixed500_30
 
 map:
   obstacle_file: data/maps/mixed500/mixed500.txt
@@ -14,8 +14,8 @@ map:
   prevent_corner_cutting: true
 
 cost_weights:
-  omega_length: 0.6
-  omega_risk: 0.2
+  omega_length: 0.3
+  omega_risk: 0.5
   omega_energy: 0.0
   omega_collision_risk: 0.2
   turn_angle_weight: 0.7

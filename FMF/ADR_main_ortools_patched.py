@@ -25,9 +25,9 @@ CONFIG = {
     # --- Trọng số báo cáo (bắt buộc: w1 + w2 + w3 = 1.0) ---
     # Không ảnh hưởng thuật toán FMF (vẫn minimize length thuần túy).
     # Chỉ dùng để tính và in total cost sau khi tìm được đường đi.
-    "w1": 0.4,      # Chiều dài đường đi  length(P)
-    "w2": 0.3,      # Độ rủi ro phóng xạ  R(P)
-    "w3": 0.3,      # Độ rủi ro va chạm   risk(P)
+    "w1": 0.3,      # Chiều dài đường đi  length(P)
+    "w2": 0.5,      # Độ rủi ro phóng xạ  R(P)
+    "w3": 0.2,      # Độ rủi ro va chạm   risk(P)
 
     # --- Tham số an toàn va chạm S(c) (công thức 4) ---
     "C1": 0.5,      # C1→1: ưu tiên N_obs;  C1→0: ưu tiên d_min
@@ -67,22 +67,22 @@ CONFIG = {
     #"map_path": r"E:\last_dance\LastDance\FMF\test_100\test_100.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\square400\square400.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\triangle300\triangle300.txt",
-    "map_path": r"E:\last_dance\LastDance\FMF\mixed2002\mixed2002.txt",
-    #"map_path": r"E:\last_dance\LastDance\FMF\scenario7_2\scenario7_grid2.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF\mixed2002\mixed2002.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF\scenario4\scenario4_grid.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\factory400\factory400_30.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\mixed500\mixed500.txt",
 
     # --- Bộ giải TSP ---
     # "ortools" | "aco" | "ga"
     "tsp": "aco",
-    "ntest": 10,
+    "ntest": 5,
 
     # --- Tham số OR-Tools TSP ---
     "distance_scale": 1000,
     "time_limit_sec": 5,
 
     # --- Tham số ACO TSP ---
-    "aco_ant_count": 50, # sửa chỗ này để nặn 20
+    "aco_ant_count": 100, # sửa chỗ này để nặn 20
     "aco_generations": 200, # sửa chỗ này để nặn 100
     "aco_alpha": 1.0,
     "aco_beta": 5.0,

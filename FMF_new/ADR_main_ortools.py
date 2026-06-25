@@ -33,9 +33,9 @@ from aco_ga import solve_tsp_aco, solve_tsp_aco_ga
 # =========================================================
 CONFIG = {
     # --- Trọng số tổng hợp (bắt buộc: w1 + w2 + w3 = 1.0) ---
-    "w1": 0.4,      # Chiều dài đường đi  length(P)
-    "w2": 0.3,     # Độ rủi ro phóng xạ  R(P)
-    "w3": 0.3,     # Độ rủi ro va chạm   risk(P)
+    "w1": 0.6,      # Chiều dài đường đi  length(P)
+    "w2": 0.2,     # Độ rủi ro phóng xạ  R(P)
+    "w3": 0.2,     # Độ rủi ro va chạm   risk(P)
 
     # --- Tham số an toàn va chạm (công thức 4) ---
     "C1": 0.5,      # C1→1: ưu tiên N_obs;  C1→0: ưu tiên d_min
@@ -52,6 +52,12 @@ CONFIG = {
     # True  → mọi ô có nồng độ phóng xạ >= RI_max bị coi là vật cản,
     #         robot không được phép đi qua.
     "red_flag": True,
+
+    # --- Chuẩn hóa nồng độ phóng xạ R̄(x) trong thế năng f(x) (công thức 11) ---
+    # True  → f(x) = w1 + w2·R̄_norm(x) + w3·(1−S(x))  (R̄ chuẩn hóa về [0,1] — hành vi gốc).
+    # False → f(x) = w1 + w2·R̄(x)      + w3·(1−S(x))  (dùng nồng độ phóng xạ THÔ).
+    # Lưu ý: chỉ ảnh hưởng thế năng FMF (Pha 1). Metric R(P) in ra luôn dùng giá trị thô.
+    "radiation_norm": False,
 
     # --- Hàm mục tiêu của TSP solver ---
     # True  → ma trận TSP = Total cost (7a) → solver minimize đúng
@@ -74,13 +80,15 @@ CONFIG = {
     "bresenham": True,
 
     # --- Đường dẫn bản đồ ---
-    "map_path": r"E:\last_dance\LastDance\FMF_new\square400\square400.txt",
-    #"map_path": r"E:\last_dance\LastDance\FMF_new\triangle300\triangle300.txt",
-    # "map_path": r"E:\last_dance\LastDance\FMF_new\test_100\test_100.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF_new\square400\square400.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF_new\triangle300\triangle300.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF_new\test_100\test_100.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF_new\mixed2002\mixed2002.txt",
-    #"map_path": r"E:\last_dance\LastDance\FMF_new\scenario6\scenario6_grid.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF_new\scenario4\scenario4_grid.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF_new\factory400\factory400_30.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF_new\mixed500\mixed500.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF_new\scenario7\scenario7_grid.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF_new\scenario7\scenario7_grid.txt",
 
     # --- Chọn bộ giải TSP (Pha 2) ---
     # "ortools" → OR-Tools Routing Solver (mặc định)
@@ -422,6 +430,7 @@ def evaluation_wpfmf(grid,
             "bresenham": grid.bresenham,
             "RI_max": grid.RI_max,
             "red_flag": grid.red_flag,
+            "radiation_norm": grid.normalize_radiation,
             "tsp": tsp,
             "ntest": ntest, "distance_scale": distance_scale,
             "time_limit_sec": time_limit_sec,
@@ -581,6 +590,7 @@ def main():
         bresenham=CONFIG["bresenham"],
         RI_max=CONFIG["RI_max"],
         red_flag=CONFIG["red_flag"],
+        radiation_norm=CONFIG["radiation_norm"],
     )
 
     map_path = CONFIG["map_path"]

@@ -1177,6 +1177,125 @@
         "checkpoints": 2,
         "smooth": true
       }
+    },
+    {
+      "summary": {
+        "mean_cost": 144.378516,
+        "std_cost": 0.0,
+        "best_cost": 144.378516,
+        "time_phase1": {
+          "mean": 0.253975,
+          "std": 0.007332
+        },
+        "time_phase2": {
+          "mean": 0.00446,
+          "std": 0.004463
+        },
+        "time_total": {
+          "mean": 0.258435,
+          "std": 0.011747
+        }
+      },
+      "metrics": {
+        "length": 179.621825,
+        "radiation": 236.839862,
+        "risk": 4.963573,
+        "total_cost": 144.38976
+      },
+      "metrics_mean": {
+        "length": {
+          "mean": 179.621825,
+          "std": 0.0
+        },
+        "radiation": {
+          "mean": 236.839862,
+          "std": 0.0
+        },
+        "risk": {
+          "mean": 4.963573,
+          "std": 0.0
+        },
+        "total_cost": {
+          "mean": 144.38976,
+          "std": 0.0
+        }
+      },
+      "path": [
+        [
+          8,
+          81
+        ],
+        [
+          79,
+          26
+        ],
+        [
+          79,
+          26
+        ],
+        [
+          8,
+          81
+        ]
+      ],
+      "iterations": [
+        {
+          "iteration": 1,
+          "cost": 144.37851639899094,
+          "length": 179.621825,
+          "radiation": 236.839862,
+          "risk": 4.963573,
+          "total_cost": 144.38976,
+          "time_phase1_sec": 0.2642,
+          "time_phase2_sec": 0.0108,
+          "time_total_sec": 0.2749
+        },
+        {
+          "iteration": 2,
+          "cost": 144.37851639899094,
+          "length": 179.621825,
+          "radiation": 236.839862,
+          "risk": 4.963573,
+          "total_cost": 144.38976,
+          "time_phase1_sec": 0.2505,
+          "time_phase2_sec": 0.0013,
+          "time_total_sec": 0.2518
+        },
+        {
+          "iteration": 3,
+          "cost": 144.37851639899094,
+          "length": 179.621825,
+          "radiation": 236.839862,
+          "risk": 4.963573,
+          "total_cost": 144.38976,
+          "time_phase1_sec": 0.2473,
+          "time_phase2_sec": 0.0013,
+          "time_total_sec": 0.2486
+        }
+      ],
+      "timestamp": "2026-06-24T09:15:26",
+      "config": {
+        "w1": 0.4,
+        "w2": 0.3,
+        "w3": 0.3,
+        "C1": 0.5,
+        "a": 1.0,
+        "v": 1.0,
+        "safety_radius": 5,
+        "safety_max_distance": 7.0,
+        "Solver_minimize": true,
+        "supercover": true,
+        "bresenham": true,
+        "RI_max": 8.0,
+        "red_flag": true,
+        "tsp": "ortools",
+        "ntest": 3,
+        "distance_scale": 1000,
+        "time_limit_sec": 5,
+        "map_size": 100,
+        "checkpoints": 2,
+        "smooth": true
+      }
     }
   ]
 }
