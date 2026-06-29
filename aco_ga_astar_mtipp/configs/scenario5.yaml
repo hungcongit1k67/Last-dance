@@ -4,7 +4,7 @@
 # Cost weights (w1,w2,w3): Table 8 (scenario 5 reliability run).
 project:
   name: aco_ga_astar_mtipp_scenario5
-  output_dir: results/scenario5_30
+  output_dir: results/scenario5_60
 
 map:
   obstacle_file: data/scenario5/scenario5_grid.txt
@@ -18,8 +18,8 @@ map:
   prevent_corner_cutting: true
 
 cost_weights:
-  omega_length: 0.3          # w1 (Table 8, scenario 5)
-  omega_risk: 0.5            # w2
+  omega_length: 0.6          # w1 (Table 8, scenario 5)
+  omega_risk: 0.2            # w2
   omega_energy: 0.0          # w3
   omega_collision_risk: 0.2  # not in paper: high-risk is a hard constraint (astar.high_risk_avoidance)
   turn_angle_weight: 0.01    # e1  (paper sensitivity default; Eq.9 states e1+e2=1)

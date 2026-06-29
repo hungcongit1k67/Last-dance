@@ -22,6 +22,7 @@ import queue
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 try:
     import pygame
@@ -986,7 +987,7 @@ class GridMap:
         sz = self.mapSize
         plt.figure(figsize=(8, 8), dpi=80)
         plt.axis([-1, sz, -sz, 1])
-        plt.title(self.DFType + " - Cumulative cost T(x)", fontsize=14)
+        plt.title(self.DFType + " - Cumulative cost T(x)", fontsize=10)
         mksz = self.mksz
 
         blx, bly = [], []
@@ -1002,9 +1003,16 @@ class GridMap:
                 if self.gridMap[i][j] == 0 and self.F_label[i][j] != -1:
                     if self.F_label[i][j] in rmv:
                         continue
-                    x2.append(j); y2.append(-i); z2.append(-self.T[i][j])
+                    x2.append(j); y2.append(-i); z2.append(self.T[i][j])
+        ax = plt.gca()
+        ax.set_aspect('equal', adjustable='box')
         if x2:
-            plt.scatter(x2, y2, c=z2, cmap='jet', marker='s', s=mksz * mksz)
+            sc = ax.scatter(x2, y2, c=z2, cmap='jet', marker='s', s=mksz * mksz)
+            cax = make_axes_locatable(ax).append_axes("right", size="4%", pad=0.1)
+            cb = plt.colorbar(sc, cax=cax)
+            cb.set_label('T(x)', fontsize=9)
+            cb.ax.tick_params(labelsize=8)
+        plt.sca(ax)
 
         dx, dy = [], []
         for i in range(sz):
@@ -1067,7 +1075,7 @@ class GridMap:
         plt.figure(figsize=(8, 8), dpi=80)
         plt.axis([-1, sz, -sz, 1])
         plt.title(f"Local cost f(x)  [w1={self.w1:.2f}, w2={self.w2:.2f}, w3={self.w3:.2f}]",
-                  fontsize=14)
+                  fontsize=10)
         mksz = self.mksz
 
         x2, y2, z2 = [], [], []
@@ -1077,9 +1085,15 @@ class GridMap:
                     fv = self.f_cost[i][j]
                     if fv < 1e9:
                         x2.append(j); y2.append(-i); z2.append(fv)
+        ax = plt.gca()
+        ax.set_aspect('equal', adjustable='box')
         if x2:
-            plt.scatter(x2, y2, c=z2, cmap='viridis', marker='s', s=mksz * mksz)
-            plt.colorbar(label='f(x)')
+            sc = ax.scatter(x2, y2, c=z2, cmap='viridis', marker='s', s=mksz * mksz)
+            cax = make_axes_locatable(ax).append_axes("right", size="4%", pad=0.1)
+            cb = plt.colorbar(sc, cax=cax)
+            cb.set_label('f(x)', fontsize=9)
+            cb.ax.tick_params(labelsize=8)
+        plt.sca(ax)
 
         blx, bly = [], []
         for i in range(sz):

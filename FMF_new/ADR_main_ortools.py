@@ -33,8 +33,8 @@ from aco_ga import solve_tsp_aco, solve_tsp_aco_ga
 # =========================================================
 CONFIG = {
     # --- Trọng số tổng hợp (bắt buộc: w1 + w2 + w3 = 1.0) ---
-    "w1": 0.6,      # Chiều dài đường đi  length(P)
-    "w2": 0.2,     # Độ rủi ro phóng xạ  R(P)
+    "w1": 0.3,      # Chiều dài đường đi  length(P)
+    "w2": 0.5,     # Độ rủi ro phóng xạ  R(P)
     "w3": 0.2,     # Độ rủi ro va chạm   risk(P)
 
     # --- Tham số an toàn va chạm (công thức 4) ---
@@ -51,7 +51,7 @@ CONFIG = {
     # False → không thay đổi gì (hành vi gốc).
     # True  → mọi ô có nồng độ phóng xạ >= RI_max bị coi là vật cản,
     #         robot không được phép đi qua.
-    "red_flag": True,
+    "red_flag": False,
 
     # --- Chuẩn hóa nồng độ phóng xạ R̄(x) trong thế năng f(x) (công thức 11) ---
     # True  → f(x) = w1 + w2·R̄_norm(x) + w3·(1−S(x))  (R̄ chuẩn hóa về [0,1] — hành vi gốc).
@@ -80,15 +80,19 @@ CONFIG = {
     "bresenham": True,
 
     # --- Đường dẫn bản đồ ---
-    #"map_path": r"E:\last_dance\LastDance\FMF_new\square400\square400.txt",
-    "map_path": r"E:\last_dance\LastDance\FMF_new\triangle300\triangle300.txt",
-    #"map_path": r"E:\last_dance\LastDance\FMF_new\test_100\test_100.txt",
-    #"map_path": r"E:\last_dance\LastDance\FMF_new\mixed2002\mixed2002.txt",
-    #"map_path": r"E:\last_dance\LastDance\FMF_new\scenario4\scenario4_grid.txt",
-    #"map_path": r"E:\last_dance\LastDance\FMF_new\factory400\factory400_30.txt",
-    #"map_path": r"E:\last_dance\LastDance\FMF_new\mixed500\mixed500.txt",
-    #"map_path": r"E:\last_dance\LastDance\FMF_new\scenario7\scenario7_grid.txt",
-    #"map_path": r"E:\last_dance\LastDance\FMF_new\scenario7\scenario7_grid.txt",
+    # "map_path": r"E:\last_dance\LastDance\FMF_new\scenario4\scenario4_grid.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF_new\scenario5\scenario5_grid.txt",
+    # "map_path": r"E:\last_dance\LastDance\FMF_new\scenario6\scenario6_grid.txt",
+    # "map_path": r"E:\last_dance\LastDance\FMF_new\scenario7_2\scenario7_grid2.txt",
+    # "map_path": r"E:\last_dance\LastDance\FMF_new\scenario7\scenario7_grid.txt",
+    # "map_path": r"E:\last_dance\LastDance\FMF_new\mixed2002\mixed2002.txt",
+    # "map_path": r"E:\last_dance\LastDance\FMF_new\square400\square400.txt",
+    # "map_path": r"E:\last_dance\LastDance\FMF_new\triangle300\triangle300.txt",
+    # "map_path": r"E:\last_dance\LastDance\FMF_new\mixed500\mixed500.txt",
+    # "map_path": r"E:\last_dance\LastDance\FMF_new\warehouse3\warehouse3.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF_new\warehouse4\warehouse4.txt",
+    # "map_path": r"E:\last_dance\LastDance\FMF_new\test_100\test_100.txt",
+
 
     # --- Chọn bộ giải TSP (Pha 2) ---
     # "ortools" → OR-Tools Routing Solver (mặc định)
@@ -98,14 +102,14 @@ CONFIG = {
     "tsp": "ortools",
 
     # --- Tham số OR-Tools TSP ---
-    "ntest": 3  , # Số lần chạy OR-Tools (với cùng tham số) để đánh giá độ ổn định của giải pháp
+    "ntest": 1  , # Số lần chạy OR-Tools (với cùng tham số) để đánh giá độ ổn định của giải pháp
     "distance_scale": 1000, # Scale ma trận chi phí từ float sang int cho OR-Tools (ví dụ: 1.0 -> 1000, sqrt(2) -> 1414)
     "time_limit_sec": 5, # Thời gian tối đa cho mỗi lần chạy OR-Tools (giây)
 
     # --- Path output ---
     # True  → in/lưu path đã smooth (turning points, ~128 bước)
     # False → in/lưu full path cell-by-cell (đi qua từng ô lưới, ~1000+ bước)
-    "smooth": True,
+    "smooth": False,
 }
 
 
@@ -399,6 +403,7 @@ def evaluation_wpfmf(grid,
     cells = grid.getPath(best_path)
     total, length, radiation, risk = grid.pathTotalCost(cells)
 
+    # In path cụ thể ra
     path_tuples = [(int(c[0]), int(c[1])) for c in cells]
     path_label  = "turning points (smoothed)" if smooth else "cell-by-cell (full)"
 

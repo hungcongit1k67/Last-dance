@@ -119,6 +119,9 @@ python eval.py --config configs/scenario4.yaml --n 3 --independent
 python eval.py --config configs/scenario5.yaml --n 3 --independent
 python eval.py --config configs/scenario6.yaml --n 3 --independent
 python eval.py --config configs/scenario7.yaml --n 3 --independent
+
+python eval.py --config configs/warehouse3.yaml --n 3 --independent
+python eval.py --config configs/warehouse4.yaml --n 3 --independent
 ```
 
 

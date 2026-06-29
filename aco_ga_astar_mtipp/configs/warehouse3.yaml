@@ -1,0 +1,51 @@
+project:
+  name: aco_ga_astar_mtipp_warehouse3
+  output_dir: results/warehouse3_30
+
+map:
+  obstacle_file: data/warehouse3/warehouse3.txt
+  radiation_file: data/warehouse3/radiation_grid.txt
+  target_file: data/targets/targets.json
+  target_source: map
+  grid_size: 1.0
+  robot_velocity: 1.0
+  ri_max: 8.0
+  allow_diagonal: true
+  prevent_corner_cutting: true
+
+cost_weights:
+  omega_length: 0.3          # w1 (Table 8, scenario 7)
+  omega_risk: 0.5            # w2
+  omega_energy: 0.0          # w3
+  omega_collision_risk: 0.2  # not in paper: high-risk is a hard constraint (astar.high_risk_avoidance)
+  turn_angle_weight: 0.01    # e1  (paper sensitivity default; Eq.9 states e1+e2=1)
+  turn_count_weight: 0.09    # e2
+  safety_c1: 0.5             # project-only (unused while omega_collision_risk = 0)
+  safety_radius: 5.0
+  safety_max_distance: 7.0
+
+astar:
+  high_risk_avoidance: true
+
+GA:                          # Table 7, scenarios 5-7
+  population_size: 100       # np
+  max_generation: 200        # Gmax
+  crossover_rate: 0.9        # pc
+  mutation_rate: 0.05        # pm
+  gap: 0.9                   # gap
+  elite_size: 3              # project-only (not specified in paper)
+
+ACO:                         # Table 7, scenarios 5-7
+  num_ants: 50              # Nmax
+  max_iteration: 100         # Imax
+  alpha: 1.0                 # alpha
+  beta: 5.0                  # beta
+  rho: 0.1                   # rho
+  q: 1.0                     # Q (from sensitivity study; not given in Table 7)
+  q0: 0.85                   # pseudo-random q0 (value not given in paper)
+  initial_pheromone: 0.5     # tau0
+  ga_pheromone_bonus: 0.5    # C of Eq.10 (0.5 <= c <= 1; exact value not fixed in paper)
+  min_pheromone: 1.0e-06     # project-only
+  max_pheromone: 12.0        # project-only
+
+random_seed: 42

@@ -29,8 +29,8 @@ ACO_GA_CONFIG = {
     "random_seed": 42,          # None -> không cố định seed (mỗi lần chạy khác nhau)
 
     "GA": {                     # Table 7, scenario 5-7
-        "population_size": 200, # np
-        "max_generation": 500,  # Gmax
+        "population_size": 100, # np
+        "max_generation": 100,  # Gmax
         "crossover_rate": 0.9,  # pc
         "mutation_rate": 0.05,  # pm
         "gap": 0.9,             # gap
@@ -38,8 +38,8 @@ ACO_GA_CONFIG = {
     },
 
     "ACO": {                    # Table 7, scenario 5-7
-        "num_ants": 200,        # Nmax
-        "max_iteration": 500,   # Imax
+        "num_ants": 50,        # Nmax
+        "max_iteration": 100,   # Imax
         "alpha": 1.0,           # alpha
         "beta": 5.0,            # beta
         "rho": 0.1,             # rho (tốc độ bay hơi pheromone)

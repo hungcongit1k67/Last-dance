@@ -71,6 +71,10 @@ CONFIG = {
     #"map_path": r"E:\last_dance\LastDance\FMF\scenario4\scenario4_grid.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\factory400\factory400_30.txt",
     #"map_path": r"E:\last_dance\LastDance\FMF\mixed500\mixed500.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF\scenario6\scenario6_grid.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF\scenario7_2\scenario7_grid2.txt",
+    #"map_path": r"E:\last_dance\LastDance\FMF\scenario7\scenario7_grid.txt",
+    "map_path": r"E:\last_dance\LastDance\FMF\warehouse3\warehouse3.txt",
 
     # --- Bộ giải TSP ---
     # "ortools" | "aco" | "ga"
